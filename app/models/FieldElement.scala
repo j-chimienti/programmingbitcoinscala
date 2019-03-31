@@ -1,21 +1,30 @@
 package models
 
-case class FieldElement(num: Long, prime: Long) {
+case class FieldElement(num: Option[Long] = None, prime: Long) {
 
 
-  if (num > prime || num < 0) {
+  num match {
 
-    throw new RuntimeException(s"Num $num not in field range 0 to ${prime - 1}")
+
+    case Some(number) =>
+
+      if (number > prime || number < 0) {
+
+
+        throw new RuntimeException(s"Num $num.get not in field range 0 to ${prime - 1}")
+      }
+    case None =>
+
   }
-
   @throws(classOf[RuntimeException])
   def +(_fieldElem: FieldElement): FieldElement = {
 
 
     assertEqPrimes(_fieldElem)
-    val result = (BigInt(num) + _fieldElem.num).mod(prime)
+    val result = (BigInt(num.get) + _fieldElem.num.get).mod(prime)
 
-    FieldElement(result.toLong, prime)
+    val _num = Some(result.toLong)
+    FieldElement(_num, prime)
   }
 
 
@@ -25,8 +34,8 @@ case class FieldElement(num: Long, prime: Long) {
 
     assertEqPrimes(_fieldElem)
 
-    val result = (BigInt(num) - _fieldElem.num).mod(prime)
-    FieldElement(result.toLong, prime)
+    val result = (BigInt(num.get) - _fieldElem.num.get).mod(prime)
+    FieldElement(Some(result.toLong), prime)
 
   }
 
@@ -34,8 +43,16 @@ case class FieldElement(num: Long, prime: Long) {
   def *(_fieldElem: FieldElement): FieldElement = {
 
     assertEqPrimes(_fieldElem)
-    val result = (BigInt(num) * _fieldElem.num).mod(prime)
-    FieldElement(result.toLong, prime)
+    val result = (BigInt(num.get) * _fieldElem.num.get).mod(prime)
+    FieldElement(Some(result.toLong), prime)
+  }
+
+  def *(coeff: Int) = {
+
+    val n = num.get * BigInt(coeff)
+    val _num = n.mod(prime).toLong
+
+    FieldElement(Some(_num), prime)
   }
 
   @throws(classOf[RuntimeException])
@@ -44,9 +61,9 @@ case class FieldElement(num: Long, prime: Long) {
     assertEqPrimes(_fieldElem)
     // num = (self.num * pow(other.num, self.prime - 2, self.prime)) % self.prime
 
-    val result = (num * BigInt(_fieldElem.num).modPow(prime - 2, prime)).mod(prime)
+    val result = (BigInt(_fieldElem.num.get).modPow(prime - 2, prime) * num.get).mod(prime)
 
-    FieldElement(result.toLong, prime)
+    FieldElement(Some(result.toLong), prime)
 
   }
 
@@ -54,11 +71,11 @@ case class FieldElement(num: Long, prime: Long) {
 
   def **(_num: Int): FieldElement = {
 
-    val result = BigInt(num).modPow(
+    val result = BigInt(num.get).modPow(
       BigInt(_num).mod(prime - 1),
       prime
     )
-    FieldElement(result.toLong, prime)
+    FieldElement(Some(result.toLong), prime)
   }
 
   def ==(obj: FieldElement): Boolean = {
@@ -66,6 +83,8 @@ case class FieldElement(num: Long, prime: Long) {
     num == obj.num && obj.prime == prime
 
   }
+
+  def equals(obj: FieldElement): Boolean = num == obj.num && obj.prime == prime
 
   def !=(_fieldEleem: FieldElement): Boolean = {
 

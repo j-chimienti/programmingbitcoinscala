@@ -1,133 +1,24 @@
 package models
 
 
-object Point {
 
-  def apply(x: FieldElement, y: FieldElement, a: FieldElement, b: FieldElement): PointFE = {
-
-    PointFE(x, y, a, b)
-
-  }
-}
-
-
-
-case class PointFE(x: FieldElement, y: FieldElement, a: FieldElement, b: FieldElement) {
-
-  val zero: Int = 0
-
-  if (!(x.num.isInfinity && y.num.isInfinity)) {
-
-    if (y ** 2 != x ** 3 + (a * x) + b) {
-      throw new RuntimeException(s"($x, $y) is not on the curve")
-    }
-
-  }
-
-  def equals(obj: PointFE): Boolean =
-    x == obj.x && y == obj.y && a == obj.a && b == obj.b
-
-
-  def !=(point: PointFE): Boolean = {
-
-
-    x != point.x || y != point.y || a != point.a || b != point.b
-
-  }
-
-  override def toString: String = {
-
-  if (x.num.isInfinity) {
-    "Point(infinity)"
-  } else {
-
-    s"Point(${x.num}, ${y.num})_${x.prime}"
-  }
-
-  }
-
-  @throws(classOf[RuntimeException])
-  def +(point: PointFE): PointFE = {
-
-
-    if (a != point.a || b != point.b) {
-
-      throw new RuntimeException(s"PointFEs $this, $point are not on the same curve")
-    }
-
-    /*
-
-    if (this == point && y == zero) {
-
-      PointFE(a = a, b = b)
-
-      // Case 0.0: this is the point at infinity, return other point
-    } else if (x.isInfinity) {
-      point
-
-      // Case 0.0: other is the point at infinity, return this point
-    } else if (point.x.isInfinity) {
-
-      this
-      // Case 1: self.x == other.x, self.y != other.y
-    } else
-     */
-
-    if (x == point.x && y != point.y) {
-
-      val _x = FieldElement(num = Double.PositiveInfinity.toLong, prime = x.prime)
-      val _y = FieldElement(num = Double.PositiveInfinity.toLong, prime = x.prime)
-      PointFE(_x, _y, a = a, b = b)
-
-      //      # Case 2: self.x != other.x
-    } else if (x != point.x) {
-
-
-      val slope = (point.y - y) / (point.x - x)
-      val x3 = slope ** 2 - x - point.x
-      val y3 = slope * (x - x3) - y
-
-      PointFE(x3, y3, a, b)
-
-
-    }
-
-      // # Case 3: self.x == other.x, self.y == other.y
-    else {
-
-      println("case 3 not implmented")
-      this
-    }
-
-
-//    else {
-//
-//      val s = (3 * x ** 2 + a) / (2 * y)
-//
-//      val xx = s ** 2 - 2 * x
-//
-//      val yy = s * (x - xx) - y
-//
-//      PointFE(xx, yy, a, b)
-//    }
-  }
-
-
-}
-
-case class Point(x: Double = Double.PositiveInfinity, y: Double = Double.PositiveInfinity, a: Double, b: Double)  {
+case class Point(x: Option[Double] = None, y: Option[Double] = None, a: Double, b: Double)  {
 
 
 
   val zero: Int = 0
 
-  if (!(x.isInfinity && y.isInfinity)) {
 
-    if (Math.pow(y, 2) != Math.pow(x, 3) + (a * x) + b) {
+  if (x.isDefined && y.isDefined) {
+
+
+    if (Math.pow(y.get, 2) != Math.pow(x.get, 3) + (a * x.get) + b) {
       throw new RuntimeException(s"($x, $y) is not on the curve")
     }
 
   }
+
+
 
   def equals(obj: Point): Boolean =
     x == obj.x && y == obj.y && a == obj.a && b == obj.b
@@ -140,6 +31,35 @@ case class Point(x: Double = Double.PositiveInfinity, y: Double = Double.Positiv
 
   }
 
+  /*
+
+  def __mul__(self, other):
+        if self.prime != other.prime:
+            raise RuntimeError('Primes must be the same')
+        # self.num and other.num are the actual values
+        num = (self.num * other.num) % self.prime
+        # self.prime is what you'll need to mod against
+        prime = self.prime
+        # You need to return an element of the same class
+        # use: self.__class__(num, prime)
+        return self.__class__(num, prime)
+   */
+
+
+  def *(coeff: Int) = {
+
+    // product = self.__class__(None, None, self.a, self.b) # (1)
+
+    var product = Point(a = a, b = b)
+    for (_ <- 1 to coeff) {
+
+      product += this
+
+    }
+
+    product
+  }
+
 
   @throws(classOf[RuntimeException])
   def +(point: Point): Point = {
@@ -150,16 +70,16 @@ case class Point(x: Double = Double.PositiveInfinity, y: Double = Double.Positiv
       throw new RuntimeException(s"Points $this, $point are not on the same curve")
     }
 
-    if (this == point && y == zero) {
+    if (this == point && y.get == zero) {
 
       Point(a = a, b = b)
 
       // Case 0.0: this is the point at infinity, return other point
-    } else if (x.isInfinity) {
+    } else if (x.isEmpty) {
       point
 
       // Case 0.0: other is the point at infinity, return this point
-    } else if (point.x.isInfinity) {
+    } else if (point.x.isEmpty) {
 
       this
       // Case 1: self.x == other.x, self.y != other.y
@@ -171,23 +91,23 @@ case class Point(x: Double = Double.PositiveInfinity, y: Double = Double.Positiv
     } else if(x != point.x) {
 
 
-      val slope = (point.y - y) / (point.x - x)
-      val x3 = Math.pow(slope, 2) - x - point.x
-      val y3 = slope * (x - x3) - y
+      val slope = (point.y.get - y.get) / (point.x.get - x.get)
+      val x3 = Math.pow(slope, 2) - x.get - point.x.get
+      val y3 = slope * (x.get - x3) - y.get
 
-      Point(x3, y3, a, b)
+      Point(Some(x3), Some(y3), a, b)
 
       // # Case 3: self.x == other.x, self.y == other.y
 
     } else {
 
-      val s = (3 * Math.pow(x, 2) + a) / (2 * y)
+      val s = (3 * Math.pow(x.get, 2) + a) / (2 * y.get)
 
-      val xx = Math.pow(s, 2) - 2 * x
+      val xx = Math.pow(s, 2) - 2 * x.get
 
-      val yy = s * (x - xx) - y
+      val yy = s * (x.get - xx) - y.get
 
-      Point(xx, yy, a, b)
+      Point(Some(xx), Some(yy), a, b)
     }
   }
 
@@ -195,7 +115,7 @@ case class Point(x: Double = Double.PositiveInfinity, y: Double = Double.Positiv
 
   override def toString: String = {
 
-    if (x.isInfinity) {
+    if (x.isEmpty) {
 
       s"Point(infinity)"
     } else {

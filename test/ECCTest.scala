@@ -1,71 +1,16 @@
-import models.{FieldElement, Point}
+import models.{FieldElement, PointFE}
 import org.scalatest._
 
 class ECCTest extends FunSuite with BeforeAndAfter {
-
-  test("addition: get started") {
-
-    val prime = 223
-    val a = FieldElement(num=0, prime=prime)
-    val b = FieldElement(num=7, prime=prime)
-    val x1 = FieldElement(num=192, prime=prime)
-    val y1 = FieldElement(num=105, prime=prime)
-    val x2 = FieldElement(num=17, prime=prime)
-    val y2 = FieldElement(num=56, prime=prime)
-    val p1 = Point(x = x1, y = y1, a, b)
-    val p2 = Point(x2, y2, a, b)
-
-    val x3 = FieldElement(170, prime)
-    val y3 = FieldElement(142, prime)
-    val p3 = Point(x3, y3, a, b)
-
-    assert(p1 + p2 == p3)
-  }
-
-
-  test("add") {
-
-    // tests the following additions on curve y^2=x^3-7 over F_223:
-    // (192,105) + (17,56)
-    // (47,71) + (117,141)
-    // (143,98) + (76,66)
-    val prime = 223
-    val a = FieldElement(0, prime)
-    val b = FieldElement(7, prime)
-
-    val additions : Seq[(Int, Int, Int, Int, Int, Int)] = Seq(
-    // (x1, y1, x2, y2, x3, y3)
-    (192, 105, 17, 56, 170, 142),
-    (47, 71, 117, 141, 60, 139),
-    (143, 98, 76, 66, 47, 71),
-    )
-    // iterate over the additions
-    for (addition <-  additions) {
-      val ( x1_raw, y1_raw, x2_raw, y2_raw, x3_raw, y3_raw) = addition
-      val x1 = FieldElement(x1_raw, prime)
-      val y1 = FieldElement(y1_raw, prime)
-      val p1 = Point(x1, y1, a, b)
-      val x2 = FieldElement(x2_raw, prime)
-      val y2 = FieldElement(y2_raw, prime)
-      val p2 = Point(x2, y2, a, b)
-      val x3 = FieldElement(x3_raw, prime)
-      val y3 = FieldElement(y3_raw, prime)
-      val p3 = Point(x3, y3, a, b)
-      // check that p1 + p2 == p3
-      assert(p1 + p2 == p3)
-    }
-  }
 
 
   test("test_on_curve") {
 
     // tests the following points whether they are on the curve or not
     // on curve y ^ 2 = x ^ 3 - 7 over F_223:
-    // (192, 105) (17, 56)(200, 119)(1, 193)(42, 99)
-    // the ones that aren 't should raise a RuntimeError
     val prime = 223
-    val a = FieldElement(0, prime)
-    val b = FieldElement(7, prime)
+    val a = FieldElement(Some(0), prime)
+    val b = FieldElement(Some(7), prime)
 
     val valid_points = Seq((192, 105), (17, 56), (1, 193))
     val invalid_points = Seq((200, 119), (42, 99))
@@ -74,82 +19,141 @@ class ECCTest extends FunSuite with BeforeAndAfter {
     for (point <- valid_points) {
 
       val ( x_raw, y_raw ) = point
-      val x = FieldElement(x_raw, prime)
-      val y = FieldElement(y_raw, prime)
+      val x = FieldElement(Some(x_raw), prime)
+      val y = FieldElement(Some(y_raw), prime)
       // Creating the point should not result in an error
-      Point(x, y, a, b)
+      PointFE(Some(x), Some(y), a, b)
 
     }
     // iterate over invalid points
     for (point <- invalid_points) {
 
-      var ( x_raw, y_raw) = point
-      var x = FieldElement(x_raw, prime)
-      val y = FieldElement(y_raw, prime)
+      val (x_raw, y_raw) = point
+      val x = FieldElement(Some(x_raw), prime)
+      val y = FieldElement(Some(y_raw), prime)
 
-      assertThrows[RuntimeException](Point(x, y, a, b))
+      assertThrows[RuntimeException](PointFE(Some(x), Some(y), a, b))
+    }
+  }
+
+
+  test("addition: get started") {
+
+    val prime = 223
+    val a = FieldElement(Some(0), prime)
+    val b = FieldElement(Some(7), prime)
+    val x1 = FieldElement(Some(192), prime)
+    val y1 = FieldElement(Some(105), prime)
+    val x2 = FieldElement(Some(17), prime)
+    val y2 = FieldElement(Some(56), prime)
+    val p1 = PointFE(Some(x1),Some(y1), a, b)
+    val p2 = PointFE(Some(x2), Some(y2), a, b)
+
+    val x3 = FieldElement(Some(170), prime)
+    val y3 = FieldElement(Some(142), prime)
+    val p3 = PointFE(Some(x3), Some(y3), a, b)
+
+    val result = p1 + p2
+    assert(result == p3)
+  }
+
+
+
+
+  test("mult: get started") {
+
+    val prime = 223
+    val a = FieldElement(Some(0), prime)
+    val b = FieldElement(Some(7), prime)
+    val x1 = FieldElement(Some(15), prime)
+    val y1 = FieldElement(Some(86), prime)
+
+    val p1 = PointFE(Some(x1),Some(y1), a, b)
+
+    val result : PointFE = p1 * 7
+    println(result)
+
+  }
+
+  test("add") {
+
+    // tests the following additions on curve y^2=x^3-7 over F_223:
+    // (192,105) + (17,56)
+    // (47,71) + (117,141)
+    // (143,98) + (76,66)
+    val prime = 223
+    val a = FieldElement(Some(0), prime)
+    val b = FieldElement(Some(7), prime)
+
+    val additions : Seq[(Int, Int, Int, Int, Int, Int)] = Seq(
+    // (x1, y1, x2, y2, x3, y3)
+    (192, 105, 17, 56, 170, 142),
+    (47, 71, 117, 141, 60, 139),
+    (143, 98, 76, 66, 47, 71),
+    )
+    // iterate over the additions
+    for (( x1_raw, y1_raw, x2_raw, y2_raw, x3_raw, y3_raw) <-  additions) {
+      val x1 = FieldElement(Some(x1_raw), prime)
+      val y1 = FieldElement(Some(y1_raw), prime)
+      val p1 = PointFE(Some(x1), Some(y1), a, b)
+      val x2 = FieldElement(Some(x2_raw), prime)
+      val y2 = FieldElement(Some(y2_raw), prime)
+      val p2 = PointFE(Some(x2), Some(y2), a, b)
+      val x3 = FieldElement(Some(x3_raw), prime)
+      val y3 = FieldElement(Some(y3_raw), prime)
+      val p3 = PointFE(Some(x3), Some(y3), a, b)
+      // check that p1 + p2 == p3
+      assert(p1 + p2 == p3)
     }
   }
 
 
 
-//  test("test_rmul") {
-//
-//  // tests the following scalar multiplications
-//  // 2 * (192, 105)
-//  // 2 * (143, 98)
-//  // 2 * (47, 71)
-//  // 4 * (47, 71)
-//  // 8 * (47, 71)
-//  // 21 * (47, 71)
-//  var prime = 223
-//  var a = FieldElement(0, prime)
-//  var b = FieldElement(7, prime)
-//
-//  multiplications = (
-//  // (coefficient, x1, y1, x2, y2)
-//  (2, 192, 105, 49, 71)
-//  ,
-//  (2, 143, 98, 64, 168)
-//  ,
-//  (2, 47, 71, 36, 111)
-//  ,
-//  (4, 47, 71, 194, 51)
-//  ,
-//  (8, 47, 71, 116, 55)
-//  ,
-//  (21, 47, 71, None, None)
-//  ,
-//  )
-//
-//  // iterate over the multiplications
-//  for s
-//  , x1_raw
-//  , y1_raw
-//  , x2_raw
-//  , y2_raw in multiplications:
-//  // Initialize points this way:
-// // x1 = FieldElement(x1_raw, prime)
-// // y1 = FieldElement(y1_raw, prime)
-//  // p1 = Point(x1, y1, a, b)
-//  var x1 = FieldElement(x1_raw, prime)
-//  var y1 = FieldElement(y1_raw, prime)
-//  p1 = Point(x1, y1, a, b)
-//  // initialize the second point based on whether it 's the point at infinity
-// // x2 = FieldElement(x2_raw, prime)
-// // y2 = FieldElement(y2_raw, prime)
-//  // p2 = Point(x2, y2, a, b)
-//  if x2_raw is None:
-//    p2
-//  = Point(None, None, a, b)
-//  else:
-//  var x2 = FieldElement(x2_raw, prime)
-//  var y2 = FieldElement(y2_raw, prime)
-//  p2 = Point(x2, y2, a, b)
-//
-//  // check that the product is equal to the expected point
-//    self.assertEqual(s * p1, p2)
-//  }
+
+
+
+  test("test_rmul") {
+
+    val prime = 223
+    val a = FieldElement(Some(0), prime)
+    val b = FieldElement(Some(7), prime)
+
+    val multiplications = Seq(
+    // (coefficient, x1, y1, x2, y2)
+    (2, 192, 105, 49, 71),
+    (2, 143, 98, 64, 168),
+    (2, 47, 71, 36, 111),
+    (4, 47, 71, 194, 51),
+    (8, 47, 71, 116, 55),
+    //(21, 47, 71, None, None))
+    )
+
+    // iterate over the multiplications
+    for((s, x1_raw, y1_raw, x2_raw, y2_raw) <- multiplications) {
+
+      val x1 = FieldElement(Some(x1_raw), prime)
+      val y1 = FieldElement(Some(y1_raw), prime)
+      val p1 = PointFE(Some(x1), Some(y1), a, b)
+
+      val x2 = FieldElement(Some(x2_raw), prime)
+      val y2 = FieldElement(Some(y2_raw), prime)
+      val p2 = PointFE(Some(x2), Some(y2), a, b)
+
+      // check that the product is equal to the expected point
+      assert(p1 * s == p2)
+    }
+    val (s, x1_raw, y1_raw, x2_raw, y2_raw) = (21, 47, 71, None, None)
+
+    val x1 = FieldElement(Some(x1_raw), prime)
+    val y1 = FieldElement(Some(y1_raw), prime)
+    val p1 = PointFE(Some(x1), Some(y1), a, b)
+
+    val p2 = PointFE(None, None, a, b)
+
+    // check that the product is equal to the expected point
+    assert( p1 * s == p2)
+  }
+
 
 
 }
