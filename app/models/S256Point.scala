@@ -4,9 +4,12 @@ import java.io.ByteArrayInputStream
 import java.nio.{ByteBuffer, ByteOrder}
 
 import fr.acinq.bitcoin.Base58.Prefix
-import fr.acinq.bitcoin.ByteVector32
+import fr.acinq.bitcoin.Crypto.PrivateKey
+import fr.acinq.bitcoin.{Base58Check, ByteVector32, Crypto}
 import fr.acinq.bitcoin.Protocol._
 import scodec.bits.ByteVector
+import scala.language.postfixOps
+import scodec.bits._
 
 object S256Point {
   val A = S256Field(Some(secp256kk1.A))
@@ -16,26 +19,34 @@ object S256Point {
     new S256Point(x, y, A, B)
 
   def apply(x: String, y: String): S256Point =
-    S256Point.apply(BigInt(x, 16), BigInt(y, 16))
-
-  def apply(x: BigInt, y: BigInt): S256Point =
-    S256Point.apply(Some(S256Field(Some(x))), Some(S256Field(Some(y))))
+    S256Point(BigInt(x, 16), BigInt(y, 16))
 
   def apply(x: FieldElement, y: FieldElement): S256Point =
-    S256Point(Some(S256Field(x.num)), Some(S256Field(y.num)))
+    S256Point(x.num.get, y.num.get)
+
+  def apply(x: ByteVector, y: ByteVector): S256Point =
+    S256Point(BigInt(x.toArray), BigInt(y.toArray))
+
+  def apply(x: BigInt, y: BigInt): S256Point =
+    S256Point(Some(S256Field(Some(x))), Some(S256Field(Some(y))))
 
   def apply: S256Point = new S256Point(None, None, A, B)
 
-  // eturns a Point object from a compressed sec binary (not hex)
-  def parse(sec_bin: Array[Byte]): S256Point = {
+  /**
+    *
+    * Returns a Point object from a compressed sec binary (not hex)
+    * @param sec_bin sec_binary ByteVector
+    * @return
+    */
+  def parse(sec_bin: ByteVector): S256Point = {
 
     if (sec_bin.head == 4) {
-      val x = BigInt(sec_bin.slice(1, 33))
-      val y = BigInt(sec_bin.slice(33, 65))
-      S256Point(Some(S256Field(Some(x))), Some(S256Field(Some(y))))
+      val x = BigInt(sec_bin.toArray.slice(1, 33))
+      val y = BigInt(sec_bin.toArray.slice(33, 65))
+      S256Point(x, y)
     }
-    val is_even = sec_bin.head == 2
-    val x = S256Field(Some(BigInt(sec_bin.slice(1, -1))))
+    val is_even = sec_bin.head == 2.toByte
+    val x = S256Field(Some(BigInt(sec_bin.toArray.drop(1))))
     // right side of the equation y^2 = x^3 + 7
     val alpha: S256Field = x ** 3 + S256Field(Some(secp256kk1.B))
     // solve for left side
@@ -60,7 +71,6 @@ class S256Point(x: Option[S256Field] = None,
                 b: S256Field)
     extends PointFE(x, y, a, b) {
 
-  import HashHelper._
   import secp256kk1._
   val bits = 256
   override def toString: String =
@@ -70,7 +80,7 @@ class S256Point(x: Option[S256Field] = None,
     }
   def *(coeff: BigInt): S256Point = {
 
-    var coefficient = coeff.mod(secp256kk1.N)
+    var coefficient = coeff.mod(N)
     var current: S256Point = this
     var result: S256Point = S256Point(None, None)
     for (_ <- 1 to bits) {
@@ -119,7 +129,7 @@ class S256Point(x: Option[S256Field] = None,
       S256Point(Some(xx), Some(yy))
     }
   }
-  def sec(compressed: Boolean = true) = {
+  def sec(compressed: Boolean = true): ByteVector = {
 
     val xBv =
       ByteVector(x.get.num.get.toByteArray)
@@ -134,28 +144,39 @@ class S256Point(x: Option[S256Field] = None,
 
   }
 
-  /**
-    * Returns the address string
-    * @param compressed
-    * @param testnet
-    */
   def address(compressed: Boolean = true, testnet: Boolean = false): String = {
 
     // get the sec
+
+//    val hex =
+//      hex"BCF69F7AFF3273B864F9DD76896FACE8E3D3CF69A133585C8177816F14FC9B55"
+//
+//    val privateKey = PrivateKey(
+//      hex"BCF69F7AFF3273B864F9DD76896FACE8E3D3CF69A133585C8177816F14FC9B55"
+//    )
+//    val publicKey = privateKey.publicKey
+//    assert(
+//      publicKey.toBin === hex"04D7E9DD0C618C65DC2E3972E2AA406CCD34E5E77895C96DC48AF0CB16A1D9B8CE0C0A3E2F4CD494FF54FBE4F5A95B410C0BF022EB2B6F23AE39F40DB79FAA6827"
+//    )
+//
+//    val address =
+//      Base58Check.encode(Prefix.PubkeyAddress, Crypto.hash160(publicKey.toBin))
+//    assert(address == "19FgFQGZy47NcGTJ4hfNdGMwS8EATqoa1X")
+
     val _sec: ByteVector = sec(compressed)
     // hash160 the sec
-    val h160: ByteVector = hash160(_sec)
+    val h160: ByteVector = Crypto.hash160(_sec) // hash160(_sec)
     val prefix: Byte =
       if (testnet) Prefix.PubkeyAddressTestnet else Prefix.PubkeyAddress
-    val raw: ByteVector = ByteVector(Array(prefix) ++ h160.toArray)
     // checksum is first 4 bytes of double_sha256 of raw
     // val who = double_sha256(raw).toArray.take(4)
-    val checksum: Array[Byte] = hash256(raw).toArray.take(4)
+    val foo = Base58Check.encode(prefix, h160)
 
+    foo
     // encode_base58 the raw + checksum
     //val address = encode_base58(raw ++ ByteVector(checksum), prefix)
-    val address = encode_base58S(raw ++ ByteVector(checksum))
-    address
+    //val address = encode_base58S(raw ++ ByteVector(checksum))
+    //address
   }
 
   def verify(z: String, sig: Signature): Boolean =
@@ -165,11 +186,11 @@ class S256Point(x: Option[S256Field] = None,
     // remember 1/s = pow(s, N-2, N)
     val s_inv = sig.s.modPow(N - 2, N)
     // u = z / s
-    val u = z * s_inv.mod(N)
+    val u = (z * s_inv).mod(N)
     // v = r / s
-    val v = sig.r * s_inv.mod(N)
+    val v = (sig.r * s_inv).mod(N)
     // u*G + v*P should have as the x coordinate, r
-    val total = G * u + this * v
+    val total: S256Point = G * u + this * v
     total.x.get.num.get == sig.r
   }
 

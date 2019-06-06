@@ -1,5 +1,7 @@
 package models
 
+import scodec.bits.ByteVector
+
 object S256Field {
   def apply(n: Option[BigInt] = None): S256Field = new S256Field(n)
 
@@ -9,16 +11,18 @@ class S256Field(n: Option[BigInt] = None)
     extends FieldElement(n, secp256kk1.P) {
   def hex: String = {
     val fill = 64
-    val len = n.toString.length
+    val ns = n.get.toString(16)
+    val len = ns.length
     val toFill = Math.max(0, fill - len)
     var str = ""
     for (_ <- 1 to toFill) {
       str += "0"
     }
-    str += n.toString
+    str += ns
     // println(s"length = ${str.length}, 64 = ${str.length == 64}")
-    //require(str.length == 64)
+    require(str.length == 64)
     str
+    //n.get.toString(16)
   }
   override def toString: String = hex
 

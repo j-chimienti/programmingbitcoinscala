@@ -1,7 +1,10 @@
+import fr.acinq.bitcoin.Base58.Prefix
+import fr.acinq.bitcoin.{Base58Check, Crypto}
+import fr.acinq.bitcoin.Crypto.PrivateKey
 import models.{Point, PointFE, S256Field, S256Point, Signature}
 import org.scalatest.FunSuite
 import scodec.bits.ByteVector
-
+import scodec.bits._
 class S256Test extends FunSuite {
 
   import models.secp256kk1._
@@ -106,11 +109,12 @@ class S256Test extends FunSuite {
   test("address") {
 
     val secret = BigInt(888).pow(3)
-    val mainnet_address = "148dY81A9BmdpMhvYEVznrM45kWN32vSCN"
-    val testnet_address = "mieaqB68xDCtbUBYFoUNcmZNwk74xcBfTP"
+
+    val mainnetAddr = "148dY81A9BmdpMhvYEVznrM45kWN32vSCN"
+    val testnetAddr = "mieaqB68xDCtbUBYFoUNcmZNwk74xcBfTP"
     val point = G * secret
-    assert(point.address(compressed = true, testnet = false) == mainnet_address)
-    assert(point.address(compressed = true, testnet = true) == testnet_address)
+    assert(point.address(compressed = true, testnet = false) == mainnetAddr)
+    assert(point.address(compressed = true, testnet = true) == testnetAddr)
     val secret1 = BigInt(321)
     val mainnet_address1 = "1S6g2xBJSED7Qr9CYZib5f4PYVhHZiVfj"
     val testnet_address1 = "mfx3y63A7TfTtXKkv7Y6QzsPFY6QCBCXiP"
@@ -137,8 +141,14 @@ class S256Test extends FunSuite {
   test("verify") {
 
     val point = S256Point(
-      "887387e452b8eacc4acfde10d9aaf7f6d9a0f975aabb10d006e4da568744d06c",
-      "61de6d95231cd89026e286df3b6ae4a894a3378e393e93a0f45b666329a0ae34"
+      BigInt(
+        "887387e452b8eacc4acfde10d9aaf7f6d9a0f975aabb10d006e4da568744d06c",
+        16
+      ),
+      BigInt(
+        "61de6d95231cd89026e286df3b6ae4a894a3378e393e93a0f45b666329a0ae34",
+        16
+      )
     )
     val points = List(
       (
@@ -158,24 +168,22 @@ class S256Test extends FunSuite {
 
   test("parse") {
 
-    val hex =
-      "0349fc4e631e3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278a"
-    val sec = BigInt(hex, 16).toByteArray
+    val sec =
+      hex"0349fc4e631e3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278a"
     val point = S256Point.parse(sec)
     val want =
-      "a56c896489c71dfc65701ce25050f542f336893fb8cd15f4e8e5c124dbf58e47"
-    assert(point.y.get.num.get == BigInt(want, 16))
+      hex"0xa56c896489c71dfc65701ce25050f542f336893fb8cd15f4e8e5c124dbf58e47"
+
+    val foo = point.y.get.num.get.toString(16)
+    assert(foo == want.toHex)
   }
 
   test("Reading hex string") {
-
-    val hex =
+    val rawHex =
       "0349fc4e631e3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278a"
-    val sec = BigInt(hex, 16).toByteArray
-
-    val ss = ByteVector.fromValidHex(hex).toArray
-
-    assert(BigInt(sec) == BigInt(ss))
+    val foo = BigInt(rawHex, 16).toByteArray
+    val bar = ByteVector.fromValidHex(rawHex).toArray
+    assert(BigInt(foo) == BigInt(bar))
   }
 
 }

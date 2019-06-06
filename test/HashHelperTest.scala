@@ -9,14 +9,24 @@ class HashHelperTest extends FunSuite {
 
   import models.HashHelper._
 
-  def assertEqual(a: AnyRef, b: AnyRef): Unit = assert(a == b)
+  test("encode and decode address") {
+
+    val to = "mi1cMMSL9BZwTQZYpweE1nTmwRxScirPp3"
+    val (prefix, decoded) = Base58Check.decode(to)
+    val addr = Base58Check.encode(prefix, decoded)
+    assert(addr == to)
+  }
+
+  def assertEqual[T](a: T, b: T): Unit = assert(a == b)
+
   test("bytes") {
 
     val b = "hello world".getBytes(StandardCharsets.US_ASCII)
     val s = "hello world"
     // https://stackoverflow.com/questions/5393243/how-do-i-compare-two-arrays-in-scala
     assertEqual(b.deep, str_to_bytes(s).deep)
-    assertEqual(s, bytes_to_str(b))
+    assert(BigInt(b) == BigInt(str_to_bytes(s)))
+    assert(s == bytes_to_str(b))
   }
 
   test("littleEndianToInt") {
@@ -24,10 +34,10 @@ class HashHelperTest extends FunSuite {
     val h = "99c3980000000000"
     val want = BigInt(10011545)
     val result = littleEndianToInt(h)
-    assert(result == want.toInt)
+    assert(result == want)
     val h1 = "a135ef0100000000"
     val want1 = BigInt(32454049)
-    assert(littleEndianToInt(h1) == want1.toInt)
+    assert(littleEndianToInt(h1) == want1)
   }
 
   test("intToLittleEndian") {
@@ -57,11 +67,10 @@ class HashHelperTest extends FunSuite {
     val (_, h160) = decode_base58(addr)
     val want = "507b27411ccf7f16f10297de6cef3f291623eddf"
     assert(h160.toHex == want)
-    val got =
-      encode_base58_checksum(h160, testnet = true)
-
-    //val p = Base58Check.checksum(h160)
+    val prefix = 111.toByte
+    val got = encode(prefix, h160)
     assert(got == addr)
+
   }
 
   test("p2pkh_address") {

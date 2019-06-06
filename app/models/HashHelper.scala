@@ -157,10 +157,7 @@ object HashHelper {
   def decode_base58(input: String): (Byte, ByteVector) =
     Base58Check.decode(input)
 
-  def encode_base58_checksum(bv: ByteVector, testnet: Boolean): String = {
-    val foo = double_sha256(bv).toArray.take(4)
-    encode_base58(ByteVector(bv.toArray ++ foo), testnet)
-  }
+  def encode(prefix: Byte, data: ByteVector) = Base58Check.encode(prefix, data)
 
   /**
     * 256 bits bitcoin hash
