@@ -3,7 +3,6 @@ import org.scalatest._
 
 class ECCTest extends FunSuite with BeforeAndAfter {
 
-
   test("test_on_curve") {
 
     // tests the following points whether they are on the curve or not
@@ -18,7 +17,7 @@ class ECCTest extends FunSuite with BeforeAndAfter {
     // iterate over valid points
     for (point <- valid_points) {
 
-      val ( x_raw, y_raw ) = point
+      val (x_raw, y_raw) = point
       val x = FieldElement(Some(x_raw), prime)
       val y = FieldElement(Some(y_raw), prime)
       // Creating the point should not result in an error
@@ -36,7 +35,6 @@ class ECCTest extends FunSuite with BeforeAndAfter {
     }
   }
 
-
   test("addition: get started") {
 
     val prime = 223
@@ -46,7 +44,7 @@ class ECCTest extends FunSuite with BeforeAndAfter {
     val y1 = FieldElement(Some(105), prime)
     val x2 = FieldElement(Some(17), prime)
     val y2 = FieldElement(Some(56), prime)
-    val p1 = PointFE(Some(x1),Some(y1), a, b)
+    val p1 = PointFE(Some(x1), Some(y1), a, b)
     val p2 = PointFE(Some(x2), Some(y2), a, b)
 
     val x3 = FieldElement(Some(170), prime)
@@ -57,9 +55,6 @@ class ECCTest extends FunSuite with BeforeAndAfter {
     assert(result == p3)
   }
 
-
-
-
   test("mult: get started") {
 
     val prime = 223
@@ -68,9 +63,9 @@ class ECCTest extends FunSuite with BeforeAndAfter {
     val x1 = FieldElement(Some(15), prime)
     val y1 = FieldElement(Some(86), prime)
 
-    val p1 = PointFE(Some(x1),Some(y1), a, b)
+    val p1 = PointFE(Some(x1), Some(y1), a, b)
 
-    val result : PointFE = p1 * 7
+    val result: PointFE = p1 * 7
     println(result)
 
   }
@@ -85,14 +80,14 @@ class ECCTest extends FunSuite with BeforeAndAfter {
     val a = FieldElement(Some(0), prime)
     val b = FieldElement(Some(7), prime)
 
-    val additions : Seq[(Int, Int, Int, Int, Int, Int)] = Seq(
-    // (x1, y1, x2, y2, x3, y3)
-    (192, 105, 17, 56, 170, 142),
-    (47, 71, 117, 141, 60, 139),
-    (143, 98, 76, 66, 47, 71),
+    val additions: Seq[(Int, Int, Int, Int, Int, Int)] = Seq(
+      // (x1, y1, x2, y2, x3, y3)
+      (192, 105, 17, 56, 170, 142),
+      (47, 71, 117, 141, 60, 139),
+      (143, 98, 76, 66, 47, 71)
     )
     // iterate over the additions
-    for (( x1_raw, y1_raw, x2_raw, y2_raw, x3_raw, y3_raw) <-  additions) {
+    for ((x1_raw, y1_raw, x2_raw, y2_raw, x3_raw, y3_raw) <- additions) {
       val x1 = FieldElement(Some(x1_raw), prime)
       val y1 = FieldElement(Some(y1_raw), prime)
       val p1 = PointFE(Some(x1), Some(y1), a, b)
@@ -107,11 +102,6 @@ class ECCTest extends FunSuite with BeforeAndAfter {
     }
   }
 
-
-
-
-
-
   test("test_rmul") {
 
     val prime = 223
@@ -119,17 +109,16 @@ class ECCTest extends FunSuite with BeforeAndAfter {
     val b = FieldElement(Some(7), prime)
 
     val multiplications = Seq(
-    // (coefficient, x1, y1, x2, y2)
-    (2, 192, 105, 49, 71),
-    (2, 143, 98, 64, 168),
-    (2, 47, 71, 36, 111),
-    (4, 47, 71, 194, 51),
-    (8, 47, 71, 116, 55),
-    //(21, 47, 71, None, None))
+      // (coefficient, x1, y1, x2, y2)
+      (2, 192, 105, 49, 71),
+      (2, 143, 98, 64, 168),
+      (2, 47, 71, 36, 111),
+      (4, 47, 71, 194, 51),
+      (8, 47, 71, 116, 55)
     )
 
     // iterate over the multiplications
-    for((s, x1_raw, y1_raw, x2_raw, y2_raw) <- multiplications) {
+    for ((s, x1_raw, y1_raw, x2_raw, y2_raw) <- multiplications) {
 
       val x1 = FieldElement(Some(x1_raw), prime)
       val y1 = FieldElement(Some(y1_raw), prime)
@@ -147,13 +136,10 @@ class ECCTest extends FunSuite with BeforeAndAfter {
     val x1 = FieldElement(Some(x1_raw), prime)
     val y1 = FieldElement(Some(y1_raw), prime)
     val p1 = PointFE(Some(x1), Some(y1), a, b)
-
-    val p2 = PointFE(None, None, a, b)
+    val p2 = PointFE(x2_raw, y2_raw, a, b)
 
     // check that the product is equal to the expected point
-    assert( p1 * s == p2)
+    assert(p1 * s == p2)
   }
-
-
 
 }

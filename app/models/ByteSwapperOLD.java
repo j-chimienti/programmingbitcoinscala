@@ -7,7 +7,7 @@ package models;
  *
  * @author <a href="mailto:jacob.dreyer@geosoft.no">Jacob Dreyer</a>
  */
-public class ByteSwapper
+public class ByteSwapperOLD
 {
 
     /**
