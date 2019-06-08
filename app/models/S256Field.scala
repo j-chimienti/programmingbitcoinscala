@@ -1,29 +1,22 @@
 package models
 
 import scodec.bits.ByteVector
+import scala.language.postfixOps
 
 object S256Field {
-  def apply(n: Option[BigInt] = None): S256Field = new S256Field(n)
+
+  def apply(n: String): S256Field = S256Field(Some(BigInt(n, 16)))
+  def apply(n: Int): S256Field = S256Field(Some(BigInt(n)))
+  def apply(n: BigInt): S256Field = S256Field(Some(n))
+  def apply(n: Option[BigInt] = None): S256Field =
+    new S256Field(n)
 
 }
 
 class S256Field(n: Option[BigInt] = None)
     extends FieldElement(n, secp256kk1.P) {
-  def hex: String = {
-    val fill = 64
-    val ns = n.get.toString(16)
-    val len = ns.length
-    val toFill = Math.max(0, fill - len)
-    var str = ""
-    for (_ <- 1 to toFill) {
-      str += "0"
-    }
-    str += ns
-    // println(s"length = ${str.length}, 64 = ${str.length == 64}")
-    require(str.length == 64)
-    str
-    //n.get.toString(16)
-  }
+  def hex: String = n.get.toString(16) zfill
+
   override def toString: String = hex
 
   def sqrt: S256Field = {
@@ -40,6 +33,8 @@ class S256Field(n: Option[BigInt] = None)
     val result = mult(s256Field.num.get)
     S256Field(Some(result))
   }
+  override def *(coeff: Int): S256Field =
+    S256Field(Some(mult(coeff)))
 
   override def -(fe: FieldElement): S256Field =
     S256Field(Some(minus(fe.num, fe.prime)))
@@ -49,9 +44,6 @@ class S256Field(n: Option[BigInt] = None)
 
   override def +(fe: FieldElement): S256Field =
     S256Field(Some(add(fe.num, fe.prime)))
-
-  override def *(coeff: Int): S256Field =
-    S256Field(Some(mult(coeff)))
 
   override def **(_num: BigInt): S256Field =
     S256Field(Some(pow(_num)))

@@ -9,7 +9,12 @@ case class Signature(r: BigInt, s: BigInt) {
 
   override def toString: String = s"Signature($r,$s)"
 
-  def der = {
+  /**
+    *   The serialized Signature.
+    *   Signatures cannot be compressed due as s cannot be derived from r
+    * @return
+    */
+  def der: Array[Byte] = {
     var rbin: Array[Byte] = r.toByteArray
     var result = Array.empty[Byte]
     // if rbin has a high bit, add a 00

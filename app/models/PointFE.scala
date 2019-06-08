@@ -1,18 +1,20 @@
 package models
 
-trait PointTFE[T] {
+//object PointFE {
+//
+//  def apply(x: Int, y: Int, a: Int, b: Int)
+//}
+
+case class PointFE(x: Option[FieldElement] = None,
+                   y: Option[FieldElement] = None,
+                   a: FieldElement,
+                   b: FieldElement) {
 
   if (x.isDefined && y.isDefined)
     if (y.get ** 2 != x.get ** 3 + (a * x.get) + b)
       throw new RuntimeException(s"(${x.get}, ${y.get}) is not on the curve")
 
-  def x: Option[FieldElement]
-  def y: Option[FieldElement]
-  def a: FieldElement
-  def b: FieldElement
-  def same(point: Point): Boolean = {
-    this == point && y.get == 0
-  }
+  def same(point: PointFE): Boolean = this == point && y.get.num.get == 0
 
   override def toString: String =
     if (x.isEmpty) "Point(infinity)"
@@ -28,14 +30,6 @@ trait PointTFE[T] {
 
   def someFE(int: Option[BigInt]): Option[FieldElement] = Some(FE(int.get))
 
-}
-
-case class PointFE(x: Option[FieldElement] = None,
-                   y: Option[FieldElement] = None,
-                   a: FieldElement,
-                   b: FieldElement)
-    extends PointTFE[PointFE] {
-
   def requireSameCurve(point: PointFE): Unit =
     if (a != point.a || b != point.b)
       throw new RuntimeException(
@@ -43,26 +37,20 @@ case class PointFE(x: Option[FieldElement] = None,
       )
 
   @throws(classOf[RuntimeException])
-  def +(point: PointFE): PointFE = {
-    requireSameCurve(point)
-    if (this == point && y.get == 0) PointFE(None, None, a, b)
-    // Case 0.0: this is the point at infinity, return other point
-    else if (x.isEmpty) point
-    // Case 0.0: other is the point at infinity, return this point
-    else if (point.x.isEmpty) PointFE(x, y, a, b)
-    // Case 1: self.x == other.x, self.y != other.y
-    else if (x == point.x && y != point.y)
+  def +(that: PointFE): PointFE = {
+    requireSameCurve(that)
+    if (this == that && y.get.num.get == 0) PointFE(None, None, a, b)
+    else if (x.isEmpty) that
+    else if (that.x.isEmpty) PointFE(x, y, a, b)
+    else if (x == that.x && y != that.y)
       PointFE(None, None, a, b)
-    // Case 2: self.x != other.x
-    else if (x != point.x) {
-      val denom: FieldElement = (point.x.get - x.get)
-      val slope: FieldElement = (point.y.get - y.get) / denom
-      val x3 = slope ** 2 - x.get - point.x.get
+    else if (x != that.x) {
+      val denom: FieldElement = that.x.get - x.get
+      val slope: FieldElement = (that.y.get - y.get) / denom
+      val x3 = slope ** 2 - x.get - that.x.get
       val y3 = slope * (x.get - x3) - y.get
       PointFE(Some(x3), Some(y3), a, b)
-    }
-    // Case 3: self.x == other.x, self.y == other.y
-    else {
+    } else {
       val numerator = x.get ** 2 + a
       val s = (numerator * 3) / (y.get * 2)
       val xx = s ** 2 - x.get * 2

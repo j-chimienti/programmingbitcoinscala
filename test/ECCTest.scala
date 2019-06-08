@@ -35,41 +35,6 @@ class ECCTest extends FunSuite with BeforeAndAfter {
     }
   }
 
-  test("addition: get started") {
-
-    val prime = 223
-    val a = FieldElement(Some(0), prime)
-    val b = FieldElement(Some(7), prime)
-    val x1 = FieldElement(Some(192), prime)
-    val y1 = FieldElement(Some(105), prime)
-    val x2 = FieldElement(Some(17), prime)
-    val y2 = FieldElement(Some(56), prime)
-    val p1 = PointFE(Some(x1), Some(y1), a, b)
-    val p2 = PointFE(Some(x2), Some(y2), a, b)
-
-    val x3 = FieldElement(Some(170), prime)
-    val y3 = FieldElement(Some(142), prime)
-    val p3 = PointFE(Some(x3), Some(y3), a, b)
-
-    val result = p1 + p2
-    assert(result == p3)
-  }
-
-  test("mult: get started") {
-
-    val prime = 223
-    val a = FieldElement(Some(0), prime)
-    val b = FieldElement(Some(7), prime)
-    val x1 = FieldElement(Some(15), prime)
-    val y1 = FieldElement(Some(86), prime)
-
-    val p1 = PointFE(Some(x1), Some(y1), a, b)
-
-    val result: PointFE = p1 * 7
-    println(result)
-
-  }
-
   test("add") {
 
     // tests the following additions on curve y^2=x^3-7 over F_223:

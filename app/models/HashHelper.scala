@@ -4,8 +4,9 @@ import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import util.control.Breaks._
+import java.security.MessageDigest
 
+import util.control.Breaks._
 import fr.acinq.bitcoin.Base58.Prefix
 import fr.acinq.bitcoin.{Base58Check, ByteVector32}
 import scodec.bits.ByteVector
@@ -21,15 +22,15 @@ class NotImplementedException extends Exception
 
 object HashHelper {
 
-  val BASE58_ALPHABET =
-    "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+  val BASE58_ALPHABET: Array[Byte] =
+    "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".getBytes()
 
-//  def sha256(input: String): String =
-//    MessageDigest
-//      .getInstance("sha-256")
-//      .digest(input.getBytes())
-//      .map("%02x".format(_))
-//      .mkString
+  def SHA256(input: Array[Byte]): Array[Byte] =
+    MessageDigest
+      .getInstance("sha-256")
+      .digest(input)
+  //.map("%02x".format(_))
+  //.mkString
 
   // Returns a string version of the bytes
   def bytes_to_str(b: Array[Byte]): String =
@@ -72,12 +73,8 @@ object HashHelper {
     bb.array()
   }
 
-  @deprecated
-  def hash160(s: String): String = {
-
-    "fixme"
-    //RIPEMD160.decrypt(sha256(s))
-  }
+  def HASH160(s: ByteVector): Array[Byte] =
+    RIPEMD160.decrypt(sha256(s))
 
   def hash(digest: Digest)(input: ByteVector): ByteVector = {
     digest.update(input.toArray, 0, input.length.toInt)
@@ -93,71 +90,56 @@ object HashHelper {
 
   def ripemd160: ByteVector => ByteVector = hash(new RIPEMD160Digest)
 
-  /**
-    * 160 bits bitcoin hash, used mostly for address encoding
-    * hash160(input) = RIPEMD160(SHA256(input))
-    *
-    * @param input array of byte
-    * @return the 160 bits BTC hash of input
-    */
-  def hash160(input: ByteVector): ByteVector = ripemd160(sha256(input))
-
-  def encode_base58S(s: ByteVector) = {
+  def encodeBase58S(s: ByteVector): ByteVector = {
 
     var count = 0
-
     breakable {
       for (c <- s.toArray) {
         if (c == 0.toByte) count += 1
         else break
       }
     }
-    val prefix = Array.fill(count)(1.toByte)
+    val prefix: Array[Byte] = ("1" * count).split("").map(_.toByte)
     // convert from binary to hex, then hex to integer
-    var num = BigInt(s.toArray)
+    var num = BigInt(s.toHex, 16)
     var result = Array.empty[Byte]
     while (num > 0) {
-      val (num1, mod) = num /% 58 // divmod(num, 58)
+      val (num1, mod) = num /% 58
       num = num1
-      val bar: String = BASE58_ALPHABET.toList(mod.toInt).toString
-      result = result ++ Array(("0x0" + bar).toByte)
+      result = result.+:(BASE58_ALPHABET(mod.toInt))
     }
-    val b = prefix ++ result
-    ByteVector(b).toHex
+    ByteVector(prefix ++ result)
   }
-  def encode_base58(bv: ByteVector, prefix: Byte): String =
-    Base58Check.encode(prefix, bv)
 
-  def encode_base58(hex: ByteVector, testnet: Boolean): String =
-    encode_base58(
-      hex,
-      if (testnet) Prefix.PubkeyAddressTestnet else Prefix.PubkeyAddress
+  def h1602p2sh(hex: String, testnet: Boolean): String =
+    Base58Check.encode(
+      if (testnet) Prefix.ScriptAddressTestnet else Prefix.ScriptAddress,
+      ByteVector.fromValidHex(hex)
     )
-  def encode_base58(hex: String, testnet: Boolean): String =
-    encode_base58(
-      ByteVector.fromValidHex(hex),
-      if (testnet) Prefix.PubkeyAddressTestnet else Prefix.PubkeyAddress
-    )
-  def encode_base58(hex: String, prefix: Byte): String =
-    encode_base58(ByteVector.fromValidHex(hex), prefix)
 
-  def h160_to_p2sh_address(hex: String, testnet: Boolean = false): String =
-    encode_base58(
-      ByteVector.fromValidHex(hex),
-      if (testnet) Prefix.ScriptAddressTestnet else Prefix.ScriptAddress
+  def h1602p2sh(data: ByteVector, testnet: Boolean): String =
+    Base58Check.encode(
+      if (testnet) Prefix.ScriptAddressTestnet else Prefix.ScriptAddress,
+      data
     )
-  def h160_to_p2pkh_address(bv: ByteVector, testnet: Boolean): String =
-    encode_base58(
-      bv,
-      if (testnet) Prefix.PubkeyAddressTestnet else Prefix.PubkeyAddress
-    )
-  def h160_to_p2pkh_address(h160: String, testnet: Boolean = false): String =
-    h160_to_p2pkh_address(ByteVector.fromValidHex(h160), testnet)
 
-  def decode_base58(input: String): (Byte, ByteVector) =
+  def h1602p2pkh(h160: String, testnet: Boolean): String =
+    Base58Check.encode(
+      if (testnet) Prefix.PubkeyAddressTestnet else Prefix.PubkeyAddress,
+      ByteVector.fromValidHex(h160)
+    )
+
+  def h1602p2pkh(h160: ByteVector, testnet: Boolean): String =
+    Base58Check.encode(
+      if (testnet) Prefix.PubkeyAddressTestnet else Prefix.PubkeyAddress,
+      h160
+    )
+
+  def encodeBase58(prefix: Byte, data: ByteVector) =
+    Base58Check.encode(prefix, data)
+
+  def decodeBase58(input: String): (Byte, ByteVector) =
     Base58Check.decode(input)
-
-  def encode(prefix: Byte, data: ByteVector) = Base58Check.encode(prefix, data)
 
   /**
     * 256 bits bitcoin hash
@@ -168,14 +150,12 @@ object HashHelper {
     */
   def hash256(input: ByteVector) = ByteVector32(sha256(sha256(input)))
 
-  def double_sha256(bv: ByteVector): ByteVector32 = sha256(sha256(bv))
-
   /**
     * encodes an integer as a varint
     * @param i
     * @return
     */
-  def encode_varint(i: Int): Array[Byte] = {
+  def encodVarint(i: Int): Array[Byte] = {
     // 253
     if (i < BigInt("fd", 16)) BigInt(i).toByteArray
     // 65536

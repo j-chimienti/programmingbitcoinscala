@@ -1,70 +1,17 @@
 package models
 
-import java.io.ByteArrayInputStream
-import java.nio.{ByteBuffer, ByteOrder}
-
-import fr.acinq.bitcoin.Base58.Prefix
-import fr.acinq.bitcoin.Crypto.PrivateKey
-import fr.acinq.bitcoin.{Base58Check, ByteVector32, Crypto}
-import fr.acinq.bitcoin.Protocol._
+import fr.acinq.bitcoin.{Base58Check, Crypto}
 import scodec.bits.ByteVector
+
 import scala.language.postfixOps
-import scodec.bits._
 
-object S256Point {
-  val A = S256Field(Some(secp256kk1.A))
-  val B = S256Field(Some(secp256kk1.B))
-  def apply(x: Option[S256Field] = None,
-            y: Option[S256Field] = None): S256Point =
-    new S256Point(x, y, A, B)
-
-  def apply(x: String, y: String): S256Point =
-    S256Point(BigInt(x, 16), BigInt(y, 16))
-
-  def apply(x: FieldElement, y: FieldElement): S256Point =
-    S256Point(x.num.get, y.num.get)
-
-  def apply(x: ByteVector, y: ByteVector): S256Point =
-    S256Point(BigInt(x.toArray), BigInt(y.toArray))
-
-  def apply(x: BigInt, y: BigInt): S256Point =
-    S256Point(Some(S256Field(Some(x))), Some(S256Field(Some(y))))
-
-  def apply: S256Point = new S256Point(None, None, A, B)
-
-  /**
-    *
-    * Returns a Point object from a compressed sec binary (not hex)
-    * @param sec_bin sec_binary ByteVector
-    * @return
-    */
-  def parse(sec_bin: ByteVector): S256Point = {
-
-    if (sec_bin.head == 4) {
-      val x = BigInt(sec_bin.toArray.slice(1, 33))
-      val y = BigInt(sec_bin.toArray.slice(33, 65))
-      S256Point(x, y)
-    }
-    val is_even = sec_bin.head == 2.toByte
-    val x = S256Field(Some(BigInt(sec_bin.toArray.drop(1))))
-    // right side of the equation y^2 = x^3 + 7
-    val alpha: S256Field = x ** 3 + S256Field(Some(secp256kk1.B))
-    // solve for left side
-    val beta = alpha.sqrt
-    val (even_beta, odd_beta) = if (beta.num.get.mod(2) == 0) {
-      val even_beta = beta
-      val odd_beta = S256Field(Some(secp256kk1.P - beta.num.get))
-      (even_beta, odd_beta)
-    } else {
-      val even_beta = S256Field(Some(secp256kk1.P - beta.num.get))
-      val odd_beta = beta
-      (even_beta, odd_beta)
-    }
-    S256Point(Some(x), if (is_even) Some(even_beta) else Some(odd_beta))
-  }
-
-}
-
+/**
+  *   The Public Key
+  * @param x coordinate
+  * @param y coordinate
+  * @param a Field of coeff of secpk256k1 curve
+  * @param b Field of coeff of secpk256k1 curve
+  */
 class S256Point(x: Option[S256Field] = None,
                 y: Option[S256Field] = None,
                 a: S256Field,
@@ -87,19 +34,16 @@ class S256Point(x: Option[S256Field] = None,
       if ((coefficient & 1) != 0) {
         result = result + current
       }
-      current = current + current
+      current += current
       coefficient >>= 1
     }
     result
   }
-  @throws(classOf[RuntimeException])
   def +(point: S256Point): S256Point = {
     requireSameCurve(point)
     add(point)
   }
 
-  // fixme:
-  @throws(classOf[RuntimeException])
   def add(point: S256Point): S256Point = {
     requireSameCurve(point)
     if (this == point && y.get.num.get == 0)
@@ -129,54 +73,32 @@ class S256Point(x: Option[S256Field] = None,
       S256Point(Some(xx), Some(yy))
     }
   }
+
+  /**
+    * Standards for Efficient Cryptography
+    * Serialize the data
+    * @param compressed form of sec format wanted
+    * @return the 33 byte if compressed and 65 if not compressed
+    */
   def sec(compressed: Boolean = true): ByteVector = {
 
-    val xBv =
-      ByteVector(x.get.num.get.toByteArray)
+    val X = x.get.num.get
     if (compressed) {
       val byte = if (y.get.num.get.mod(2) == 0) 2.toByte else 3.toByte
-      xBv.take(33).update(0, byte)
+      ByteVector(X.toByteArray.+:(byte))
     } else {
-      val byte = 4.toByte
-      val yy = ByteVector(y.get.num.get.toByteArray)
-      (xBv ++ yy).take(65).update(0, byte)
+      ByteVector((X.toByteArray ++ y.get.num.get.toByteArray).+:(4.toByte))
     }
 
   }
 
   def address(compressed: Boolean = true, testnet: Boolean = false): String = {
-
-    // get the sec
-
-//    val hex =
-//      hex"BCF69F7AFF3273B864F9DD76896FACE8E3D3CF69A133585C8177816F14FC9B55"
-//
-//    val privateKey = PrivateKey(
-//      hex"BCF69F7AFF3273B864F9DD76896FACE8E3D3CF69A133585C8177816F14FC9B55"
-//    )
-//    val publicKey = privateKey.publicKey
-//    assert(
-//      publicKey.toBin === hex"04D7E9DD0C618C65DC2E3972E2AA406CCD34E5E77895C96DC48AF0CB16A1D9B8CE0C0A3E2F4CD494FF54FBE4F5A95B410C0BF022EB2B6F23AE39F40DB79FAA6827"
-//    )
-//
-//    val address =
-//      Base58Check.encode(Prefix.PubkeyAddress, Crypto.hash160(publicKey.toBin))
-//    assert(address == "19FgFQGZy47NcGTJ4hfNdGMwS8EATqoa1X")
-
-    val _sec: ByteVector = sec(compressed)
-    // hash160 the sec
-    val h160: ByteVector = Crypto.hash160(_sec) // hash160(_sec)
-    val prefix: Byte =
-      if (testnet) Prefix.PubkeyAddressTestnet else Prefix.PubkeyAddress
-    // checksum is first 4 bytes of double_sha256 of raw
-    // val who = double_sha256(raw).toArray.take(4)
-    val foo = Base58Check.encode(prefix, h160)
-
-    foo
-    // encode_base58 the raw + checksum
-    //val address = encode_base58(raw ++ ByteVector(checksum), prefix)
-    //val address = encode_base58S(raw ++ ByteVector(checksum))
-    //address
+    val prefix = if (testnet) 0x6f.toByte else 0x00.toByte
+    val SEC = sec(compressed)
+    val h160 = Crypto.hash160(SEC) // 20 byte
+    val raw = h160.+:(prefix)
+    val checksum = Base58Check.checksum(raw)
+    (raw ++ checksum).toBase58
   }
 
   def verify(z: String, sig: Signature): Boolean =
@@ -192,6 +114,63 @@ class S256Point(x: Option[S256Field] = None,
     // u*G + v*P should have as the x coordinate, r
     val total: S256Point = G * u + this * v
     total.x.get.num.get == sig.r
+  }
+
+}
+
+object S256Point {
+
+  def apply(x: String, y: String): S256Point =
+    S256Point.apply(BigInt(x, 16), BigInt(y, 16))
+
+  def apply(x: FieldElement, y: FieldElement): S256Point =
+    S256Point.apply(x.num.get, y.num.get)
+
+  def apply(x: ByteVector, y: ByteVector): S256Point =
+    S256Point.apply(BigInt(x.toArray), BigInt(y.toArray))
+
+  def apply(x: BigInt, y: BigInt): S256Point =
+    S256Point.apply(S256Field(x), S256Field(y))
+
+  def apply(x: S256Field, y: S256Field): S256Point =
+    S256Point.apply(Some(x), Some(y))
+
+  def apply(x: Option[S256Field] = None,
+            y: Option[S256Field] = None): S256Point =
+    new S256Point(x, y, S256Field(secp256kk1.A), S256Field(secp256kk1.B))
+
+  def apply: S256Point =
+    new S256Point(None, None, S256Field(secp256kk1.A), S256Field(secp256kk1.B))
+
+  /**
+    *
+    * Returns a Point object from a compressed sec binary (not hex)
+    * @param sec_bin sec_binary ByteVector
+    * @return
+    */
+  def parse(sec_bin: ByteVector): S256Point = {
+
+    if (sec_bin.head == 4) {
+      val x = sec_bin.slice(1, 33)
+      val y = sec_bin.slice(33, 65)
+      S256Point(x, y)
+    }
+    val is_even = sec_bin.head == 2.toByte
+    val x = S256Field(Some(BigInt(sec_bin.toArray.drop(1))))
+    // right side of the equation y^2 = x^3 + 7
+    val alpha: S256Field = x ** 3 + S256Field(secp256kk1.B)
+    // solve for left side
+    val beta = alpha.sqrt
+    val (even_beta, odd_beta) = if (beta.num.get.mod(2) == 0) {
+      val even_beta = beta
+      val odd_beta = S256Field(secp256kk1.P - beta.num.get)
+      (even_beta, odd_beta)
+    } else {
+      val even_beta = S256Field(secp256kk1.P - beta.num.get)
+      val odd_beta = beta
+      (even_beta, odd_beta)
+    }
+    S256Point(x, if (is_even) even_beta else odd_beta)
   }
 
 }

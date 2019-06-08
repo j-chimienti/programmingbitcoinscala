@@ -1,13 +1,12 @@
 package models
 
-import org.specs2.mutable.Specification
+import org.scalatest.WordSpec
 import scala.util.Random
 
-class SignatureTest extends Specification {
+class SignatureTest extends WordSpec {
 
-  "SignatureTest" should {
-
-    "der" in {
+  "der" should {
+    "create serialized Signature" in {
       val r = new Random
       val testcases = List(
         (BigInt(1), BigInt(2)),
@@ -21,8 +20,7 @@ class SignatureTest extends Specification {
         assert(sig2.r == r)
         assert(sig2.s == s)
       }
-      ok
-    }
 
+    }
   }
 }
