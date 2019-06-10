@@ -19,12 +19,50 @@ class S256Point(x: Option[S256Field] = None,
     extends PointFE(x, y, a, b) {
 
   import secp256kk1._
-  val bits = 256
-  override def toString: String =
-    x match {
-      case None     => "S256Point(infinity)"
-      case Some(xx) => s"S256Point($xx, ${y.get})"
+  final val bits = 256
+
+  /**
+    * Standards for Efficient Cryptography
+    * Serialize the data
+    * @param compressed form of sec format wanted
+    * @return the 33 byte if compressed and 65 if not compressed
+    */
+  def sec(compressed: Boolean = true): ByteVector = {
+
+    val X = x.get.num.get
+    if (compressed) {
+      val byte = if (y.get.num.get.mod(2) == 0) 2.toByte else 3.toByte
+      ByteVector(X.toByteArray.+:(byte))
+    } else {
+      ByteVector((X.toByteArray ++ y.get.num.get.toByteArray).+:(4.toByte))
     }
+
+  }
+
+  def address(compressed: Boolean = true, testnet: Boolean = false): String = {
+    val prefix = if (testnet) 0x6f.toByte else 0x00.toByte
+    val SEC = sec(compressed)
+    val h160 = Crypto.hash160(SEC) // 20 byte
+    val raw = h160.+:(prefix)
+    val checksum = Base58Check.checksum(raw)
+    (raw ++ checksum).toBase58
+  }
+
+  def verify(z: String, sig: Signature): Boolean =
+    verify(BigInt(z, 16), sig)
+
+  def verify(z: BigInt, sig: Signature): Boolean = {
+    // remember 1/s = pow(s, N-2, N)
+    val s_inv = sig.s.modPow(N - 2, N)
+    // u = z / s
+    val u = (z * s_inv).mod(N)
+    // v = r / s
+    val v = (sig.r * s_inv).mod(N)
+    // u*G + v*P should have as the x coordinate, r
+    val total: S256Point = G * u + this * v
+    total.x.get.num.get == sig.r
+  }
+
   def *(coeff: BigInt): S256Point = {
 
     var coefficient = coeff.mod(N)
@@ -73,48 +111,11 @@ class S256Point(x: Option[S256Field] = None,
       S256Point(Some(xx), Some(yy))
     }
   }
-
-  /**
-    * Standards for Efficient Cryptography
-    * Serialize the data
-    * @param compressed form of sec format wanted
-    * @return the 33 byte if compressed and 65 if not compressed
-    */
-  def sec(compressed: Boolean = true): ByteVector = {
-
-    val X = x.get.num.get
-    if (compressed) {
-      val byte = if (y.get.num.get.mod(2) == 0) 2.toByte else 3.toByte
-      ByteVector(X.toByteArray.+:(byte))
-    } else {
-      ByteVector((X.toByteArray ++ y.get.num.get.toByteArray).+:(4.toByte))
+  override def toString: String =
+    x match {
+      case None     => "S256Point(infinity)"
+      case Some(xx) => s"S256Point($xx, ${y.get})"
     }
-
-  }
-
-  def address(compressed: Boolean = true, testnet: Boolean = false): String = {
-    val prefix = if (testnet) 0x6f.toByte else 0x00.toByte
-    val SEC = sec(compressed)
-    val h160 = Crypto.hash160(SEC) // 20 byte
-    val raw = h160.+:(prefix)
-    val checksum = Base58Check.checksum(raw)
-    (raw ++ checksum).toBase58
-  }
-
-  def verify(z: String, sig: Signature): Boolean =
-    verify(BigInt(z, 16), sig)
-
-  def verify(z: BigInt, sig: Signature): Boolean = {
-    // remember 1/s = pow(s, N-2, N)
-    val s_inv = sig.s.modPow(N - 2, N)
-    // u = z / s
-    val u = (z * s_inv).mod(N)
-    // v = r / s
-    val v = (sig.r * s_inv).mod(N)
-    // u*G + v*P should have as the x coordinate, r
-    val total: S256Point = G * u + this * v
-    total.x.get.num.get == sig.r
-  }
 
 }
 

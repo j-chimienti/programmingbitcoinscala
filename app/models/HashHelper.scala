@@ -1,16 +1,13 @@
 package models
 
-import java.io.ByteArrayInputStream
+import java.io.{ByteArrayInputStream, InputStream}
 import java.nio.charset.StandardCharsets
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.security.MessageDigest
-
-import util.control.Breaks._
 import fr.acinq.bitcoin.Base58.Prefix
 import fr.acinq.bitcoin.{Base58Check, ByteVector32}
 import scodec.bits.ByteVector
-import fr.acinq.bitcoin.Protocol._
 import org.spongycastle.crypto.Digest
 import org.spongycastle.crypto.digests.{
   RIPEMD160Digest,
@@ -52,6 +49,23 @@ object HashHelper {
     uint32(stream, ByteOrder.LITTLE_ENDIAN)
   }
 
+  def uint32(stream: InputStream,
+             order: ByteOrder = ByteOrder.LITTLE_ENDIAN): Long = {
+
+    val bin = Array[Byte](4)
+    stream.read(bin)
+    uint32(bin, order)
+
+  }
+
+  def uint32(input: Array[Byte], order: ByteOrder): Long = {
+    val buf = ByteBuffer.wrap(input).order(order)
+    buf.getInt() & 0xFFFFFFFFL
+  }
+
+  def littleEndianToInt(data: InputStream): Long =
+    uint32(data, ByteOrder.LITTLE_ENDIAN)
+
   // https://gist.github.com/paulononaka/908246
 
   // https://stackoverflow.com/questions/3842828/converting-little-endian-to-big-endian
@@ -73,8 +87,8 @@ object HashHelper {
     bb.array()
   }
 
-  def HASH160(s: ByteVector): Array[Byte] =
-    RIPEMD160.decrypt(sha256(s))
+//  def HASH160(s: ByteVector): Array[Byte] =
+//    RIPEMD160.decrypt(sha256(s))
 
   def hash(digest: Digest)(input: ByteVector): ByteVector = {
     digest.update(input.toArray, 0, input.length.toInt)
@@ -90,26 +104,26 @@ object HashHelper {
 
   def ripemd160: ByteVector => ByteVector = hash(new RIPEMD160Digest)
 
-  def encodeBase58S(s: ByteVector): ByteVector = {
-
-    var count = 0
-    breakable {
-      for (c <- s.toArray) {
-        if (c == 0.toByte) count += 1
-        else break
-      }
-    }
-    val prefix: Array[Byte] = ("1" * count).split("").map(_.toByte)
-    // convert from binary to hex, then hex to integer
-    var num = BigInt(s.toHex, 16)
-    var result = Array.empty[Byte]
-    while (num > 0) {
-      val (num1, mod) = num /% 58
-      num = num1
-      result = result.+:(BASE58_ALPHABET(mod.toInt))
-    }
-    ByteVector(prefix ++ result)
-  }
+//  def encodeBase58S(s: ByteVector): ByteVector = {
+//
+//    var count = 0
+//    breakable {
+//      for (c <- s.toArray) {
+//        if (c == 0.toByte) count += 1
+//        else break
+//      }
+//    }
+//    val prefix: Array[Byte] = ("1" * count).split("").map(_.toByte)
+//    // convert from binary to hex, then hex to integer
+//    var num = BigInt(s.toHex, 16)
+//    var result = Array.empty[Byte]
+//    while (num > 0) {
+//      val (num1, mod) = num /% 58
+//      num = num1
+//      result = result.+:(BASE58_ALPHABET(mod.toInt))
+//    }
+//    ByteVector(prefix ++ result)
+//  }
 
   def h1602p2sh(hex: String, testnet: Boolean): String =
     Base58Check.encode(
@@ -151,11 +165,31 @@ object HashHelper {
   def hash256(input: ByteVector) = ByteVector32(sha256(sha256(input)))
 
   /**
+    * Read a variable integer from a stream
+    * @param stream
+    */
+  def readVarint(stream: InputStream) = {
+
+    val buf = Array[Byte](1)
+    val i: Int = stream.read(buf)
+    val len: Int = i match {
+      case 0xfd => 2
+      case 0xfe => 4
+      case 0xff => 8
+      case who  => who
+    }
+    val a = new Array[Byte](len)
+    val bb = stream.read(a)
+    bb
+
+  }
+
+  /**
     * encodes an integer as a varint
     * @param i
     * @return
     */
-  def encodVarint(i: Int): Array[Byte] = {
+  def encodeVarint(i: Int): Array[Byte] = {
     // 253
     if (i < BigInt("fd", 16)) BigInt(i).toByteArray
     // 65536

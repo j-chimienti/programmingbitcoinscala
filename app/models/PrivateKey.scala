@@ -2,7 +2,6 @@ package models
 
 import scala.language.postfixOps
 import scala.util.Random
-import fr.acinq.bitcoin.{Base58Check, ByteVector32, Crypto}
 import scodec.bits.ByteVector
 
 case class PrivateKey(secret: ByteVector, point: S256Point) {
@@ -30,11 +29,8 @@ case class PrivateKey(secret: ByteVector, point: S256Point) {
     */
   def wif(compressed: Boolean = true, testnet: Boolean = false): String = {
 
-    // convert secret to 32 bytes
-
     val prefix = if (testnet) 0xef.toByte else 0x80.toByte
-    //var bytes = secret.padLeft(32).toArray.+:(prefix) // (2)
-    var bytes = secret.toArray.+:(prefix) // (2)
+    var bytes = secret.toArray.+:(prefix)
     if (compressed) bytes = bytes.:+(0x01.toByte)
     val check = HashHelper.hash256(ByteVector(bytes)).take(4)
     val foo = bytes ++ check.toArray

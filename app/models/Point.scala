@@ -21,13 +21,8 @@ case class Point(x: Option[BigInt] = None,
         s"Points ${this}, $point are not on the same curve"
       )
 
-  def !=(point: Point): Boolean = {
+  def !=(point: Point): Boolean =
     x != point.x || y != point.y || a != point.a || b != point.b
-  }
-
-  def *(coef: BigInt): Point = {
-    this.*(coef.toInt)
-  }
 
   def *(coeff: Int): Point = {
     var product = Point(a = a, b = b)
@@ -35,7 +30,6 @@ case class Point(x: Option[BigInt] = None,
     product
   }
 
-  @throws(classOf[RuntimeException])
   def +(that: Point): Point = {
     requireSameCurve(that)
     if (this == that && y.get == 0)
