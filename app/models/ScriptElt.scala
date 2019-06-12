@@ -259,5 +259,5 @@ object ScriptElt {
   val elt2code: Map[ScriptElt, Int] = code2elt.map(_.swap)
 
   // name -> code
-  val name2code = code2elt.mapValues(_.asInstanceOf[Product].productPrefix.stripPrefix("OP_")).map(_.swap) + ("NOP2" -> 0xb1) + ("NOP3" -> 0xb2)
+  val name2code: Map[String, Int] = code2elt.mapValues(_.asInstanceOf[Product].productPrefix.stripPrefix("OP_")).map(_.swap) + ("NOP2" -> 0xb1) + ("NOP3" -> 0xb2)
 }

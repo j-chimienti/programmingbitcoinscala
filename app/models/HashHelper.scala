@@ -5,8 +5,10 @@ import java.nio.charset.StandardCharsets
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.security.MessageDigest
+
 import fr.acinq.bitcoin.Base58.Prefix
-import fr.acinq.bitcoin.{Base58Check, ByteVector32}
+import fr.acinq.bitcoin.Protocol.uint32
+import fr.acinq.bitcoin.{Base58Check, ByteVector32, Protocol}
 import scodec.bits.ByteVector
 import org.spongycastle.crypto.Digest
 import org.spongycastle.crypto.digests.{
@@ -42,36 +44,40 @@ object HashHelper {
     * @param input
     * @return Long
     */
-  // https://stackoverflow.com/questions/51123309/converting-a-big-int-to-little-endian-byte-slice
   def littleEndianToInt(input: String): Long = {
     val ba = ByteVector.fromValidHex(input).toArray
-    val stream = new ByteArrayInputStream(ba)
-    uint32(stream, ByteOrder.LITTLE_ENDIAN)
+    littleEndianToInt(ba)
+
   }
 
-  def uint32(stream: InputStream,
+  def littleEndianToInt(data: Array[Byte]): Int =
+    ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).getInt()
+
+  def uint8(stream: InputStream): Int = stream.read()
+
+  def uint16(data: Array[Byte]): Int = {
+
+    val o = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+    o.getShort() & 0xFFFF
+  }
+
+  def uint32(input: InputStream,
              order: ByteOrder = ByteOrder.LITTLE_ENDIAN): Long = {
-
-    val bin = Array[Byte](4)
-    stream.read(bin)
+    val bin = new Array[Byte](4)
+    input.read(bin)
     uint32(bin, order)
-
   }
 
   def uint32(input: Array[Byte], order: ByteOrder): Long = {
-    val buf = ByteBuffer.wrap(input).order(order)
-    buf.getInt() & 0xFFFFFFFFL
+    val buffer = ByteBuffer.wrap(input).order(order)
+    buffer.getInt() & 0xFFFFFFFFL
   }
-
-  def littleEndianToInt(data: InputStream): Long =
-    uint32(data, ByteOrder.LITTLE_ENDIAN)
 
   // https://gist.github.com/paulononaka/908246
 
   // https://stackoverflow.com/questions/3842828/converting-little-endian-to-big-endian
   def intToLittleEndian(numero: Array[Byte], allocate: Int): Array[Byte] = {
 
-    //uint32(new ByteArrayInputStream(numero), ByteOrder.LITTLE_ENDIAN)
     val bb = ByteBuffer.allocate(allocate)
     bb.order(ByteOrder.LITTLE_ENDIAN)
     bb.put(numero)
@@ -79,13 +85,8 @@ object HashHelper {
 
   }
 
-  def intToLittleEndian(num: Int, allocate: Int): Array[Byte] = {
-
-    val bb = ByteBuffer.allocate(allocate)
-    bb.order(ByteOrder.LITTLE_ENDIAN)
-    bb.putInt(num)
-    bb.array()
-  }
+  def intToLittleEndian(num: Int, allocate: Int = 4): Array[Byte] =
+    intToLittleEndian(BigInt(num).toByteArray, allocate)
 
 //  def HASH160(s: ByteVector): Array[Byte] =
 //    RIPEMD160.decrypt(sha256(s))
@@ -96,6 +97,16 @@ object HashHelper {
     digest.doFinal(out, 0)
     ByteVector.view(out)
   }
+
+  /**
+    *
+    * @param data string (addr)
+    * @return the version Byte and the data in base58
+    */
+  def base58(data: String): (Byte, ByteVector) = Base58Check.decode(data)
+
+  def base58Encode(version: Int, h160: ByteVector): String =
+    Base58Check.encode(version, h160)
 
   def sha1: ByteVector => ByteVector = hash(new SHA1Digest)
 
@@ -149,7 +160,7 @@ object HashHelper {
       h160
     )
 
-  def encodeBase58(prefix: Byte, data: ByteVector) =
+  def encodeBase58(prefix: Byte, data: ByteVector): String =
     Base58Check.encode(prefix, data)
 
   def decodeBase58(input: String): (Byte, ByteVector) =
@@ -168,19 +179,12 @@ object HashHelper {
     * Read a variable integer from a stream
     * @param stream
     */
-  def readVarint(stream: InputStream) = {
+  def readVarint(stream: InputStream): Long = stream.read() match {
 
-    val buf = Array[Byte](1)
-    val i: Int = stream.read(buf)
-    val len: Int = i match {
-      case 0xfd => 2
-      case 0xfe => 4
-      case 0xff => 8
-      case who  => who
-    }
-    val a = new Array[Byte](len)
-    val bb = stream.read(a)
-    bb
+    case 0xfd                  => Protocol.uint16(stream)
+    case 0xfe                  => Protocol.uint32(stream)
+    case 0xff                  => Protocol.uint64(stream)
+    case value if value < 0xfd => value
 
   }
 

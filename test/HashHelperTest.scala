@@ -1,36 +1,28 @@
 import java.nio.charset.StandardCharsets
 
 import fr.acinq.bitcoin.{Base58Check, Crypto}
-import models.ByteSwapper
-import org.scalatest.FunSuite
+import models.{ByteSwapper, HashHelper}
+import org.scalatest.{FlatSpec, FunSuite}
 import scodec.bits.ByteVector
 
-class HashHelperTest extends FunSuite {
+class HashHelperTest extends FlatSpec {
 
   import models.HashHelper._
 
-  test("base58 encode and decode address") {
-
-    val to = "mnrVtF8DWjMu839VW3rBfgYaAfKk8983Xf"
-    val (prefix, decoded) = Base58Check.decode(to)
-    assert(decoded.toHex == "507b27411ccf7f16f10297de6cef3f291623eddf")
-    val addr = Base58Check.encode(prefix, decoded)
-    assert(addr == to)
-  }
+  behavior of "FlatSpec"
 
   def assertEqual[T](a: T, b: T): Unit = assert(a == b)
 
-  test("bytes") {
+  it should "bytes" in {
 
     val b = "hello world".getBytes(StandardCharsets.US_ASCII)
     val s = "hello world"
-    // https://stackoverflow.com/questions/5393243/how-do-i-compare-two-arrays-in-scala
     assertEqual(b.deep, str_to_bytes(s).deep)
     assert(BigInt(b) == BigInt(str_to_bytes(s)))
     assert(s == bytes_to_str(b))
   }
 
-  test("littleEndianToInt") {
+  it should "littleEndianToInt" in {
 
     val h = "99c3980000000000"
     val want = BigInt(10011545)
@@ -41,39 +33,16 @@ class HashHelperTest extends FunSuite {
     assert(littleEndianToInt(h1) == want1)
   }
 
-  test("intToLittleEndian") {
-
-    val n = 1
-    val want: Array[Byte] =
-      Array(0x01.toByte, 0x00.toByte, 0x00.toByte, 0x00.toByte)
-    val res = intToLittleEndian(BigInt(n).toByteArray, 4)
-    assert(BigInt(res) == BigInt(want))
-    val n1 = 10011545
-    val want1 =
-      Array(
-        0x99.toByte,
-        0xc3.toByte,
-        0x98.toByte,
-        0x00.toByte,
-        0x00.toByte,
-        0x00.toByte,
-        0x00.toByte,
-        0x00.toByte
-      )
-    val result = intToLittleEndian(n1, 8)
-    assert(BigInt(want1) == BigInt(result))
-  }
-  test("base58") {
+  it should "base58" in {
     val addr = "mnrVtF8DWjMu839VW3rBfgYaAfKk8983Xf"
-    val (version, h160) = Base58Check.decode(addr)
+    val (version, h160) = base58(addr)
     val want = "507b27411ccf7f16f10297de6cef3f291623eddf"
     assert(h160.toHex == want)
-    val prefix = 111.toByte
     val got = Base58Check.encode(version, h160)
     assert(got == addr)
   }
 
-  test("p2pkh_address") {
+  it should "p2pkh_address" in {
     val h160 =
       ByteVector.fromValidHex("74d691da1574e6b3c192ecfb52cc8984ee7b6c56")
     val want = "1BenRpVUFK65JFWcQSuHnJKzc4M8ZP8Eqa"
@@ -82,7 +51,7 @@ class HashHelperTest extends FunSuite {
     assert(h1602p2pkh(h160, testnet = true) == want1)
   }
 
-  test("p2sh_address") {
+  it should "p2sh_address" in {
     val h160 =
       "74d691da1574e6b3c192ecfb52cc8984ee7b6c56"
     val want = "3CLoMMyuoDQTPRD3XYZtCvgvkadrAdvdXh"

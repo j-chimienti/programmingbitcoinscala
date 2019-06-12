@@ -4,20 +4,27 @@ import java.io.InputStream
 
 import scodec.bits.ByteVector
 
-case class TxOut(amount: Long, scriptPubKey: ByteVector) {
+case class TxOut(amount: Long, scriptPubKey: Script) {
 
-  def hex = ""
+  def serialize = {
 
+    var result = HashHelper.intToLittleEndian(amount.toInt, 8)
+    val rawScriptPubKey = scriptPubKey.serialize.toArray
+    result = result ++ rawScriptPubKey
+    result = result ++ HashHelper.encodeVarint(rawScriptPubKey.length)
+    result ++ rawScriptPubKey
+
+  }
   override def toString = s"TxOut($amount, $scriptPubKey)"
 
   def validate = {
 
     require(amount >= 0, s"Invalid Tx amount = $amount")
     require(amount < MaxMoney, s"Invalid Tx amout = $amount")
-    require(
-      scriptPubKey.length > MaxScriptElementSize,
-      s"Invalid scriptPubkey script length = ${scriptPubKey.length} limit  = $MaxScriptElementSize bytes"
-    )
+//    require(
+//      scriptPubKey.length > MaxScriptElementSize,
+//      s"Invalid scriptPubkey script length = ${scriptPubKey.length} limit  = $MaxScriptElementSize bytes"
+//    )
 
   }
 }
@@ -26,11 +33,13 @@ object TxOut {
 
   def parse(stream: InputStream): TxOut = {
 
-    val buf = Array[Byte](8)
-    val amt = HashHelper.littleEndianToInt(stream.read(buf))
+    val amtBuf = new Array[Byte](8)
+    stream.read(amtBuf)
+    val amt = HashHelper.littleEndianToInt(amtBuf)
     val scriptPubkeyLength = HashHelper.readVarint(stream)
-    val buf2 = new Array[Byte](scriptPubkeyLength)
-    val scriptPubKey = stream.read(buf2)
-    TxOut(amt, ByteVector.fromLong(scriptPubKey))
+    val scriptPubKey = new Array[Byte](scriptPubkeyLength.toInt)
+    stream.read(scriptPubKey)
+    val script = Script(scriptPubKey)
+    TxOut(amt, script)
   }
 }
