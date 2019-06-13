@@ -14,7 +14,7 @@ class TransactionAsyncTest extends AsyncFlatSpec {
     val index = 0
     val want = 42505594L
     val txIn =
-      TxIn(ByteVector.fromValidHex(txHash), index, Script(List.empty), 0)
+      TxIn(txHash, index, Script(), 0)
     for {
       value <- txIn.value()
     } yield {
@@ -44,4 +44,26 @@ class TransactionAsyncTest extends AsyncFlatSpec {
     }
   }
 
+  it should "input public key" in {
+
+    val tx_hash =
+      "d1c789a9c60383bf715f3f6ad9d14b91fe55f3deb369fe5d9280cb1a01793f81"
+    val index = 0
+    val txIn = TxIn(
+      prevTx = ByteVector.fromValidHex(tx_hash),
+      prevIdx = index,
+      scriptSig = Script(),
+      sequence = 0L
+    )
+    val want =
+      "76a914a802fc56c704ce87c42d7c92eb75e7896bdc41ae88ac"
+    for {
+
+      t <- txIn.scriptPubKey()
+    } yield {
+
+      assert(t.serialize.toHex == want)
+    }
+
+  }
 }

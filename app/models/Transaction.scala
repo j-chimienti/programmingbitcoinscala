@@ -5,6 +5,13 @@ import java.io.{ByteArrayInputStream, InputStream}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+/**
+  *
+  * @param version Tranaction data format version
+  * @param inputs Transaction inputs
+  * @param outputs Transaction outputs
+  * @param locktime the block number or timestamp at which this transaction is locked
+  */
 case class Transaction(version: Long,
                        inputs: Seq[TxIn],
                        outputs: Seq[TxOut],
@@ -18,6 +25,8 @@ case class Transaction(version: Long,
       outputs.map(_.amount).sum < MaxMoney,
       "Sum of outputs amount is invalid"
     )
+    val outPoints = inputs.map(_.prevTx.toHex)
+    require(outPoints.size == outPoints.toSet.size, "Duplicate inputs")
 
   }
 
@@ -34,8 +43,9 @@ case class Transaction(version: Long,
 
   def serialize = {
 
-    var result: Array[Byte] = HashHelper.intToLittleEndian(version.toInt, 4)
-    result = result ++ HashHelper.encodeVarint(result.length)
+    val vers: Array[Byte] = HashHelper.intToLittleEndian(version.toInt, 4)
+    var result = vers
+    result = result ++ HashHelper.encodeVarint(inputs.length)
     for (txIn <- inputs) {
       result = result ++ txIn.serialize
     }
@@ -43,8 +53,7 @@ case class Transaction(version: Long,
     for (txOut <- outputs) {
       result = result ++ txOut.serialize
     }
-    result = result ++ HashHelper.intToLittleEndian(locktime.toInt, 4)
-    result
+    result ++ HashHelper.intToLittleEndian(locktime.toInt, 4)
 
   }
 
@@ -59,13 +68,11 @@ case class Transaction(version: Long,
       inputs
         .map(input => input.value(testnet))
 
-    val inputSumFuture: Future[Long] = Future.sequence(inputValue).map(_.sum)
-    val outputSum = outputs.map(_.amount).sum
-
     for {
-      inputSum <- inputSumFuture
+      inputSum <- Future.sequence(inputValue).map(_.sum)
     } yield {
 
+      val outputSum = outputs.map(_.amount).sum
       inputSum - outputSum
     }
   }
@@ -96,11 +103,11 @@ object Transaction {
     val inputs: Seq[TxIn] = for (_ <- 1L to numInputs)
       yield TxIn.parse(stream)
     val numOutputs = HashHelper.readVarint(stream)
-    val outputs: Seq[TxOut] = for (_ <- 1L to numOutputs.toInt)
+    val outputs: Seq[TxOut] = for (_ <- 1L to numOutputs)
       yield TxOut.parse(stream)
     val lt = new Array[Byte](4)
     stream.read(lt)
-    val lockTime = BigInt(lt)
+    val lockTime = HashHelper.littleEndianToInt(lt)
     Transaction(version.toInt, inputs, outputs, lockTime.toLong)
   }
 }

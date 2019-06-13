@@ -2,8 +2,11 @@ package models
 
 import java.io.InputStream
 
-import scodec.bits.ByteVector
-
+/**
+  *
+  * @param amount amount in Satoshis
+  * @param scriptPubKey public key script which sets the conditions for spending this output
+  */
 case class TxOut(amount: Long, scriptPubKey: Script) {
 
   def serialize = {

@@ -25,19 +25,20 @@ object TransactionService {
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   val client: AhcWSClient = AhcWSClient()
 
-  val cache: Map[String, Transaction] = mutable.Map.empty[String, Transaction]
+  val cache: mutable.Map[String, Transaction] =
+    mutable.Map.empty[String, Transaction]
 
   def baseUri(testnet: Boolean = false): String =
     if (testnet) "https://blockstream.info/testnet/api"
     else "https://blockstream.info/api"
 
   /**
-    * Get the tx hex and parse the tx
+    * Get the tx hex and parse the tx. Store in cache
     * @param txId Transaction id
     * @param testnet
     * @return Transaction
     */
-  def fetchTx(txId: String, testnet: Boolean = false): Future[Transaction] = {
+  def fetch(txId: String, testnet: Boolean = false): Future[Transaction] = {
 
     if (cache.contains(txId))
       FastFuture.successful[Transaction](cache(txId))

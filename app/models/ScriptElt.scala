@@ -47,7 +47,7 @@ case object OP_2SWAP extends ScriptElt
 case object OP_IFDUP extends ScriptElt
 case object OP_DEPTH extends ScriptElt
 case object OP_DROP extends ScriptElt
-case object OP_DUP extends ScriptElt
+case object OP_DUP extends ScriptElt // Duplicate top stack item
 case object OP_NIP extends ScriptElt
 case object OP_OVER extends ScriptElt
 case object OP_PICK extends ScriptElt

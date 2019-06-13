@@ -9,14 +9,14 @@ class TransactionServiceTest extends AsyncFlatSpec {
   behavior of "TransactionService"
   val txService = TransactionService
 
-  it should "fetchTx" in {
+  it should "fetch Transaction" in {
 
     val hexStr =
       "d1c789a9c60383bf715f3f6ad9d14b91fe55f3deb369fe5d9280cb1a01793f81"
 
     for {
 
-      tx <- txService.fetchTx(hexStr, false)
+      tx <- txService.fetch(hexStr, false)
       fee <- tx.fee(false)
     } yield {
 

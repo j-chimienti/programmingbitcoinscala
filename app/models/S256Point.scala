@@ -9,14 +9,9 @@ import scala.language.postfixOps
   *   The Public Key
   * @param x coordinate
   * @param y coordinate
-  * @param a Field of coeff of secpk256k1 curve
-  * @param b Field of coeff of secpk256k1 curve
   */
-class S256Point(x: Option[S256Field] = None,
-                y: Option[S256Field] = None,
-                a: S256Field,
-                b: S256Field)
-    extends PointFE(x, y, a, b) {
+class S256Point(x: Option[S256Field] = None, y: Option[S256Field] = None)
+    extends PointFE(x, y, S256Field(secp256kk1.A), S256Field(secp256kk1.B)) {
 
   import secp256kk1._
   final val bits = 256
@@ -138,10 +133,10 @@ object S256Point {
 
   def apply(x: Option[S256Field] = None,
             y: Option[S256Field] = None): S256Point =
-    new S256Point(x, y, S256Field(secp256kk1.A), S256Field(secp256kk1.B))
+    new S256Point(x, y)
 
   def apply: S256Point =
-    new S256Point(None, None, S256Field(secp256kk1.A), S256Field(secp256kk1.B))
+    new S256Point(None, None)
 
   /**
     *

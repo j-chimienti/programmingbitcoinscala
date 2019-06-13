@@ -107,8 +107,6 @@ class S256PointTest extends FlatSpec {
       val point: S256Point = S256Point(x, y)
       // check that the secret*G is the same as the point
       assert(G * secret == point)
-
-      println(point.address())
     }
   }
 
@@ -169,6 +167,7 @@ class S256PointTest extends FlatSpec {
     )
 
     for ((secret, mainnet, testnet, comp1, comp2) <- components) {
+
       //val pk = PrivateKey(ByteVector(secret.toByteArray).padLeft(32))
       val pk = PrivateKey(secret.toLong)
       val pubKey = pk.point

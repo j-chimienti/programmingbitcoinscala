@@ -33,6 +33,11 @@ case class Signature(r: BigInt, s: BigInt) {
 object Signature {
 
   def apply(r: Int, s: Int): Signature = Signature(BigInt(r), BigInt(s))
+
+  def fromHex(r: String, s: String): Signature =
+    Signature(BigInt(r, 16), BigInt(s, 16))
+
+  @deprecated(message = "User fromHex")
   def apply(r: String, s: String): Signature =
     Signature(BigInt(r, 16), BigInt(s, 16))
 

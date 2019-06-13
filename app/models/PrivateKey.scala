@@ -8,6 +8,8 @@ case class PrivateKey(secret: ByteVector, point: S256Point) {
 
   def hex: String = secret.toHex zfill
 
+  def publicKey: S256Point = point
+
   def sign(z: BigInt): Signature = {
 
     val k = BigInt(256, Random)
@@ -52,13 +54,13 @@ object PrivateKey {
   def fromBase58(data: String): PrivateKey =
     PrivateKey(ByteVector.fromValidBase58(data))
 
+  def apply(num: Long): PrivateKey =
+    new PrivateKey(ByteVector.fromLong(num), secp256kk1.G * num)
+
   def apply(secret: ByteVector): PrivateKey = secret.length match {
     case 32 => PrivateKey(secret, secp256kk1.G * BigInt(secret.toArray))
     case 33 if secret.last == 1 =>
       PrivateKey(secret.take(32), secp256kk1.G * BigInt(secret.toArray))
   }
-
-  def apply(num: Long): PrivateKey =
-    new PrivateKey(ByteVector.fromLong(num), secp256kk1.G * num)
 
 }

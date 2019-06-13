@@ -21,7 +21,7 @@ import scodec.bits.ByteVector
 import scala.annotation.tailrec
 import ScriptElt._
 
-case class Script(elements: Seq[ScriptElt]) {
+case class Script(elements: Seq[ScriptElt] = Seq.empty) {
 
   def signature(index: Int = 0): ScriptElt =
     `type` match {
@@ -45,6 +45,10 @@ case class Script(elements: Seq[ScriptElt]) {
 
   def `type`: String = {
 
+//    if (isPayToScript(elements)) {
+//      println("PAY TO SCRIPT!!")
+//
+//    }
     if (elements.isEmpty) "blank"
     // OP_DUP OP_HASH160 <20 byte hash> <OP_EQUALVERIFY>  <OP_CHECKSIG>
     else if (elements.head == OP_DUP && elements(1) == OP_HASH160
@@ -124,8 +128,11 @@ case class Script(elements: Seq[ScriptElt]) {
       case p2ppk if p2ppk == "p2pkh sig" => elements(1)
       case p2sh if p2sh == "p2sh sig"    =>
         // Hack: assumes p2sh is multisig
-        val redeemScript = Script(elements.last.asInstanceOf[OP_PUSHDATA].data)
-        redeemScript.elements(idx + 1)
+        elements.last match {
+          case op: OP_PUSHDATA =>
+            val redeemScript = Script(op.data)
+            redeemScript.elements(idx + 1)
+        }
       case _ =>
         throw new RuntimeException("Script type needs to be p2pk or p2sh")
     }

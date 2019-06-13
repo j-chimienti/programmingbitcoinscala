@@ -1,13 +1,12 @@
 package models
 
-import java.io.{ByteArrayInputStream, InputStream}
+import java.io.{InputStream}
 import java.nio.charset.StandardCharsets
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.security.MessageDigest
 
 import fr.acinq.bitcoin.Base58.Prefix
-import fr.acinq.bitcoin.Protocol.uint32
 import fr.acinq.bitcoin.{Base58Check, ByteVector32, Protocol}
 import scodec.bits.ByteVector
 import org.spongycastle.crypto.Digest
@@ -50,8 +49,8 @@ object HashHelper {
 
   }
 
-  def littleEndianToInt(data: Array[Byte]): Int =
-    ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).getInt()
+  def littleEndianToInt(data: Array[Byte]): Long =
+    ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).getInt() & 0xFFFFFFFFL
 
   def uint8(stream: InputStream): Int = stream.read()
 
