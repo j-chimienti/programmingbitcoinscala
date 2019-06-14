@@ -1,19 +1,13 @@
 package services
 
-import java.io.ByteArrayInputStream
-
 import models.Transaction
 import play.api.libs.json.{JsArray, Json, OFormat}
-import scodec.bits.ByteVector
 
 import scala.concurrent.duration._
 import akka.actor.ActorSystem
-
-import scala.collection.mutable.Map
 import akka.http.scaladsl.util.FastFuture
 import akka.stream.ActorMaterializer
 import play.api.libs.ws.ahc.AhcWSClient
-
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -38,25 +32,32 @@ object TransactionService {
     * @param testnet
     * @return Transaction
     */
-  def fetch(txId: String, testnet: Boolean = false): Future[Transaction] = {
+  def fetch(txId: String,
+            testnet: Boolean = false): Future[Option[Transaction]] = {
 
     if (cache.contains(txId))
-      FastFuture.successful[Transaction](cache(txId))
+      FastFuture.successful(Some(cache(txId)))
     else {
       val url = baseUri(testnet) + s"/tx/$txId/hex"
       client
         .url(url)
-        .withRequestTimeout(10 second)
+        .withRequestTimeout(10 seconds)
         .get()
         .map(response => {
-          val hexStr = response.body
-          val stream =
-            new ByteArrayInputStream(ByteVector.fromValidHex(hexStr).toArray)
-          val tx = Transaction
-            .parse(stream)
-          cache(txId) = tx
-          tx
-
+          response.status match {
+            case 404 =>
+              println(response.body)
+              None
+            case 200 =>
+              val hexStr = response.body
+              val tx = Transaction.parse(hexStr)
+              cache(txId) = tx
+              Some(tx)
+            case _ =>
+              println("UNKNOWN ERROR")
+              println(response.body)
+              None
+          }
         })
 
     }

@@ -1,7 +1,17 @@
 package models
 
 import scodec.bits.ByteVector
-import java.io.{ByteArrayInputStream, InputStream}
+import java.io.{
+  ByteArrayInputStream,
+  ByteArrayOutputStream,
+  InputStream,
+  OutputStream
+}
+
+import HashHelper._
+
+import fr.acinq.bitcoin.Protocol.{writeCollection, writeUInt32}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -41,19 +51,23 @@ case class Transaction(version: Long,
   def isCoinbase = inputs.length == 1 && inputs.head.prevIdx == 0xffffffff
   //def hash = HashHelper.hash256(serialize).reverse
 
-  def serialize = {
+  val PROTOCOL_VERSION = 70015
+  def serialize(out: OutputStream): Unit = {
 
-    val vers: Array[Byte] = HashHelper.intToLittleEndian(version.toInt, 4)
-    var result = vers
-    result = result ++ HashHelper.encodeVarint(inputs.length)
-    for (txIn <- inputs) {
-      result = result ++ txIn.serialize
-    }
-    result = result ++ HashHelper.encodeVarint(outputs.length)
-    for (txOut <- outputs) {
-      result = result ++ txOut.serialize
-    }
-    result ++ HashHelper.intToLittleEndian(locktime.toInt, 4)
+    writeUInt32(version.toInt, out)
+    writeVarint(inputs.length, out)
+    for (input <- inputs) input.serialize(out)
+    writeVarint(outputs.length, out)
+    for (output <- outputs) output.serialize(out)
+    writeUInt32(locktime.toInt, out)
+
+  }
+
+  def serialize: ByteVector = {
+
+    val out = new ByteArrayOutputStream()
+    serialize(out)
+    ByteVector.view(out.toByteArray)
 
   }
 
@@ -64,16 +78,18 @@ case class Transaction(version: Long,
     */
   def fee(testnet: Boolean = false): Future[Long] = {
 
-    val inputValue: Seq[Future[Long]] =
-      inputs
-        .map(input => input.value(testnet))
-
+    val list = inputs.map(input => input.value(testnet))
     for {
-      inputSum <- Future.sequence(inputValue).map(_.sum)
-    } yield {
+      inputsRaw <- Future.sequence(list)
 
-      val outputSum = outputs.map(_.amount).sum
-      inputSum - outputSum
+    } yield {
+      val inputsFound = inputsRaw.flatten
+      if (inputs.length != inputsFound.length)
+        throw new RuntimeException(s"Error fetching tx fee")
+
+      val inputsSum = inputsFound.sum
+      val outputsSum = outputs.map(_.amount).sum
+      inputsSum - outputsSum
     }
   }
 
@@ -96,18 +112,14 @@ object Transaction {
   }
   def parse(stream: InputStream): Transaction = {
 
-    val buf = new Array[Byte](4)
-    stream.read(buf)
-    val version = HashHelper.littleEndianToInt(buf)
-    val numInputs = HashHelper.readVarint(stream)
+    val version = uint32(stream)
+    val numInputs = readVarint(stream)
     val inputs: Seq[TxIn] = for (_ <- 1L to numInputs)
       yield TxIn.parse(stream)
-    val numOutputs = HashHelper.readVarint(stream)
+    val numOutputs = readVarint(stream)
     val outputs: Seq[TxOut] = for (_ <- 1L to numOutputs)
       yield TxOut.parse(stream)
-    val lt = new Array[Byte](4)
-    stream.read(lt)
-    val lockTime = HashHelper.littleEndianToInt(lt)
-    Transaction(version.toInt, inputs, outputs, lockTime.toLong)
+    val locktime = uint32(stream)
+    Transaction(version.toInt, inputs, outputs, locktime)
   }
 }

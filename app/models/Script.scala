@@ -23,6 +23,8 @@ import ScriptElt._
 
 case class Script(elements: Seq[ScriptElt] = Seq.empty) {
 
+  def serialize(out: OutputStream) = Script.write(elements, out)
+
   def signature(index: Int = 0): ScriptElt =
     `type` match {
       case p2ppk if p2ppk == "p2pkh sig" => elements.head
@@ -89,33 +91,6 @@ case class Script(elements: Seq[ScriptElt] = Seq.empty) {
 
   }
 
-  def serialize: ByteVector = write(elements)
-
-  def write(script: Seq[ScriptElt]): ByteVector = {
-    val out = new ByteArrayOutputStream()
-    write(script, out)
-    ByteVector.view(out.toByteArray)
-  }
-
-  def write(script: Seq[ScriptElt], out: OutputStream): Unit = script match {
-    case Nil => ()
-    case OP_PUSHDATA(data, length) :: tail
-        if data.length < 0x4c && data.length == length =>
-      out.write(data.length.toInt); out.write(data.toArray); write(tail, out)
-    case OP_PUSHDATA(data, 0x4c) :: tail if data.length < 0xff =>
-      writeUInt8(0x4c, out); writeUInt8(data.length.toInt, out);
-      out.write(data.toArray); write(tail, out)
-    case OP_PUSHDATA(data, 0x4d) :: tail if data.length < 0xffff =>
-      writeUInt8(0x4d, out); writeUInt16(data.length.toInt, out);
-      out.write(data.toArray); write(tail, out)
-    case OP_PUSHDATA(data, 0x4e) :: tail if data.length < 0xffffffff =>
-      writeUInt8(0x4e, out); writeUInt32(data.length, out);
-      out.write(data.toArray); write(tail, out)
-    case op @ OP_PUSHDATA(data, code) :: tail =>
-      throw new RuntimeException(s"invalid element $op")
-    case head :: tail => out.write(ScriptElt.elt2code(head)); write(tail, out)
-  }
-
   /**
     *   Index isn't used for p2pkh, for p2sh, means one of n pubkeys
     * @param idx
@@ -141,6 +116,32 @@ case class Script(elements: Seq[ScriptElt] = Seq.empty) {
 }
 
 object Script {
+
+  def write(script: Seq[ScriptElt]): ByteVector = {
+
+    val out = new ByteArrayOutputStream()
+    write(script, out)
+    ByteVector.view(out.toByteArray)
+  }
+
+  def write(script: Seq[ScriptElt], out: OutputStream): Unit = script match {
+    case Nil => ()
+    case OP_PUSHDATA(data, length) :: tail
+        if data.length < 0x4c && data.length == length =>
+      out.write(data.length.toInt); out.write(data.toArray); write(tail, out)
+    case OP_PUSHDATA(data, 0x4c) :: tail if data.length < 0xff =>
+      writeUInt8(0x4c, out); writeUInt8(data.length.toInt, out);
+      out.write(data.toArray); write(tail, out)
+    case OP_PUSHDATA(data, 0x4d) :: tail if data.length < 0xffff =>
+      writeUInt8(0x4d, out); writeUInt16(data.length.toInt, out);
+      out.write(data.toArray); write(tail, out)
+    case OP_PUSHDATA(data, 0x4e) :: tail if data.length < 0xffffffff =>
+      writeUInt8(0x4e, out); writeUInt32(data.length, out);
+      out.write(data.toArray); write(tail, out)
+    case op @ OP_PUSHDATA(data, code) :: tail =>
+      throw new RuntimeException(s"invalid element $op")
+    case head :: tail => out.write(ScriptElt.elt2code(head)); write(tail, out)
+  }
 
   /**
     * parse a script from a input stream of binary data

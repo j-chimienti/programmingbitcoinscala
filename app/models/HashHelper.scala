@@ -1,12 +1,26 @@
 package models
 
-import java.io.{InputStream}
+import java.io.{
+  ByteArrayInputStream,
+  ByteArrayOutputStream,
+  IOException,
+  InputStream,
+  OutputStream
+}
 import java.nio.charset.StandardCharsets
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.security.MessageDigest
 
 import fr.acinq.bitcoin.Base58.Prefix
+import fr.acinq.bitcoin.Protocol.{
+  bytes,
+  varint,
+  writeUInt16,
+  writeUInt32,
+  writeUInt64,
+  writeUInt8
+}
 import fr.acinq.bitcoin.{Base58Check, ByteVector32, Protocol}
 import scodec.bits.ByteVector
 import org.spongycastle.crypto.Digest
@@ -43,34 +57,16 @@ object HashHelper {
     * @param input
     * @return Long
     */
+  @deprecated(message = "Use uint")
   def littleEndianToInt(input: String): Long = {
     val ba = ByteVector.fromValidHex(input).toArray
     littleEndianToInt(ba)
 
   }
 
+  @deprecated(message = "Use uint")
   def littleEndianToInt(data: Array[Byte]): Long =
     ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).getInt() & 0xFFFFFFFFL
-
-  def uint8(stream: InputStream): Int = stream.read()
-
-  def uint16(data: Array[Byte]): Int = {
-
-    val o = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
-    o.getShort() & 0xFFFF
-  }
-
-  def uint32(input: InputStream,
-             order: ByteOrder = ByteOrder.LITTLE_ENDIAN): Long = {
-    val bin = new Array[Byte](4)
-    input.read(bin)
-    uint32(bin, order)
-  }
-
-  def uint32(input: Array[Byte], order: ByteOrder): Long = {
-    val buffer = ByteBuffer.wrap(input).order(order)
-    buffer.getInt() & 0xFFFFFFFFL
-  }
 
   // https://gist.github.com/paulononaka/908246
 
@@ -84,6 +80,9 @@ object HashHelper {
 
   }
 
+  def intToLittleEndian(num: Long, allocate: Int): Array[Byte] =
+    intToLittleEndian(BigInt(num).toByteArray, allocate)
+
   def intToLittleEndian(num: Int, allocate: Int = 4): Array[Byte] =
     intToLittleEndian(BigInt(num).toByteArray, allocate)
 
@@ -95,6 +94,25 @@ object HashHelper {
     val out = new Array[Byte](digest.getDigestSize)
     digest.doFinal(out, 0)
     ByteVector.view(out)
+  }
+
+  def hash(input: InputStream): ByteVector32 =
+    ByteVector32(bytes(input, 32)) // a hash is always 256 bits
+
+  def script(input: InputStream): ByteVector = {
+    val length = varint(input) // read size
+    bytes(input, length.toInt) // read bytes
+  }
+  def bytes(input: InputStream, size: Long): ByteVector =
+    bytes(input, size.toInt)
+
+  def bytes(input: InputStream, size: Int): ByteVector = {
+    val blob = new Array[Byte](size)
+    if (size > 0) {
+      val count = input.read(blob)
+      if (count < size) throw new IOException("not enough data to read from")
+    }
+    ByteVector.view(blob)
   }
 
   /**
@@ -113,27 +131,6 @@ object HashHelper {
     (x: ByteVector) => ByteVector32(hash(new SHA256Digest)(x))
 
   def ripemd160: ByteVector => ByteVector = hash(new RIPEMD160Digest)
-
-//  def encodeBase58S(s: ByteVector): ByteVector = {
-//
-//    var count = 0
-//    breakable {
-//      for (c <- s.toArray) {
-//        if (c == 0.toByte) count += 1
-//        else break
-//      }
-//    }
-//    val prefix: Array[Byte] = ("1" * count).split("").map(_.toByte)
-//    // convert from binary to hex, then hex to integer
-//    var num = BigInt(s.toHex, 16)
-//    var result = Array.empty[Byte]
-//    while (num > 0) {
-//      val (num1, mod) = num /% 58
-//      num = num1
-//      result = result.+:(BASE58_ALPHABET(mod.toInt))
-//    }
-//    ByteVector(prefix ++ result)
-//  }
 
   def h1602p2sh(hex: String, testnet: Boolean): String =
     Base58Check.encode(
@@ -192,22 +189,127 @@ object HashHelper {
     * @param i
     * @return
     */
-  def encodeVarint(i: Int): Array[Byte] = {
-    // 253
-    if (i < BigInt("fd", 16)) BigInt(i).toByteArray
-    // 65536
-    else if (i < BigInt("10000", 16))
-      ("\\xfd" + intToLittleEndian(BigInt(i).toByteArray, 4))
-        .getBytes(StandardCharsets.UTF_8)
-    // 4294967296
-    else if (i < BigInt("100000000", 16))
-      ("\\xfe" + intToLittleEndian(BigInt(i).toByteArray, 4))
-        .getBytes(StandardCharsets.UTF_8)
-    // 10000000000000000
-    else if (i < BigInt("10000000000000000", 16))
-      ("\\xff" + intToLittleEndian(BigInt(i).toByteArray, 4))
-        .getBytes(StandardCharsets.UTF_8)
-    else throw new Error(s"integer too large: $i")
+  def encodeVarint(i: Long) = {
+
+    val out = new ByteArrayOutputStream()
+    if (i < 0xfd) writeUInt8(i.toInt, out)
+    else if (i < 0x10000) {
+      writeUInt8(0xfd, out)
+      writeUInt16(i.toInt, out)
+
+    } else if (i < 0x100000000L) {
+      writeUInt8(0xfe, out)
+      writeUInt32(i.toInt, out)
+    } else {
+      writeUInt8(0xff, out)
+      writeUInt64(i, out)
+    }
+    out.toByteArray
+  }
+
+  def writeVarint(input: Long, out: OutputStream): Unit = {
+    if (input < 0xfdL) writeUInt8(input.toInt, out)
+    else if (input < 65535L) {
+      writeUInt8(0xfd, out)
+      writeUInt16(input.toInt, out)
+    } else if (input < 1048576L) {
+      writeUInt8(0xfe, out)
+      writeUInt32(input.toInt, out)
+    } else {
+      writeUInt8(0xff, out)
+      writeUInt64(input, out)
+    }
+  }
+
+  def writeScript(input: Array[Byte], out: OutputStream) = {
+
+    writeVarint(input.length.toLong, out)
+    out.write(input)
+  }
+
+  def uint8(stream: InputStream): Int = stream.read()
+
+  def uint16(data: Array[Byte]): Int = {
+
+    val o = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+    o.getShort() & 0xFFFF
+  }
+
+  def uint32(input: InputStream,
+             order: ByteOrder = ByteOrder.LITTLE_ENDIAN): Long = {
+    val bin = new Array[Byte](4)
+    input.read(bin)
+    uint32(bin, order)
+  }
+
+  def uint32(input: Array[Byte], order: ByteOrder): Long = {
+    val buffer = ByteBuffer.wrap(input).order(order)
+    buffer.getInt() & 0xFFFFFFFFL
+  }
+
+  def writeUInt8(input: Int, out: OutputStream): Unit = out.write(input & 0xff)
+
+  def uint16(input: InputStream,
+             order: ByteOrder = ByteOrder.LITTLE_ENDIAN): Int = {
+    val bin = new Array[Byte](2)
+    input.read(bin)
+    uint16(bin, order)
+  }
+
+  def uint16(input: Array[Byte], order: ByteOrder): Int = {
+    val buffer = ByteBuffer.wrap(input).order(order)
+    buffer.getShort & 0xFFFF
+  }
+
+  def writeUInt16(input: Int,
+                  out: OutputStream,
+                  order: ByteOrder = ByteOrder.LITTLE_ENDIAN): Unit =
+    out.write(writeUInt16(input, order).toArray)
+
+  def writeUInt16(input: Int, order: ByteOrder): ByteVector = {
+    val bin = new Array[Byte](2)
+    val buffer = ByteBuffer.wrap(bin).order(order)
+    buffer.putShort(input.toShort)
+    ByteVector.view(bin)
+  }
+
+  def writeUInt32(input: Long,
+                  out: OutputStream,
+                  order: ByteOrder = ByteOrder.LITTLE_ENDIAN): Unit =
+    out.write(writeUInt32(input, order).toArray)
+
+  def writeUInt32(input: Long, order: ByteOrder): ByteVector = {
+    val bin = new Array[Byte](4)
+    val buffer = ByteBuffer.wrap(bin).order(order)
+    buffer.putInt((input & 0xffffffff).toInt)
+    ByteVector.view(bin)
+  }
+
+  def writeUInt32(input: Long): ByteVector =
+    writeUInt32(input, ByteOrder.LITTLE_ENDIAN)
+
+  def uint64(input: InputStream,
+             order: ByteOrder = ByteOrder.LITTLE_ENDIAN): Long = {
+    val bin = new Array[Byte](8)
+    input.read(bin)
+    uint64(bin, order)
+  }
+
+  def uint64(input: Array[Byte], order: ByteOrder): Long = {
+    val buffer = ByteBuffer.wrap(input).order(order)
+    buffer.getLong()
+  }
+
+  def writeUInt64(input: Long,
+                  out: OutputStream,
+                  order: ByteOrder = ByteOrder.LITTLE_ENDIAN): Unit =
+    out.write(writeUInt64(input, order).toArray)
+
+  def writeUInt64(input: Long, order: ByteOrder): ByteVector = {
+    val bin = new Array[Byte](8)
+    val buffer = ByteBuffer.wrap(bin).order(order)
+    buffer.putLong(input)
+    ByteVector.view(bin)
   }
 
 }

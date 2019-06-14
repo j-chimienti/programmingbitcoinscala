@@ -1,3 +1,7 @@
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+
+import scodec.bits.ByteVector
+
 import scala.language.{implicitConversions, postfixOps}
 
 package object models {

@@ -1,5 +1,8 @@
 package models
 
+import java.io.ByteArrayOutputStream
+
+import fr.acinq.bitcoin.ByteVector32
 import org.scalatest.AsyncFlatSpec
 import scodec.bits.ByteVector
 
@@ -12,13 +15,14 @@ class TransactionAsyncTest extends AsyncFlatSpec {
     val txHash =
       "d1c789a9c60383bf715f3f6ad9d14b91fe55f3deb369fe5d9280cb1a01793f81"
     val index = 0
+    val sequence = 0
     val want = 42505594L
     val txIn =
-      TxIn(txHash, index, Script(), 0)
+      TxIn(txHash, index, sequence)
     for {
       value <- txIn.value()
     } yield {
-      assert(value == want)
+      assert(value.getOrElse(0L) == want)
     }
 
   }
@@ -44,25 +48,25 @@ class TransactionAsyncTest extends AsyncFlatSpec {
     }
   }
 
-  it should "input public key" in {
+  it should "determine input public key" in {
 
     val tx_hash =
       "d1c789a9c60383bf715f3f6ad9d14b91fe55f3deb369fe5d9280cb1a01793f81"
     val index = 0
     val txIn = TxIn(
-      prevTx = ByteVector.fromValidHex(tx_hash),
+      prevTx = ByteVector32(ByteVector.fromValidHex(tx_hash)),
       prevIdx = index,
-      scriptSig = Script(),
+      scriptSig = ByteVector.empty,
       sequence = 0L
     )
     val want =
       "76a914a802fc56c704ce87c42d7c92eb75e7896bdc41ae88ac"
     for {
 
-      t <- txIn.scriptPubKey()
+      scriptPubKey <- txIn.scriptPubKey().map(r => r.get)
     } yield {
 
-      assert(t.serialize.toHex == want)
+      assert(scriptPubKey.toHex == want)
     }
 
   }

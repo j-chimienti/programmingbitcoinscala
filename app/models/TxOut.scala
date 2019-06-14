@@ -1,22 +1,22 @@
 package models
 
-import java.io.InputStream
+import java.io.{InputStream, OutputStream}
+
+import fr.acinq.bitcoin.Protocol.writeUInt64
+import HashHelper._
+import scodec.bits.ByteVector
 
 /**
   *
   * @param amount amount in Satoshis
   * @param scriptPubKey public key script which sets the conditions for spending this output
   */
-case class TxOut(amount: Long, scriptPubKey: Script) {
+case class TxOut(amount: Long, scriptPubKey: ByteVector) {
 
-  def serialize = {
+  def serialize(out: OutputStream) = {
 
-    var result = HashHelper.intToLittleEndian(amount.toInt, 8)
-    val rawScriptPubKey = scriptPubKey.serialize.toArray
-    result = result ++ rawScriptPubKey
-    result = result ++ HashHelper.encodeVarint(rawScriptPubKey.length)
-    result ++ rawScriptPubKey
-
+    writeUInt64(amount, out)
+    writeScript(scriptPubKey.toArray, out)
   }
   override def toString = s"TxOut($amount, $scriptPubKey)"
 
@@ -34,15 +34,13 @@ case class TxOut(amount: Long, scriptPubKey: Script) {
 
 object TxOut {
 
+  def apply(amount: Long, scriptPubKey: Seq[ScriptElt]): TxOut =
+    new TxOut(amount, Script.write(scriptPubKey))
+
   def parse(stream: InputStream): TxOut = {
 
-    val amtBuf = new Array[Byte](8)
-    stream.read(amtBuf)
-    val amt = HashHelper.littleEndianToInt(amtBuf)
-    val scriptPubkeyLength = HashHelper.readVarint(stream)
-    val scriptPubKey = new Array[Byte](scriptPubkeyLength.toInt)
-    stream.read(scriptPubKey)
-    val script = Script(scriptPubKey)
-    TxOut(amt, script)
+    val amt = uint64(stream)
+    val elems = script(stream)
+    TxOut(amt, elems)
   }
 }

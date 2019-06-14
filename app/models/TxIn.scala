@@ -1,11 +1,33 @@
 package models
 
 import scodec.bits.ByteVector
-import java.io.{ByteArrayInputStream, InputStream}
+import java.io.{
+  ByteArrayInputStream,
+  ByteArrayOutputStream,
+  InputStream,
+  OutputStream
+}
+
+import fr.acinq.bitcoin.{ByteVector32, MaxScriptElementSize, OutPoint}
 import services.TransactionService
+
+import HashHelper._
 import scala.language.postfixOps
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
+//case class PrevTx(hash: ByteVector32, index: Long = 0) {
+//
+//  require(index >= -1)
+//
+//  val txId = hash.reverse
+//  def write(input: OutPoint, out: OutputStream, protocolVersion: Long) = {
+//    out.write(input.hash.toArray)
+//    writeUInt32(input.index.toInt, out)
+//  }
+//}
+//
+//object PrevTx {}
 
 /**
   *
@@ -16,58 +38,73 @@ import scala.concurrent.Future
   * @param scriptSig Signature script which should match the public key script of the output that we want to spend
   * @param sequence Transaction version defined by sender.
   */
-case class TxIn(prevTx: ByteVector,
+case class TxIn(prevTx: ByteVector32,
                 prevIdx: Int = 0,
-                scriptSig: Script,
+                scriptSig: ByteVector,
                 sequence: Long = 0xFFFFFFFFL) {
 
   require(prevIdx >= -1)
 
-  override def toString: String = s"TxIn(${prevTx.toHex}, $prevIdx)"
+  lazy val txId: ByteVector = prevTx.reverse
 
-  def serialize = {
-    var result = prevTx.reverse.toArray
-    result = result ++ ByteVector.empty.toArray
-    val rawScriptSig = scriptSig.serialize.toArray
-    result = result ++ HashHelper.encodeVarint(rawScriptSig.length)
-    result = result ++ rawScriptSig
-    result ++ HashHelper.intToLittleEndian(sequence.toInt, 4)
+  override def toString: String = s"TxIn($txId, $prevIdx)"
+
+  def validate(input: TxIn): Unit =
+    require(
+      scriptSig.length <= MaxScriptElementSize,
+      s"signature script is ${input.scriptSig.length} bytes, limit is $MaxScriptElementSize bytes"
+    )
+
+  // fixme
+  def serialize(out: OutputStream) = {
+
+    out.write(prevTx.toArray)
+    writeUInt32(prevIdx, out)
+    writeScript(scriptSig.toArray, out)
+    writeUInt32(sequence.toInt, out)
 
   }
-  def value(testnet: Boolean = false): Future[Long] = {
+  def value(testnet: Boolean = false): Future[Option[Long]] = {
 
     for {
-      tx <- TransactionService.fetch(prevTx.toHex, testnet)
-    } yield tx.outputs(prevIdx).amount
+      txOpt <- TransactionService.fetch(txId.toHex, testnet)
+    } yield
+      txOpt match {
+        case None     => None
+        case Some(tx) => Some(tx.outputs(prevIdx).amount)
+
+      }
 
   }
-  def scriptPubKey(testnet: Boolean = false): Future[Script] = {
+  def scriptPubKey(testnet: Boolean = false): Future[Option[ByteVector]] = {
 
     for {
-      tx <- TransactionService.fetch(prevTx.toHex, testnet)
-    } yield {
-
-      tx.outputs(prevIdx).scriptPubKey
-    }
-  }
-
-  def derSignature(idx: Int = 0) = {
-
-    scriptSig.signature(idx) match {
-
-      case signature: OP_PUSHDATA => signature.data.dropRight(1)
-
-    }
+      txOpt <- TransactionService.fetch(prevTx.toHex, testnet)
+    } yield
+      txOpt match {
+        case Some(tx) => Some(tx.outputs(prevIdx).scriptPubKey)
+        case None     => None
+      }
 
   }
 
-  def hashType(idx: Int = 0) = {
-    scriptSig.signature(idx) match {
-      case op: OP_PUSHDATA => op.data.last
-    }
-  }
-
-  def secPubKey(idx: Int = 0) = scriptSig.secPubkey(idx)
+//  def derSignature(idx: Int = 0) = {
+//
+//    scriptSig.signature(idx) match {
+//
+//      case signature: OP_PUSHDATA => signature.data.dropRight(1)
+//
+//    }
+//
+//  }
+//
+//  def hashType(idx: Int = 0) = {
+//    scriptSig.signature(idx) match {
+//      case op: OP_PUSHDATA => op.data.last
+//    }
+//  }
+//
+  //def secPubKey(idx: Int = 0) = scriptSig.secPubkey(idx)
 
   //def redeemScript = scriptSig.redeemScript
 
@@ -75,14 +112,13 @@ case class TxIn(prevTx: ByteVector,
 
 object TxIn {
 
+  def apply(prevTx: String, index: Int, sequence: Long): TxIn = new TxIn(
+    ByteVector32(ByteVector(ByteVector.fromValidHex(prevTx).toArray.reverse)),
+    index,
+    ByteVector.empty,
+    sequence
+  )
   def apply(stream: InputStream): TxIn = TxIn.parse(stream)
-  def apply(hash: String): TxIn = TxIn.parse(hash)
-
-  def apply(hash: String, index: Int, script: Script, locktime: Long): TxIn =
-    TxIn(ByteVector.fromValidHex(hash), index, script, locktime)
-
-  def parse(hash: String): TxIn =
-    TxIn.parse(new ByteArrayInputStream(ByteVector.fromValidHex(hash).toArray))
 
   /**
     * Takes a byte stream and parses the tx_input at the start
@@ -92,26 +128,12 @@ object TxIn {
     * @return
     */
   def parse(stream: InputStream): TxIn = {
-    // prev tx id is 32 bytes in little endian order
-    val prevTxBuf = new Array[Byte](32)
-    stream.read(prevTxBuf)
-    val prevTx = ByteVector(prevTxBuf).reverse
+    val prevTxId = hash(stream)
+    val prevTxIdx = uint32(stream)
+    val sigScript = script(stream)
+    val sequence = uint32(stream)
+    TxIn(prevTxId, prevTxIdx.toInt, sigScript, sequence)
 
-    // tx index 4 bytes
-    val prevIdxArr = new Array[Byte](4)
-    stream.read(prevIdxArr)
-    val prevIdx: Long = HashHelper.littleEndianToInt(prevIdxArr)
-    // script sig is a varible length
-    val scriptSigLength = HashHelper.readVarint(stream)
-    val scriptSigBuf = new Array[Byte](scriptSigLength.toInt)
-    stream.read(scriptSigBuf)
-    val scriptSig = Script(scriptSigBuf)
-
-    // sequence is 4 bytes, little-endian, as int
-    val seqBuf = new Array[Byte](4)
-    stream.read(seqBuf)
-    val sequence = HashHelper.littleEndianToInt(seqBuf)
-    TxIn(prevTx, prevIdx.toInt, scriptSig, sequence)
   }
 
 }
