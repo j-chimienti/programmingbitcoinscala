@@ -1,5 +1,7 @@
 package models
 
+import fr.acinq.bitcoin.ByteVector32
+
 import scala.language.postfixOps
 import scala.util.Random
 import scodec.bits.ByteVector
@@ -43,19 +45,19 @@ case class PrivateKey(secret: ByteVector, point: S256Point) {
 
 object PrivateKey {
 
+  def apply(num: BigInt): PrivateKey =
+    PrivateKey.apply(ByteVector.fromValidHex(num.toString(16)).padLeft(32))
+
   /**
     *   String must be in hex format or will throw error
     * @param data
     * @return
     */
-  def fromHex(data: String): PrivateKey =
-    PrivateKey(ByteVector.fromValidHex(data))
+  def apply(data: String): PrivateKey =
+    PrivateKey.apply(ByteVector.fromValidHex(data).padLeft(32))
 
   def fromBase58(data: String): PrivateKey =
-    PrivateKey(ByteVector.fromValidBase58(data))
-
-  def apply(num: Long): PrivateKey =
-    new PrivateKey(ByteVector.fromLong(num), secp256kk1.G * num)
+    PrivateKey.apply(ByteVector.fromValidBase58(data).padLeft(32))
 
   def apply(secret: ByteVector): PrivateKey = secret.length match {
     case 32 => PrivateKey(secret, secp256kk1.G * BigInt(secret.toArray))

@@ -8,7 +8,7 @@ import java.io.{
   OutputStream
 }
 
-import fr.acinq.bitcoin.{ByteVector32, MaxScriptElementSize, OutPoint}
+import fr.acinq.bitcoin.{ByteVector32}
 import services.TransactionService
 
 import HashHelper._
@@ -40,7 +40,7 @@ import scala.concurrent.Future
   */
 case class TxIn(prevTx: ByteVector32,
                 prevIdx: Int = 0,
-                scriptSig: ByteVector,
+                scriptSig: ByteVector = ByteVector.empty,
                 sequence: Long = 0xFFFFFFFFL) {
 
   require(prevIdx >= -1)
@@ -54,9 +54,7 @@ case class TxIn(prevTx: ByteVector32,
       scriptSig.length <= MaxScriptElementSize,
       s"signature script is ${input.scriptSig.length} bytes, limit is $MaxScriptElementSize bytes"
     )
-
-  // fixme
-  def serialize(out: OutputStream) = {
+  def serialize(out: OutputStream): Unit = {
 
     out.write(prevTx.toArray)
     writeUInt32(prevIdx, out)
@@ -76,10 +74,16 @@ case class TxIn(prevTx: ByteVector32,
       }
 
   }
+
+  /**
+    *   Get the scriptPubKey by looking up tx hash on server
+    * @param testnet bitcoin network
+    * @return the binary scriptpubkey
+    */
   def scriptPubKey(testnet: Boolean = false): Future[Option[ByteVector]] = {
 
     for {
-      txOpt <- TransactionService.fetch(prevTx.toHex, testnet)
+      txOpt <- TransactionService.fetch(txId.toHex, testnet)
     } yield
       txOpt match {
         case Some(tx) => Some(tx.outputs(prevIdx).scriptPubKey)
@@ -88,36 +92,54 @@ case class TxIn(prevTx: ByteVector32,
 
   }
 
-//  def derSignature(idx: Int = 0) = {
-//
-//    scriptSig.signature(idx) match {
-//
-//      case signature: OP_PUSHDATA => signature.data.dropRight(1)
-//
-//    }
-//
-//  }
-//
-//  def hashType(idx: Int = 0) = {
-//    scriptSig.signature(idx) match {
-//      case op: OP_PUSHDATA => op.data.last
-//    }
-//  }
-//
-  //def secPubKey(idx: Int = 0) = scriptSig.secPubkey(idx)
+  def derSignature(idx: Int = 0) = {
 
-  //def redeemScript = scriptSig.redeemScript
+    Script(scriptSig).signature(idx) match {
+      case signature: OP_PUSHDATA => signature.data.dropRight(1)
+    }
+
+  }
+
+  def hashType(idx: Int = 0) = {
+    Script(scriptSig).signature(idx) match {
+      case op: OP_PUSHDATA => op.data.last
+    }
+  }
+
+  /**
+    *
+    * @param idx
+    * @return SEC format public if the scriptSig has one
+    */
+  def secPubKey(idx: Int = 0) =
+    Script(scriptSig).secPubkey(idx)
+
+  def redeemScript = {
+    val s = Script(scriptSig)
+    s.redeemScript
+  }
 
 }
 
 object TxIn {
 
-  def apply(prevTx: String, index: Int, sequence: Long): TxIn = new TxIn(
-    ByteVector32(ByteVector(ByteVector.fromValidHex(prevTx).toArray.reverse)),
-    index,
-    ByteVector.empty,
-    sequence
-  )
+  def apply(prevTx: String, index: Int): TxIn =
+    TxIn(
+      ByteVector32(ByteVector(ByteVector.fromValidHex(prevTx).toArray.reverse)),
+      index
+    )
+
+  def apply(prevTx: String,
+            index: Int,
+            scriptSig: ByteVector,
+            sequence: Long): TxIn =
+    TxIn(
+      ByteVector32(ByteVector(ByteVector.fromValidHex(prevTx).toArray.reverse)),
+      index,
+      scriptSig,
+      sequence
+    )
+
   def apply(stream: InputStream): TxIn = TxIn.parse(stream)
 
   /**

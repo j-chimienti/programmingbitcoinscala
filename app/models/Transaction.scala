@@ -9,7 +9,7 @@ import java.io.{
 }
 
 import HashHelper._
-
+import fr.acinq.bitcoin.ByteVector32
 import fr.acinq.bitcoin.Protocol.{writeCollection, writeUInt32}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,9 +23,10 @@ import scala.concurrent.Future
   * @param locktime the block number or timestamp at which this transaction is locked
   */
 case class Transaction(version: Long,
-                       inputs: Seq[TxIn],
+                       var inputs: Seq[TxIn],
                        outputs: Seq[TxOut],
-                       locktime: Long) {
+                       locktime: Long,
+                       testnet: Boolean = false) {
 
   def validate = {
 
@@ -48,8 +49,8 @@ case class Transaction(version: Long,
     s"version: $version\ntx_ins:\n$inputs\ntx_outs:\n$outputs\nlocktime: $locktime\n"
   }
 
-  def isCoinbase = inputs.length == 1 && inputs.head.prevIdx == 0xffffffff
-  //def hash = HashHelper.hash256(serialize).reverse
+  def isCoinbase: Boolean =
+    inputs.length == 1 && inputs.head.prevIdx == 0xffffffff
 
   val PROTOCOL_VERSION = 70015
   def serialize(out: OutputStream): Unit = {
@@ -90,6 +91,98 @@ case class Transaction(version: Long,
       val inputsSum = inputsFound.sum
       val outputsSum = outputs.map(_.amount).sum
       inputsSum - outputsSum
+    }
+  }
+
+  /**
+    *
+    * @param index
+    * @param hashType
+    * @return the integer of the hash that needs to get signed for index input_index
+    */
+  def sigHash(index: Int, hashType: Int): Future[ByteVector32] = {
+
+    val altTxIns = for (txIn <- inputs)
+      yield TxIn(txIn.prevTx, txIn.prevIdx, ByteVector.empty, txIn.sequence)
+
+    val signingInput = altTxIns(index)
+    for {
+      responseOpt <- signingInput.scriptPubKey(testnet)
+    } yield {
+      responseOpt match {
+        case None =>
+          println("ERROR fetching scriptPubKey")
+          throw new RuntimeException("Error")
+        case Some(scriptPubkey) =>
+          // todo: check wheter edit idx of tx in
+          val txIns = altTxIns
+            .slice(0, index)
+            .:+(altTxIns(index).copy(scriptSig = scriptPubkey)) ++ altTxIns
+            .slice(index + 1, altTxIns.length)
+          val altTx = Transaction(version, txIns, outputs, locktime)
+          val result = altTx.serialize ++ writeUInt32(hashType)
+          val s256 = hash256(result)
+          s256
+      }
+    }
+  }
+
+  def verifyInput(index: Int): Future[Boolean] = {
+
+    val tx = inputs(index)
+    val s = Script.write(Seq(tx.secPubKey()))
+
+    val point = S256Point.parse(s)
+    val signature = Signature.parse(tx.derSignature())
+    val ht = tx.hashType()
+
+    for { z <- sigHash(index, ht) } yield
+      point.verify(BigInt(z.toHex, 16), signature)
+
+    /*
+       # get the relevant input
+        tx_in = self.tx_ins[input_index]
+        # parse the point from the sec format (tx_in.sec_pubkey())
+        point = S256Point.parse(tx_in.sec_pubkey())
+        # parse the signature from the der format (tx_in.der_signature())
+        signature = Signature.parse(tx_in.der_signature())
+        # get the hash type from the input (tx_in.hash_type())
+        hash_type = tx_in.hash_type()
+        # get the sig_hash (z)
+        z = self.sig_hash(input_index, hash_type)
+        # use point.verify on the z and signature
+        return point.verify(z, signature)
+   */
+  }
+
+  /**
+    * Sign the input w/ the Private Key
+    * @param index
+    * @param privateKey
+    * @param hashType
+    * @return
+    */
+  def signInput(index: Int,
+                privateKey: PrivateKey,
+                hashType: Int): Future[Future[Boolean]] = {
+
+    for {
+      z <- sigHash(index, hashType)
+    } yield {
+      val i = BigInt(z.toHex, 16)
+      val der = privateKey.sign(i).der
+      val sig = der.:+(hashType.toByte)
+      val sec = privateKey.publicKey.sec()
+      val script = Script(sig ++ sec.toArray)
+      val scriptSig = Script.write(script.elements)
+      val updated = inputs(index).copy(scriptSig = scriptSig)
+      inputs = inputs.slice(0, index).:+(updated) ++ inputs.slice(
+        index + 1,
+        inputs.length
+      )
+      for {
+        verified <- verifyInput(index)
+      } yield verified
     }
   }
 

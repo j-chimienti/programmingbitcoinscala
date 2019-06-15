@@ -43,6 +43,7 @@ class S256Point(x: Option[S256Field] = None, y: Option[S256Field] = None)
     (raw ++ checksum).toBase58
   }
 
+  def verify(z: Long, sig: Signature): Boolean = verify(BigInt(z), sig)
   def verify(z: String, sig: Signature): Boolean =
     verify(BigInt(z, 16), sig)
 

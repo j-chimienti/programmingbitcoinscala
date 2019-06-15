@@ -113,6 +113,8 @@ case class Script(elements: Seq[ScriptElt] = Seq.empty) {
     }
   }
 
+  def redeemScript = throw new Error("unimplemented")
+
 }
 
 object Script {

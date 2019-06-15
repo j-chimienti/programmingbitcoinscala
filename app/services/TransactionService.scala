@@ -13,6 +13,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
 
+import scala.io.Source
+
 object TransactionService {
 
   implicit val system: ActorSystem = ActorSystem("TxIn")
@@ -37,30 +39,48 @@ object TransactionService {
 
     if (cache.contains(txId))
       FastFuture.successful(Some(cache(txId)))
-    else {
-      val url = baseUri(testnet) + s"/tx/$txId/hex"
-      client
-        .url(url)
-        .withRequestTimeout(10 seconds)
-        .get()
-        .map(response => {
-          response.status match {
-            case 404 =>
-              println(response.body)
-              None
-            case 200 =>
-              val hexStr = response.body
-              val tx = Transaction.parse(hexStr)
-              cache(txId) = tx
-              Some(tx)
-            case _ =>
-              println("UNKNOWN ERROR")
-              println(response.body)
-              None
-          }
-        })
 
-    }
+    val url = baseUri(testnet) + s"/tx/$txId/hex"
+    client
+      .url(url)
+      .withRequestTimeout(3 seconds)
+      .get()
+      .map(response => {
+        response.status match {
+          case 404 =>
+            println(response.body)
+            None
+          case 200 =>
+            val hexStr = response.body
+            val tx = Transaction.parse(hexStr)
+            cache(txId) = tx
+            Some(tx)
+          case _ =>
+            println("UNKNOWN ERROR")
+            println(response.body)
+            None
+        }
+      })
+
+  }
+
+  def post(tx: String, testnet: Boolean = false): Future[String] = {
+
+    val url = baseUri(testnet) + s"/tx"
+
+    client
+      .url(url)
+      .withRequestTimeout(5 seconds)
+      .post(tx)
+      .map(response => {
+
+        println(response.body)
+        response.body
+//        result.status match {
+//
+//          case
+//        }
+      })
   }
 }
 

@@ -5,11 +5,14 @@ import sys.process._
 object PythonConverter extends App {
 
 
+
+
+
   val isVar = " = ".r
   val assertRegex = "self.assertEqual".r
   val spaceRegex = "var\\s{2,}"
 
-  def convert(input: String, fileName: String = "./test.scala") = {
+  def convert(input: String) = {
 
     var lines = input.split("\n").toList
     var bar : List[String] = for (line <- lines) yield {
@@ -27,26 +30,47 @@ object PythonConverter extends App {
       val jj = ", want\\)".r.replaceAllIn(i, " == want\\)")
       jj
     }
-    val file = new File(fileName)
-    val fileWriter = new FileWriter(file) // to append FileWriter(file, true)
-    val buf = new BufferedWriter(fileWriter)
-    buf.write(bar.mkString("\n"))
-    buf.close()
-    println("Done")
+
+    bar
+//    val file = new File(fileName)
+//    val fileWriter = new FileWriter(file) // to append FileWriter(file, true)
+//    val buf = new BufferedWriter(fileWriter)
+//    buf.write(bar.mkString("\n"))
+//    buf.close()
+//    println("Done")
 
   }
+
   val raw9 =
     """
-      |raw_tx = bytes.fromhex(
-      |            '0100000001813f79011acb80925dfe69b3def355fe914bd1d96a3f5f71bf8303c6a989c7d1000000006b483045022100ed81ff192e75a3fd2304004dcadb746fa5e24c5031ccfcf21320b0277457c98f02207a986d955c6e0cb35d446a89d3f56100f4d7f67801c31967743a9c8e10615bed01210349fc4e631e3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278afeffffff02a135ef01000000001976a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac99c39800000000001976a9141c4bc762dd5423e332166702cb75f40df79fea1288ac19430600')
-      |        stream = BytesIO(raw_tx)
-      |        tx = Tx.parse(stream)
-      |        want = '0349fc4e631e3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278a'
-      |        self.assertEqual(tx.tx_ins[0].sec_pubkey().hex(), want)
+      |        private_key = PrivateKey(secret=8675309)
+      |        tx_ins = []
+      |        prev_tx = bytes.fromhex('0025bc3c0fa8b7eb55b9437fdbd016870d18e0df0ace7bc9864efc38414147c8')
+      |        tx_ins.append(TxIn(
+      |            prev_tx=prev_tx,
+      |            prev_index=0,
+      |            script_sig=b'',
+      |            sequence=0xffffffff,
+      |        ))
+      |        tx_outs = []
+      |        h160 = decode_base58('mzx5YhAH9kNHtcN481u6WkjeHjYtVeKVh2')
+      |        tx_outs.append(TxOut(amount=int(0.99 * 100000000), script_pubkey=p2pkh_script(h160)))
+      |        h160 = decode_base58('mnrVtF8DWjMu839VW3rBfgYaAfKk8983Xf')
+      |        tx_outs.append(TxOut(amount=int(0.1 * 100000000), script_pubkey=p2pkh_script(h160)))
+      |
+      |        tx = Tx(
+      |            version=1,
+      |            tx_ins=tx_ins,
+      |            tx_outs=tx_outs,
+      |            locktime=0,
+      |            testnet=True,
+      |        )
+      |        self.assertTrue(tx.sign_input(0, private_key, SIGHASH_ALL))
       |
     """.stripMargin
 
-  convert(raw9, "outputs.scala")
+  val result = convert(raw9)
 
-  println("cat outputs.scala"!!)
+  result.foreach { println }
+
 }

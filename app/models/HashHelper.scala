@@ -312,4 +312,16 @@ object HashHelper {
     ByteVector.view(bin)
   }
 
+  /**
+    *  Takes the h160 and returns the scripPubKey
+    * @param h160
+    * @return scriptPubKey
+    */
+  def p2pkh_script(h160: ByteVector): ByteVector =
+    ByteVector(
+      Array(0x76.toByte, 0xa9.toByte, 0x14.toByte) ++ h160.toArray ++ Array(
+        0x88.toByte,
+        0xac.toByte
+      )
+    )
 }

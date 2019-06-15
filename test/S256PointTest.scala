@@ -169,7 +169,7 @@ class S256PointTest extends FlatSpec {
     for ((secret, mainnet, testnet, comp1, comp2) <- components) {
 
       //val pk = PrivateKey(ByteVector(secret.toByteArray).padLeft(32))
-      val pk = PrivateKey(secret.toLong)
+      val pk = PrivateKey(secret)
       val pubKey = pk.point
       assert(pubKey.address(compressed = comp1, testnet = false) == mainnet)
       if (testnet.length > 0)

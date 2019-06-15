@@ -42,6 +42,8 @@ object Signature {
     Signature(BigInt(r, 16), BigInt(s, 16))
 
   def apply(signatureBin: String): Signature = parse(signatureBin.getBytes)
+  def parse(signatureBin: ByteVector): Signature =
+    parse(new ByteArrayInputStream(signatureBin.toArray))
   def parse(signature_bin: Array[Byte]): Signature =
     parse(new ByteArrayInputStream(ByteVector(signature_bin).toArray))
 

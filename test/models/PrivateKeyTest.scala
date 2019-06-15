@@ -33,50 +33,49 @@ class PrivateKeyTest extends WordSpec {
 
       assert(pk.point.address(compressed = false) == addrUncompressed)
     }
-    "sign" in {
-
-      for (_ <- 1 to 10) {
-
-        val pk: PrivateKey = PrivateKey(BigInt(256, Random).toLong)
-        val z = BigInt(256, Random)
-        val sig: Signature = pk.sign(z)
-        assert(pk.point.verify(z, sig))
-      }
-    }
 
     "resolve wif" in {
-
       val list = List(
         (
-          "0000000000000000000000000000000000000000000000000000000000000001",
+          BigInt(1), //0000000000000000000000000000000000000000000000000000000000000001
           "KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn",
           (true, false)
         ),
         (
-          "ffffffffffffff80000000000000000000000000000000000000000000000000",
+          BigInt(
+            "115792089237316194620101962879192770082288938495059262778356087116516711989248"
+          ), // ffffffffffffff80000000000000000000000000000000000000000000000000
           "L5oLkpV3aqBJ4BgssVAsax1iRa77G5CVYnv9adQ6Z87te7TyUdSC",
           (true, false)
         ),
         (
-          "fffffffffffffe00000000000000000000000000000000000000000000000000",
+          BigInt(
+            "115792089237316192209694896490707356769345799983315358995051596442327459037184"
+          ), // fffffffffffffe00000000000000000000000000000000000000000000000000",
           "93XfLeifX7Jx7n7ELGMAf1SUR6f9kgQs8Xke8WStMwUtrDucMzn",
           (false, true)
         ),
         (
-          "0dba685b4511dbd3d368e5c4358a1277de9486447af7b3604a69b8d9d8b7889d",
+          BigInt(
+            "0dba685b4511dbd3d368e5c4358a1277de9486447af7b3604a69b8d9d8b7889d",
+            16
+          ),
           "5HvLFPDVgFZRK9cd4C5jcWki5Skz6fmKqi1GQJf5ZoMofid2Dty",
           (false, false)
         ),
         (
-          "1cca23de92fd1862fb5b76e5f4f50eb082165e5191e116c18ed1a6b24be6a53f",
+          BigInt(
+            "1cca23de92fd1862fb5b76e5f4f50eb082165e5191e116c18ed1a6b24be6a53f",
+            16
+          ),
           "cNYfWuhDpbNM1JWc3c6JTrtrFVxU4AGhUKgw5f93NP2QaBqmxKkg",
           (true, true)
         )
       )
 
-      for ((hexStr, expected, (compressed, testnet)) <- list) {
+      for ((num, expected, (compressed, testnet)) <- list) {
 
-        val p = PrivateKey.fromHex(hexStr)
+        val p = PrivateKey(num)
         assert(p.wif(compressed, testnet) == expected)
 
       }
