@@ -1,16 +1,13 @@
 package models
 
-import org.scalatest.{FunSuite, WordSpec}
-import scodec.bits.ByteVector
-
-import scala.util.Random
+import org.scalatest.WordSpec
 
 class PrivateKeyTest extends WordSpec {
 
   "PrivateKeyTest" should {
 
     // https://bitcointalk.org/index.php?topic=1716322.0
-    "create address for private key = 1" in {
+    "create address" in {
       val key = 1
       val addr = "1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH"
       val addrUncompressed = "1EHNa6Q4Jz2uvNExL497mE43ikXhwF6kZm"
@@ -26,7 +23,7 @@ class PrivateKeyTest extends WordSpec {
       val wif = "5HpHagT65TZzG1PH3CSu63k8DbpvD8s5ip4nEB3kEsreAnchuDf"
 
       val pk = PrivateKey(key)
-      // assert(pk.secret.toHex == pkHex)
+      assert(pk.secret.toHex == pkHex)
       assert(pk.point.address() == addr)
       assert(pk.point.sec().toHex == pubKey)
       assert(pk.point.sec(false).toHex == pubKeyUn)

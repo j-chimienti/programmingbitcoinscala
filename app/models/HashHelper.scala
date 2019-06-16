@@ -1,48 +1,25 @@
 package models
 
-import java.io.{
-  ByteArrayInputStream,
-  ByteArrayOutputStream,
-  IOException,
-  InputStream,
-  OutputStream
-}
+import java.io._
+import scodec.bits._
 import java.nio.charset.StandardCharsets
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.security.MessageDigest
-
-import fr.acinq.bitcoin.Base58.Prefix
-import fr.acinq.bitcoin.Protocol.{
-  bytes,
-  varint,
-  writeUInt16,
-  writeUInt32,
-  writeUInt64,
-  writeUInt8
-}
-import fr.acinq.bitcoin.{Base58Check, ByteVector32, Protocol}
-import scodec.bits.ByteVector
+import java.nio.{ByteBuffer, ByteOrder}
+import scala.language.implicitConversions
 import org.spongycastle.crypto.Digest
 import org.spongycastle.crypto.digests.{
   RIPEMD160Digest,
   SHA1Digest,
   SHA256Digest
 }
+import fr.acinq.bitcoin.Base58Check
 
 class NotImplementedException extends Exception
 
 object HashHelper {
 
+  import Base58._
   val BASE58_ALPHABET: Array[Byte] =
     "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".getBytes()
-
-  def SHA256(input: Array[Byte]): Array[Byte] =
-    MessageDigest
-      .getInstance("sha-256")
-      .digest(input)
-  //.map("%02x".format(_))
-  //.mkString
 
   // Returns a string version of the bytes
   def bytes_to_str(b: Array[Byte]): String =
@@ -57,18 +34,17 @@ object HashHelper {
     * @param input
     * @return Long
     */
-  @deprecated(message = "Use uint")
-  def littleEndianToInt(input: String): Long = {
+  def littleEndianToInt(input: String, allocate: Int = 4): Long = {
     val ba = ByteVector.fromValidHex(input).toArray
-    littleEndianToInt(ba)
-
+    littleEndianToInt(ba, allocate)
   }
 
-  @deprecated(message = "Use uint")
-  def littleEndianToInt(data: Array[Byte]): Long =
-    ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).getInt() & 0xFFFFFFFFL
+  def littleEndianToInt(data: Array[Byte], allocate: Int): Long =
+    allocate match {
 
-  // https://gist.github.com/paulononaka/908246
+      case 4 => uint32(data, ByteOrder.LITTLE_ENDIAN)
+      case 8 => uint64(data, ByteOrder.LITTLE_ENDIAN)
+    }
 
   // https://stackoverflow.com/questions/3842828/converting-little-endian-to-big-endian
   def intToLittleEndian(numero: Array[Byte], allocate: Int): Array[Byte] = {
@@ -86,21 +62,8 @@ object HashHelper {
   def intToLittleEndian(num: Int, allocate: Int = 4): Array[Byte] =
     intToLittleEndian(BigInt(num).toByteArray, allocate)
 
-//  def HASH160(s: ByteVector): Array[Byte] =
-//    RIPEMD160.decrypt(sha256(s))
-
-  def hash(digest: Digest)(input: ByteVector): ByteVector = {
-    digest.update(input.toArray, 0, input.length.toInt)
-    val out = new Array[Byte](digest.getDigestSize)
-    digest.doFinal(out, 0)
-    ByteVector.view(out)
-  }
-
-  def hash(input: InputStream): ByteVector32 =
-    ByteVector32(bytes(input, 32)) // a hash is always 256 bits
-
   def script(input: InputStream): ByteVector = {
-    val length = varint(input) // read size
+    val length = readVarint(input) // read size
     bytes(input, length.toInt) // read bytes
   }
   def bytes(input: InputStream, size: Long): ByteVector =
@@ -120,15 +83,10 @@ object HashHelper {
     * @param data string (addr)
     * @return the version Byte and the data in base58
     */
-  def base58(data: String): (Byte, ByteVector) = Base58Check.decode(data)
+  def base58Decode(data: String): (Byte, ByteVector) = Base58Check.decode(data)
 
   def base58Encode(version: Int, h160: ByteVector): String =
     Base58Check.encode(version, h160)
-
-  def sha1: ByteVector => ByteVector = hash(new SHA1Digest)
-
-  def sha256: ByteVector => ByteVector32 =
-    (x: ByteVector) => ByteVector32(hash(new SHA256Digest)(x))
 
   def ripemd160: ByteVector => ByteVector = hash(new RIPEMD160Digest)
 
@@ -162,6 +120,21 @@ object HashHelper {
   def decodeBase58(input: String): (Byte, ByteVector) =
     Base58Check.decode(input)
 
+  def hash(input: InputStream): ByteVector32 =
+    ByteVector32(bytes(input, 32)) // a hash is always 256 bits
+
+  def hash(digest: Digest)(input: ByteVector): ByteVector = {
+    digest.update(input.toArray, 0, input.length.toInt)
+    val out = new Array[Byte](digest.getDigestSize)
+    digest.doFinal(out, 0)
+    ByteVector.view(out)
+  }
+
+  def sha1: ByteVector => ByteVector = hash(new SHA1Digest)
+
+  def sha256: ByteVector => ByteVector32 =
+    (x: ByteVector) => ByteVector32(hash(new SHA256Digest)(x))
+
   /**
     * 256 bits bitcoin hash
     * hash256(input) = SHA256(SHA256(input))
@@ -169,7 +142,11 @@ object HashHelper {
     * @param input array of byte
     * @return the 256 bits BTC hash of input
     */
-  def hash256(input: ByteVector) = ByteVector32(sha256(sha256(input)))
+  def hash256(input: ByteVector): ByteVector32 =
+    ByteVector32(sha256(sha256(input)))
+
+  def readVarint(blob: Array[Byte]): Long =
+    readVarint(new ByteArrayInputStream(blob))
 
   /**
     * Read a variable integer from a stream
@@ -177,9 +154,9 @@ object HashHelper {
     */
   def readVarint(stream: InputStream): Long = stream.read() match {
 
-    case 0xfd                  => Protocol.uint16(stream)
-    case 0xfe                  => Protocol.uint32(stream)
-    case 0xff                  => Protocol.uint64(stream)
+    case 0xfd                  => uint16(stream)
+    case 0xfe                  => uint32(stream)
+    case 0xff                  => uint64(stream)
     case value if value < 0xfd => value
 
   }
@@ -189,7 +166,7 @@ object HashHelper {
     * @param i
     * @return
     */
-  def encodeVarint(i: Long) = {
+  def encodeVarint(i: Long): Array[Byte] = {
 
     val out = new ByteArrayOutputStream()
     if (i < 0xfd) writeUInt8(i.toInt, out)
@@ -221,7 +198,7 @@ object HashHelper {
     }
   }
 
-  def writeScript(input: Array[Byte], out: OutputStream) = {
+  def writeScript(input: Array[Byte], out: OutputStream): Unit = {
 
     writeVarint(input.length.toLong, out)
     out.write(input)
@@ -324,4 +301,29 @@ object HashHelper {
         0xac.toByte
       )
     )
+
+  /**
+    * see https://en.bitcoin.it/wiki/Protocol_specification
+    */
+  case class ByteVector32(bytes: ByteVector) {
+    require(bytes.size == 32, s"size must be 32 bytes, is ${bytes.size} bytes")
+
+    def reverse: ByteVector32 = ByteVector32(bytes.reverse)
+
+    override def toString: String = bytes.toHex
+  }
+
+  object ByteVector32 {
+    val Zeroes = ByteVector32(
+      hex"0000000000000000000000000000000000000000000000000000000000000000"
+    )
+    val One = ByteVector32(
+      hex"0100000000000000000000000000000000000000000000000000000000000000"
+    )
+
+    def fromValidHex(str: String) = ByteVector32(ByteVector.fromValidHex(str))
+
+    implicit def byteVector32toByteVector(h: ByteVector32): ByteVector = h.bytes
+  }
+
 }

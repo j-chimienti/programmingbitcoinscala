@@ -1,8 +1,6 @@
 import java.nio.charset.StandardCharsets
 
-import fr.acinq.bitcoin.{Base58Check, Crypto}
-import models.{ByteSwapper, HashHelper}
-import org.scalatest.{FlatSpec, FunSuite}
+import org.scalatest.{FlatSpec}
 import scodec.bits.ByteVector
 
 class HashHelperTest extends FlatSpec {
@@ -11,13 +9,11 @@ class HashHelperTest extends FlatSpec {
 
   behavior of "FlatSpec"
 
-  def assertEqual[T](a: T, b: T): Unit = assert(a == b)
-
   it should "bytes" in {
 
     val b = "hello world".getBytes(StandardCharsets.US_ASCII)
     val s = "hello world"
-    assertEqual(b.deep, str_to_bytes(s).deep)
+    assert(b.deep == str_to_bytes(s).deep)
     assert(BigInt(b) == BigInt(str_to_bytes(s)))
     assert(s == bytes_to_str(b))
   }
@@ -35,10 +31,10 @@ class HashHelperTest extends FlatSpec {
 
   it should "base58" in {
     val addr = "mnrVtF8DWjMu839VW3rBfgYaAfKk8983Xf"
-    val (version, h160) = base58(addr)
+    val (version, h160) = base58Decode(addr)
     val want = "507b27411ccf7f16f10297de6cef3f291623eddf"
     assert(h160.toHex == want)
-    val got = Base58Check.encode(version, h160)
+    val got = base58Encode(version, h160)
     assert(got == addr)
   }
 
