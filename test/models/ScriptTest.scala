@@ -11,6 +11,20 @@ class ScriptTest extends FlatSpec {
 
   behavior of "ScriptTest"
 
+  it should "unlock" in {
+//
+    val scriptPubKey = List(OP_5, OP_ADD, OP_9, OP_EQUAL)
+
+    val script = Script(scriptPubKey)
+
+    val scriptSig = OP_4
+
+    //val s = Script(ByteVector.fromLong(767695935687L))
+
+//    assert(script.elements sameElements s.elements)
+
+  }
+
   it should "p2pkh" in {
 
     val script_pubkey_raw = "76a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac"

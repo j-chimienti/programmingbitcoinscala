@@ -85,8 +85,8 @@ object HashHelper {
     */
   def base58Decode(data: String): (Byte, ByteVector) = Base58Check.decode(data)
 
-  def base58Encode(version: Int, h160: ByteVector): String =
-    Base58Check.encode(version, h160)
+  def base58Encode(prefix: Byte, h160: ByteVector): String =
+    Base58Check.encode(prefix, h160)
 
   def ripemd160: ByteVector => ByteVector = hash(new RIPEMD160Digest)
 

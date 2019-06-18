@@ -7,19 +7,22 @@ import scala.concurrent.duration._
 import akka.actor.ActorSystem
 import akka.http.scaladsl.util.FastFuture
 import akka.stream.ActorMaterializer
+import play.api.Logging
 import play.api.libs.ws.ahc.AhcWSClient
+
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
-
 import scala.io.Source
 
-object TransactionService {
+object TransactionService extends Logging {
 
   implicit val system: ActorSystem = ActorSystem("TxIn")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   val client: AhcWSClient = AhcWSClient()
+
+  val LOG = logger.logger
 
   val cache: mutable.Map[String, Transaction] =
     mutable.Map.empty[String, Transaction]
@@ -34,12 +37,10 @@ object TransactionService {
     * @param testnet
     * @return Transaction
     */
-  def fetch(txId: String,
-            testnet: Boolean = false): Future[Option[Transaction]] = {
+  def fetch(txId: String, testnet: Boolean = false) = {
 
     if (cache.contains(txId))
       FastFuture.successful(Some(cache(txId)))
-
     val url = baseUri(testnet) + s"/tx/$txId/hex"
     client
       .url(url)
@@ -47,18 +48,16 @@ object TransactionService {
       .get()
       .map(response => {
         response.status match {
-          case 404 =>
-            println(response.body)
-            None
           case 200 =>
             val hexStr = response.body
             val tx = Transaction.parse(hexStr)
             cache(txId) = tx
-            Some(tx)
+            tx
           case _ =>
-            println("UNKNOWN ERROR")
-            println(response.body)
-            None
+            val e =
+              s"fetch($txId, $testnet): status = ${response.status}, response = ${response.body}"
+            LOG.error(e)
+            throw new RuntimeException(e)
         }
       })
 

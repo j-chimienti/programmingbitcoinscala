@@ -1,15 +1,14 @@
 import java.nio.charset.StandardCharsets
-
-import org.scalatest.{FlatSpec}
+import org.scalatest.FlatSpec
 import scodec.bits.ByteVector
 
 class HashHelperTest extends FlatSpec {
 
   import models.HashHelper._
 
-  behavior of "FlatSpec"
+  behavior of "HashHelper"
 
-  it should "bytes" in {
+  it should "convert b/w strings and bytes" in {
 
     val b = "hello world".getBytes(StandardCharsets.US_ASCII)
     val s = "hello world"
@@ -34,7 +33,8 @@ class HashHelperTest extends FlatSpec {
     val (version, h160) = base58Decode(addr)
     val want = "507b27411ccf7f16f10297de6cef3f291623eddf"
     assert(h160.toHex == want)
-    val got = base58Encode(version, h160)
+    val prefix = 111.toByte
+    val got = base58Encode(prefix, h160)
     assert(got == addr)
   }
 
