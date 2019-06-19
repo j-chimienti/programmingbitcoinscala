@@ -21,8 +21,8 @@ scalaVersion := "2.11.11"
 lazy val akkaHttpVersion = "10.1.1"
 lazy val akkaVersion = "2.5.11"
 lazy val GatlingTest = config("gatling") extend Test
-// resolvers += "dl-john-ky" at "http://dl.john-ky.io/maven/releases"
-// resolvers += "moma" at "https://github.com/prassee/moma/raw/master/snapshots"
+resolvers += "dl-john-ky" at "http://dl.john-ky.io/maven/releases"
+resolvers += "moma" at "https://github.com/prassee/moma/raw/master/snapshots"
 libraryDependencies ++= Seq(
   jdbc,
   ehcache,
