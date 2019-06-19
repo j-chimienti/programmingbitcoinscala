@@ -4,21 +4,19 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.HomeController.index
-# An example controller showing how to use dependency injection
-GET     /count                      controllers.CountController.count
-# An example controller showing how to write asynchronous code
-GET     /message                    controllers.AsyncController.message
-
-
+GET     /                           controllers.HomeController.explorer
 GET     /book                       controllers.HomeController.toc
-GET     /book/:chapter                       controllers.HomeController.book(chapter)
+GET     /book/:chapter              controllers.HomeController.book(chapter)
 
-GET /tx/push                         controllers.HomeController.pushTx
-GET /tx/hex/:hex                       controllers.HomeController.parseTx(hex)
-GET /tx/:id                         controllers.HomeController.tx(id)
+GET     /tx/push                    controllers.HomeController.pushTx
+GET     /tx/hex/:hex                controllers.HomeController.parseTx(hex)
+GET     /tx/:id                     controllers.HomeController.tx(id)
+POST    /tx/:hex                    controllers.HomeController.postTx(hex)
+GET     /privateKey/:privateKey     controllers.HomeController.privateKey(privateKey)
+#+nocsrf
+POST    /v1/userInput               controllers.HomeController.userInput
+GET     /block/:block               controllers.HomeController.block(block)
 
-
-POST /tx/:hex  controllers.HomeController.postTx(hex)
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file               controllers.HomeController.serve(file)
+GET     /book/images/*file          controllers.HomeController.serveImg(file)

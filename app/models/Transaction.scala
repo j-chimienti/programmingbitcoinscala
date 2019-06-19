@@ -22,11 +22,12 @@ case class Transaction(version: Long,
                        testnet: Boolean = false)
     extends BtcSerializable[Transaction] {
 
+  lazy val hash: HashHelper.ByteVector32 = HashHelper.hash256(serialize)
+  lazy val txId: HashHelper.ByteVector32 = hash.reverse
   lazy val isCoinbase: Boolean = Transaction.isCoinbase(this)
-  lazy val hash = HashHelper.hash256(serialize).toHex
   override def serializer: BtcSerializer[Transaction] = Transaction
 
-  def serialize = Transaction.serialize(this)
+  def serialize: ByteVector = Transaction.serialize(this)
 
   override def toString: String = {
     var tx_ins = ""
@@ -40,13 +41,15 @@ case class Transaction(version: Long,
 
   def fee: Future[Long] = Transaction.fee(this, testnet)
 
-  def sigHash(index: Int, hashType: Int) =
+  def sigHash(index: Int, hashType: Int): Future[ByteVector] =
     Transaction.sigHash(this, index, hashType)
 
   def verifyInput(index: Int): Future[Boolean] =
     Transaction.verifyInput(this, index)
 
-  def signInput(index: Int, privateKey: PrivateKey, hashType: Int) =
+  def signInput(index: Int,
+                privateKey: PrivateKey,
+                hashType: Int): Future[Transaction] =
     Transaction
       .signInput(this, index, privateKey, hashType)
       .flatMap(tx => tx)
@@ -69,7 +72,9 @@ object Transaction extends BtcSerializer[Transaction] {
     )
     parse(stream)
   }
-  def parse(stream: InputStream): Transaction = {
+
+  def parse(stream: InputStream): Transaction = parse(stream, false)
+  def parse(stream: InputStream, testnet: Boolean = false): Transaction = {
     val version = uint32(stream)
     val inputsCount = readVarint(stream)
     val inputs: Seq[TxIn] = for (_ <- 1L to inputsCount)
@@ -78,7 +83,7 @@ object Transaction extends BtcSerializer[Transaction] {
     val outputs: Seq[TxOut] = for (_ <- 1L to outputsCount)
       yield TxOut.parse(stream)
     val locktime = uint32(stream)
-    Transaction(version.toInt, inputs, outputs, locktime)
+    Transaction(version.toInt, inputs, outputs, locktime, testnet)
   }
 
   def fromId(id: String, testnet: Boolean): Future[Transaction] =
@@ -165,11 +170,7 @@ object Transaction extends BtcSerializer[Transaction] {
     val signature = Signature.parse(der)
     val ht = tx.hashType()
     sigHash(transaction, index, ht)
-      .map(z => {
-
-        val foo = point.verify(z, signature)
-        foo
-      })
+      .map(z => point.verify(z, signature))
 
   }
 

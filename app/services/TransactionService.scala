@@ -9,12 +9,14 @@ import akka.http.scaladsl.util.FastFuture
 import akka.stream.ActorMaterializer
 import play.api.Logging
 import play.api.libs.ws.ahc.AhcWSClient
-
-import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.io.Source
+import scala.collection.mutable
+
+//
+//@Singleton
+//class TransactionService @Inject()(cache: AsyncCacheApi) extends Logging {
 
 object TransactionService extends Logging {
 
@@ -24,7 +26,7 @@ object TransactionService extends Logging {
 
   val LOG = logger.logger
 
-  val cache: mutable.Map[String, Transaction] =
+  var cache: mutable.Map[String, Transaction] =
     mutable.Map.empty[String, Transaction]
 
   def baseUri(testnet: Boolean = false): String =
@@ -39,28 +41,41 @@ object TransactionService extends Logging {
     */
   def fetch(txId: String, testnet: Boolean = false) = {
 
-    if (cache.contains(txId))
-      FastFuture.successful(Some(cache(txId)))
-    val url = baseUri(testnet) + s"/tx/$txId/hex"
-    client
-      .url(url)
-      .withRequestTimeout(3 seconds)
-      .get()
-      .map(response => {
-        response.status match {
-          case 200 =>
-            val hexStr = response.body
-            val tx = Transaction.parse(hexStr)
-            cache(txId) = tx
-            tx
-          case _ =>
-            val e =
-              s"fetch($txId, $testnet): status = ${response.status}, response = ${response.body}"
-            LOG.error(e)
-            throw new RuntimeException(e)
+    cache.get(txId) match {
+      case Some(tx) =>
+        LOG.info(s"Cached $txId")
+        FastFuture.successful(tx)
+      case None =>
+        fromService(txId, testnet).map { tx =>
+          cache(tx.txId.toHex) = tx
+          tx
         }
-      })
+    }
 
+  }
+
+  def fromService(txId: String, testnet: Boolean) = {
+
+    val url = baseUri(testnet) + s"/tx/$txId/hex"
+    for {
+      response <- client
+        .url(url)
+        .withRequestTimeout(3 seconds)
+        .get()
+    } yield {
+      response.status match {
+        case 200 =>
+          val hexStr = response.body
+          val tx = Transaction.parse(hexStr)
+          // note: to set expiry duration add duration as 3rd param
+          tx
+        case _ =>
+          val e =
+            s"fetch($txId, $testnet): status = ${response.status}, response = ${response.body}"
+          LOG.error(e)
+          throw new RuntimeException(e)
+      }
+    }
   }
 
   def post(tx: String, testnet: Boolean = false): Future[String] = {

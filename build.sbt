@@ -25,7 +25,7 @@ resolvers += "dl-john-ky" at "http://dl.john-ky.io/maven/releases"
 resolvers += "moma" at "https://github.com/prassee/moma/raw/master/snapshots"
 libraryDependencies ++= Seq(
   jdbc,
-  ehcache,
+  caffeine,
   ws,
   specs2 % Test,
   guice,

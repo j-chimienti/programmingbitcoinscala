@@ -1,9 +1,17 @@
 package controllers
 
+import akka.actor.ActorSystem
+import controllers.Assets.Asset
 import javax.inject._
-import models.{PrivateKey, Transaction}
+import models.{PrivateKey, Transaction, UserInput}
+import play.api.data.Form
 import play.api.mvc._
 import services.TransactionService
+import scala.util.Try
+import play.api.data._
+import play.api.data.Forms._
+import play.api.data.validation.Constraints._
+import play.filters.csrf.CSRF
 
 import scala.concurrent.ExecutionContext
 
@@ -12,18 +20,22 @@ import scala.concurrent.ExecutionContext
   * application's home page.
   */
 @Singleton
-class HomeController @Inject()(cc: ControllerComponents, assets: Assets)(
-  implicit ec: ExecutionContext
-) extends AbstractController(cc) {
+class HomeController @Inject()(cc: ControllerComponents,
+                               assets: Assets,
+                               actorSystem: ActorSystem
+                               //txService: TransactionService
+)(implicit ec: ExecutionContext)
+    extends AbstractController(cc) {
 
-  /**
-    * Create an Action to render an HTML page with a welcome message.
-    * The configuration in the `routes` file means that this method
-    * will be called when the application receives a `GET` request with
-    * a path of `/`.
-    */
-  def index: Action[AnyContent] = toc
+  def serve(file: Asset) = {
 
+    assets.versioned(path = "/public", file)
+  }
+
+  def serveImg(file: Asset) = {
+
+    assets.versioned(path = "/public/images", file)
+  }
   def pushTx = Action {
     Ok(views.html.pushTx())
   }
@@ -53,7 +65,7 @@ class HomeController @Inject()(cc: ControllerComponents, assets: Assets)(
     "14"
   )
   def book(chapter: String) = {
-    val ch = s"ch$chapter-test.html"
+    val ch = s"ch$chapter.html"
     Assets.at(ch)
   }
 
@@ -66,12 +78,40 @@ class HomeController @Inject()(cc: ControllerComponents, assets: Assets)(
     Ok(views.html.transaction(tx))
   }
 
-  def tx(id: String) = Action.async {
+  def tx(id: String) = Action.async { implicit request =>
     for {
       tx <- Transaction.fromId(id, false)
       fee <- tx.fee
     } yield Ok(views.html.transaction(tx, fee))
 
+  }
+
+  def privateKey(pk: String) = Action { implicit request =>
+    Ok(views.html.privateKey(PrivateKey(BigInt(pk))))
+  }
+
+  val userForm: Form[UserInput] = Form(
+    mapping("userInput" -> text)(UserInput.apply)(UserInput.unapply)
+  )
+
+  def explorer = Action { implicit req: RequestHeader =>
+    Ok(views.html.explorer(userForm))
+  }
+  def userInput = Action { implicit request =>
+    userForm.bindFromRequest.fold(
+      formWithErrors => {
+        Ok("error")
+      },
+      userInput =>
+        Redirect(routes.HomeController.tx(userInput.input))
+          .flashing("success" -> "Contact saved!")
+    )
+
+  }
+
+  def block(block: String) = Action {
+
+    Ok(views.html.block())
   }
 
 }
