@@ -22,6 +22,8 @@ case class Transaction(version: Long,
                        testnet: Boolean = false)
     extends BtcSerializable[Transaction] {
 
+  lazy val isCoinbase: Boolean = Transaction.isCoinbase(this)
+  lazy val hash = HashHelper.hash256(serialize).toHex
   override def serializer: BtcSerializer[Transaction] = Transaction
 
   def serialize = Transaction.serialize(this)
@@ -48,6 +50,7 @@ case class Transaction(version: Long,
     Transaction
       .signInput(this, index, privateKey, hashType)
       .flatMap(tx => tx)
+
 }
 
 object Transaction extends BtcSerializer[Transaction] {

@@ -22,14 +22,12 @@ class HomeController @Inject()(cc: ControllerComponents, assets: Assets)(
     * will be called when the application receives a `GET` request with
     * a path of `/`.
     */
-  def index: Action[AnyContent] = Action {
-    Ok(views.html.index("Your new application is ready.")).withNewSession
-  }
+  def index: Action[AnyContent] = toc
 
   def pushTx = Action {
-
     Ok(views.html.pushTx())
   }
+
   def postTx(hex: String, testnet: Boolean = false) = Action.async {
     for {
       result <- TransactionService.post(hex, testnet)
@@ -55,7 +53,6 @@ class HomeController @Inject()(cc: ControllerComponents, assets: Assets)(
     "14"
   )
   def book(chapter: String) = {
-
     val ch = s"ch$chapter-test.html"
     Assets.at(ch)
   }
@@ -65,7 +62,6 @@ class HomeController @Inject()(cc: ControllerComponents, assets: Assets)(
   }
 
   def parseTx(hex: String) = Action {
-
     val tx = Transaction.parse(hex)
     Ok(views.html.transaction(tx))
   }

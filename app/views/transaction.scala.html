@@ -7,6 +7,11 @@
 <p>Outputs = @tx.outputs</p>
 <p>Locktime = @tx.locktime</p>
 <p>Version = @tx.version</p>
+<p>@tx.hash</p>
+
+@if(tx.isCoinbase) {
+  <p>COINBASE TX</p>
+}
 
 
 <p>Tx Fees = @fee</p>
