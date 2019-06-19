@@ -1,0 +1,13 @@
+@(privateKey: PrivateKey)
+
+@main("Private Key") {
+
+  <p>
+    Address = @privateKey.point.address()
+  </p>
+
+  <p>
+    Wif = @privateKey.wif()
+  </p>
+
+}

@@ -1,0 +1,18 @@
+@(chapters: List[String])
+
+@main("Programming Bitcoin") {
+
+
+  <h3>Table of Contents</h3>
+
+  <ul class="list-group">
+  @for(ch <- chapters) {
+        <li class="list-group-item">
+          <a href="@routes.HomeController.book(ch)">
+              Chapter @ch
+            </a>
+        </li>
+  }
+  </ul>
+
+}
