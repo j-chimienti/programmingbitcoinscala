@@ -1,33 +1,37 @@
 package services
 
-import models.Transaction
+import models.{
+  OP_PUSHDATA,
+  PrivateKey,
+  S256Point,
+  Script,
+  ScriptElt,
+  Signature,
+  Transaction
+}
 import play.api.libs.json.{JsArray, Json, OFormat}
 
 import scala.concurrent.duration._
 import akka.actor.ActorSystem
-import akka.http.scaladsl.util.FastFuture
 import akka.stream.ActorMaterializer
+import javax.inject._
+import models.HashHelper.{hash256, writeUInt32}
 import play.api.Logging
+import play.api.cache.AsyncCacheApi
 import play.api.libs.ws.ahc.AhcWSClient
+import scodec.bits.ByteVector
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.collection.mutable
+import scala.language.implicitConversions
 
-//
-//@Singleton
-//class TransactionService @Inject()(cache: AsyncCacheApi) extends Logging {
-
-object TransactionService extends Logging {
+@Singleton
+class TransactionService @Inject()(cache: AsyncCacheApi) extends Logging {
 
   implicit val system: ActorSystem = ActorSystem("TxIn")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   val client: AhcWSClient = AhcWSClient()
-
-  val LOG = logger.logger
-
-  var cache: mutable.Map[String, Transaction] =
-    mutable.Map.empty[String, Transaction]
 
   def baseUri(testnet: Boolean = false): String =
     if (testnet) "https://blockstream.info/testnet/api"
@@ -39,22 +43,16 @@ object TransactionService extends Logging {
     * @param testnet
     * @return Transaction
     */
-  def fetch(txId: String, testnet: Boolean = false) = {
+  def fetch(txId: String, testnet: Boolean = false): Future[Transaction] = {
 
-    cache.get(txId) match {
-      case Some(tx) =>
-        LOG.info(s"Cached $txId")
-        FastFuture.successful(tx)
-      case None =>
-        fromService(txId, testnet).map { tx =>
-          cache(tx.txId.toHex) = tx
-          tx
-        }
-    }
+    cache
+      .getOrElseUpdate[Transaction](txId) {
+        fromService(txId, testnet)
+      }
 
   }
 
-  def fromService(txId: String, testnet: Boolean) = {
+  def fromService(txId: String, testnet: Boolean): Future[Transaction] = {
 
     val url = baseUri(testnet) + s"/tx/$txId/hex"
     for {
@@ -67,12 +65,11 @@ object TransactionService extends Logging {
         case 200 =>
           val hexStr = response.body
           val tx = Transaction.parse(hexStr)
-          // note: to set expiry duration add duration as 3rd param
           tx
         case _ =>
           val e =
             s"fetch($txId, $testnet): status = ${response.status}, response = ${response.body}"
-          LOG.error(e)
+          println(e)
           throw new RuntimeException(e)
       }
     }
@@ -90,12 +87,138 @@ object TransactionService extends Logging {
 
         println(response.body)
         response.body
-//        result.status match {
-//
-//          case
-//        }
       })
   }
+
+  def value(txId: String,
+            index: Int,
+            testnet: Boolean = false): Future[Long] = {
+
+    for {
+      tx <- fetch(txId, testnet)
+    } yield tx.txOut(index).amount
+
+  }
+
+  def scriptPubKey(tx: Transaction, index: Int): Future[ByteVector] =
+    scriptPubKey(tx.txId.toHex, index, tx.testnet)
+
+  /**
+    *   Get the scriptPubKey by looking up tx hash on server
+    * @param testnet bitcoin network
+    * @return the binary scriptpubkey
+    */
+  def scriptPubKey(txId: String,
+                   index: Int,
+                   testnet: Boolean = false): Future[ByteVector] = {
+
+    for {
+      tx <- fetch(txId, testnet)
+    } yield tx.txOut(index).scriptPubKey
+
+  }
+
+  /**
+    *
+    * @param index
+    * @param hashType
+    * @return the integer of the hash that needs to get signed for index input_index
+    */
+  def sigHash(tx: Transaction,
+              index: Int,
+              hashType: Int): Future[ByteVector] = {
+
+    val altTxIns = for (trans <- tx.txIn)
+      yield trans.copy(scriptSig = ByteVector.empty)
+    val input = altTxIns(index)
+    for {
+      scriptPubKey <- scriptPubKey(tx, index)
+    } yield {
+      val txIns =
+        altTxIns.updated(index, input.copy(scriptSig = scriptPubKey))
+      val tx1 = tx.copy(txIn = txIns)
+      val result = Transaction.serialize(tx1) ++ writeUInt32(hashType)
+      val hash = hash256(result)
+      hash
+
+    }
+  }
+
+  /**
+    *   Fee of the tx in satoshi
+    * @param testnet
+    * @return
+    */
+  def fee(tx: Transaction, testnet: Boolean = false): Future[Long] = {
+
+    val list =
+      tx.txIn.map(input => value(input.prevTx.toHex, input.prevIdx, testnet))
+    for {
+      txInFound <- Future.sequence(list)
+
+    } yield {
+      if (tx.txIn.length != txInFound.length)
+        throw new RuntimeException(s"Error fetching tx fee")
+      val txInSum = txInFound.sum
+      val txOutSum = tx.txOut.map(_.amount).sum
+      txInSum - txOutSum
+    }
+  }
+
+  def verifyInput(transaction: Transaction, index: Int): Future[Boolean] = {
+
+    val tx = transaction.txIn(index)
+    val pubKey = tx.secPubKey()
+    val point = S256Point.parse(pubKey)
+    val der = tx.derSignature()
+    val signature = Signature.parse(der)
+    val ht = tx.hashType()
+    sigHash(transaction, index, ht)
+      .map(z => point.verify(z, signature))
+
+  }
+
+  /** fixme
+    * Sign the input w/ the Private Key
+    * @param index
+    * @param privateKey
+    * @param hashType
+    * @return
+    */
+  def signInput(tx: Transaction,
+                index: Int,
+                privateKey: PrivateKey,
+                hashType: Int): Future[Future[Transaction]] = {
+
+    sigHash(tx, index, hashType).map(
+      z => {
+        val signature = privateKey.sign(z)
+        val der = signature.der
+        val sig = ByteVector(der :+ hashType.toByte)
+        val publicKey = privateKey.publicKey.sec(compressed = true)
+        val scriptSig: Seq[ScriptElt] = OP_PUSHDATA(sig) :: OP_PUSHDATA(
+          publicKey
+        ) :: Nil
+        val ss = Script.serialize(scriptSig)
+        val tx1 = tx.copy(
+          txIn = tx.txIn
+            .updated(index, tx.txIn(index).copy(scriptSig = ss))
+        )
+
+        for {
+
+          isVerified <- verifyInput(tx1, index)
+        } yield {
+
+          require(isVerified)
+
+          tx1
+        }
+
+      }
+    )
+  }
+
 }
 
 /// JSON obj for tx

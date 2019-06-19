@@ -4,8 +4,6 @@ import java.io.{InputStream, OutputStream}
 
 import models.HashHelper._
 import scodec.bits.ByteVector
-import services.TransactionService
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -44,27 +42,6 @@ case class TxIn(prevTx: ByteVector32,
   lazy val txId: ByteVector = prevTx.reverse
 
   override def toString: String = s"TxIn(${txId.toHex}, $prevIdx)"
-
-  def value(testnet: Boolean = false): Future[Long] = {
-
-    for {
-      tx <- TransactionService.fetch(txId.toHex, testnet)
-    } yield tx.outputs(prevIdx).amount
-
-  }
-
-  /**
-    *   Get the scriptPubKey by looking up tx hash on server
-    * @param testnet bitcoin network
-    * @return the binary scriptpubkey
-    */
-  def scriptPubKey(testnet: Boolean = false): Future[ByteVector] = {
-
-    for {
-      tx <- TransactionService.fetch(txId.toHex, testnet)
-    } yield tx.outputs(prevIdx).scriptPubKey
-
-  }
 
   def derSignature(idx: Int = 0) =
     Script(scriptSig).signature(idx).dropRight(1)

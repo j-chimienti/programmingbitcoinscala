@@ -17,23 +17,23 @@ class TransactionServiceTest extends AsyncFlatSpec {
     for {
       tx <- TransactionService.fetch(hexStr)
       fee <- tx.fee // fee is a seperate call
-      value <- tx.inputs.head.value()
+      value <- tx.txIn.head.value()
     } yield {
 
       assert(tx.version == 1)
       assert(tx.locktime == 0)
       assert(fee == 8800)
 
-      assert(tx.inputs.length == 2)
+      assert(tx.txIn.length == 2)
       assert(
-        tx.inputs.head.txId.toHex == "cbf43825e0b92ba3bfabaec509e14ee9132df1e92ffdfc6636f848fbf0537c13"
+        tx.txIn.head.txId.toHex == "cbf43825e0b92ba3bfabaec509e14ee9132df1e92ffdfc6636f848fbf0537c13"
       )
-      assert(tx.inputs.head.prevIdx == 0)
+      assert(tx.txIn.head.prevIdx == 0)
       assert(value == 17608602)
-      assert(tx.inputs.head.sequence == 4294967295L)
+      assert(tx.txIn.head.sequence == 4294967295L)
 
-      assert(tx.outputs.length == 2)
-      assert(tx.outputs.head.amount == 42505594L)
+      assert(tx.txOut.length == 2)
+      assert(tx.txOut.head.amount == 42505594L)
 
     }
   }

@@ -35,7 +35,12 @@ libraryDependencies ++= Seq(
   "org.bouncycastle" % "bcprov-jdk15on" % "1.61",
   "fr.acinq" % "bitcoin-lib_2.11" % "0.11",
   "org.scalatest" %% "scalatest" % "3.0.5" % "test"
-  //"org.bitcoinj" % "bitcoinj-core" % "0.14.5"
+  // "org.mongodb.scala" %% "mongo-scala-driver" % "2.3.0",
+  // "org.mongodb.scala" % "mongo-scala-bson_2.11" % "2.3.0",
+  // "org.mongodb" % "bson" % "3.7.0",
+  // "org.mongodb" % "mongodb-driver-core" % "3.7.0"
+
+//"org.bitcoinj" % "bitcoinj-core" % "0.14.5"
 )
 
 unmanagedResourceDirectories in Test <+= baseDirectory(

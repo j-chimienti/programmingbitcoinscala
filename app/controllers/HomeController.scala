@@ -13,6 +13,7 @@ import play.api.data.Forms._
 import play.api.data.validation.Constraints._
 import play.filters.csrf.CSRF
 
+// import org.mongodb.scala._
 import scala.concurrent.ExecutionContext
 
 /**
@@ -20,12 +21,19 @@ import scala.concurrent.ExecutionContext
   * application's home page.
   */
 @Singleton
-class HomeController @Inject()(cc: ControllerComponents,
-                               assets: Assets,
-                               actorSystem: ActorSystem
-                               //txService: TransactionService
+class HomeController @Inject()(
+  cc: ControllerComponents,
+  assets: Assets,
+  actorSystem: ActorSystem,
+  transactionService: TransactionService
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc) {
+
+  def index = {
+
+    toc
+
+  }
 
   def serve(file: Asset) = {
 
@@ -42,31 +50,28 @@ class HomeController @Inject()(cc: ControllerComponents,
 
   def postTx(hex: String, testnet: Boolean = false) = Action.async {
     for {
-      result <- TransactionService.post(hex, testnet)
+      result <- transactionService.post(hex, testnet)
     } yield {
       Ok(result)
     }
   }
 
-  val chapters = List(
-    "01",
-    "02",
-    "03",
-    "04",
-    "05",
-    "06",
-    "07",
-    "08",
-    "09",
-    "10",
-    "11",
-    "12",
-    "13",
-    "14"
-  )
-  def book(chapter: String) = {
-    val ch = s"ch$chapter.html"
-    Assets.at(ch)
+  val chapters: List[Int] = (for (i <- 1 to 14) yield i).toList
+  val ch: Map[Int, String] = chapters
+    .map(ch => {
+      val chapter = if (ch < 10) "0" + ch.toString else ch.toString
+      val file = s"public/ch$chapter.html"
+      val html = scala.io.Source.fromFile(file).mkString
+      (ch, html)
+    })
+    .toMap
+  def book(chapter: Int) = Action {
+    val cc = ch.get(chapter)
+    cc match {
+      case Some(fc) => Ok(views.html.chapter(chapter, fc))
+      case None     => Ok(views.html.toc(chapters))
+
+    }
   }
 
   def toc = Action {
@@ -80,8 +85,8 @@ class HomeController @Inject()(cc: ControllerComponents,
 
   def tx(id: String) = Action.async { implicit request =>
     for {
-      tx <- Transaction.fromId(id, false)
-      fee <- tx.fee
+      tx <- transactionService.fetch(id, false)
+      fee <- transactionService.fee(tx)
     } yield Ok(views.html.transaction(tx, fee))
 
   }

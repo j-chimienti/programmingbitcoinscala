@@ -4,9 +4,9 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.HomeController.explorer
+GET     /                           controllers.HomeController.index
 GET     /book                       controllers.HomeController.toc
-GET     /book/:chapter              controllers.HomeController.book(chapter)
+GET     /book/:chapter              controllers.HomeController.book(chapter: Int)
 
 GET     /tx/push                    controllers.HomeController.pushTx
 GET     /tx/hex/:hex                controllers.HomeController.parseTx(hex)

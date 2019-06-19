@@ -1,7 +1,6 @@
-import java.time.Clock
-
-import com.google.inject.AbstractModule
-import services.{ApplicationTimer, TransactionService}
+import com.google.inject.{AbstractModule, Provides}
+// import org.mongodb.scala.{MongoClient, MongoDatabase}
+import services.TransactionService
 
 /**
   * This class is a Guice module that tells Guice how to bind several
@@ -16,10 +15,21 @@ import services.{ApplicationTimer, TransactionService}
 class Module extends AbstractModule {
 
   override def configure() = {
-    // Ask Guice to create an instance of ApplicationTimer when the
+    // Ask Guice to create an instance of Transactionservice when the
     // application starts.
-    bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
-    bind(classOf[ApplicationTimer]).asEagerSingleton()
+    bind(classOf[TransactionService]).asEagerSingleton()
   }
+
+//  @Provides
+//  def provideMongoDatabase: MongoDatabase = {
+//
+//    // To directly connect to the default server localhost on port 27017
+//    val mongoClient: MongoClient = MongoClient()
+//
+//    // or provide custom MongoClientSettings
+//
+//    val database: MongoDatabase = mongoClient.getDatabase("programmingbitcoin")
+//    database
+//  }
 
 }
