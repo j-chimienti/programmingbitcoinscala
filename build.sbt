@@ -7,8 +7,8 @@ lazy val `programmingbitcoinscala` =
     .enablePlugins(PlayScala)
 //.settings(PlayKeys.playDefaultPort := 6666, PlayKeys.playDefaultAddress :=)
 
-PlayKeys.playDefaultPort := 9000
-PlayKeys.playDefaultAddress := "localhost"
+// PlayKeys.playDefaultPort := 9000
+// PlayKeys.playDefaultAddress := "localhost"
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
