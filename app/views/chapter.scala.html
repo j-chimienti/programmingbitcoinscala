@@ -1,0 +1,25 @@
+@import views.UtilsFE
+@(chapter: Int, html: String)
+
+
+@main(s"Chapter $chapter") {
+
+  <nav class="navbar bg-primary">
+    <a class="navbar-brand text-light" href="@routes.HomeController.toc()">Programming Bitcoin</a>
+  </nav>
+
+  <div class="row d-flex justify-content-around align-items-center mt-2">
+    @if(chapter != 1) {
+
+      <a class="nav-link" href="@routes.HomeController.book(chapter - 1)">
+        Chapter @UtilsFE.prevCh(chapter)
+      </a>
+    }
+    @if(chapter != 14) {
+      <a class="nav-link" href="@routes.HomeController.book(chapter + 1)">
+        Chapter @UtilsFE.nextCh(chapter)
+      </a>
+    }
+  </div>
+  @Html(html)
+}
