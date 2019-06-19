@@ -1,0 +1,56 @@
+@import models.UserInput
+@import helper._
+@(userInput: Form[UserInput])(implicit req: RequestHeader)
+
+@main("Bitcoin Explorer") {
+
+
+
+<h1>Bitcoin Explorer</h1>
+
+@*
+
+@form(action = routes.HomeController.userInput) {*@
+@*  @inputText(userInput("input"))*@
+@*  <button class="btn btn-primary" type="submit">*@
+@*    Search*@
+@*  </button>*@
+
+@*}*@
+
+<form id="userInputForm" action="@routes.HomeController.userInput" method="post">
+
+  @CSRF.formField
+  <input type="text" class="form-control form-control-lg" name="userInput" id="userInput">
+  <button class="btn btn-primary" type="submit">
+    Search
+  </button>
+</form>
+
+@*<script type="text/javascript">*@
+@*  const userInputForm = document.getElementById('userInputForm')*@
+@*  const userInput = document.getElementById('userInput')*@
+@*  userInputForm.addEventListener('submit', e => {*@
+
+@*      e.preventDefault()*@
+
+@*      const input = userInput.value()*@
+
+@*      fetch("/v1/userInput", {*@
+@*          headers: {*@
+@*            accept: "",*@
+@*            'content-type': "application/json"*@
+@*          },*@
+@*          method: "POST",*@
+@*          body: JSON.stringify({userInput: input})*@
+@*      }).then(response => {*@
+
+@*      }).catch(err => {*@
+
+@*      })*@
+@*  })*@
+
+
+@*</script>*@
+
+}

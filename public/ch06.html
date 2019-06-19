@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.9">
+<title>Script</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment @import statement to use as custom stylesheet */
+/*@import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700";*/
+article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section{display:block}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+abbr[title]{border-bottom:1px dotted}
+b,strong{font-weight:bold}
+dfn{font-style:italic}
+hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type="button"],input[type="reset"],input[type="submit"]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type="checkbox"],input[type="radio"]{box-sizing:border-box;padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,*::before,*::after{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;font-weight:400;font-style:normal;line-height:1;position:relative;cursor:auto;tab-size:4;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0;direction:ltr}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{font-family:inherit;font-weight:400;font-size:1em;line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em;height:0}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{font-size:1em;line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0;font-size:1em}
+ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
+ul.square{list-style-type:square}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+abbr,acronym{text-transform:uppercase;font-size:90%;color:rgba(0,0,0,.8);border-bottom:1px dotted #ddd;cursor:help}
+abbr{text-transform:none}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote cite{display:block;font-size:.9375em;color:rgba(0,0,0,.6)}
+blockquote cite::before{content:"\2014 \0020"}
+blockquote cite a,blockquote cite a:visited{color:rgba(0,0,0,.6)}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:solid 1px #dedede}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{display:table-cell;line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;-webkit-border-radius:4px;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed;word-wrap:break-word}
+:not(pre)>code.nobreak{word-wrap:normal}
+:not(pre)>code.nowrap{white-space:nowrap}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;-webkit-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em white inset;box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em #fff inset;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin-left:auto;margin-right:auto;margin-top:0;margin-bottom:0;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:-ms-flexbox;display:-webkit-flex;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border-style:solid;border-width:1px;border-color:#e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;-webkit-border-radius:4px;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:100%;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:rgba(255,255,255,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details>summary:first-of-type{cursor:pointer;display:list-item;outline:none;margin-bottom:.75em}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+table.tableblock #preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:inherit}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6)}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border-style:solid;border-width:1px;border-color:#e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;-webkit-border-radius:4px;border-radius:4px}
+.exampleblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child{margin-bottom:0}
+.sidebarblock{border-style:solid;border-width:1px;border-color:#dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;-webkit-border-radius:4px;border-radius:4px}
+.sidebarblock>:first-child{margin-top:0}
+.sidebarblock>:last-child{margin-bottom:0}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{-webkit-border-radius:4px;border-radius:4px;word-wrap:break-word;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class="highlight"],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;-webkit-border-radius:4px;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos{border-right:1px solid currentColor;opacity:.35;padding-right:.5em}
+pre.pygments .lineno{border-right:1px solid currentColor;opacity:.35;display:inline-block;margin-right:.75em}
+pre.pygments .lineno::before{content:"";margin-right:-.125em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin:0 0 1.25em;padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;text-align:left;margin-right:0}
+table.tableblock{max-width:100%;border-collapse:separate}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+td.tableblock>.content>:last-child.sidebarblock{margin-bottom:0}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>thead>tr>.tableblock,table.grid-all>tbody>tr>.tableblock{border-width:0 1px 1px 0}
+table.grid-all>tfoot>tr>.tableblock{border-width:1px 1px 0 0}
+table.grid-cols>*>tr>.tableblock{border-width:0 1px 0 0}
+table.grid-rows>thead>tr>.tableblock,table.grid-rows>tbody>tr>.tableblock{border-width:0 0 1px}
+table.grid-rows>tfoot>tr>.tableblock{border-width:1px 0 0}
+table.grid-all>*>tr>.tableblock:last-child,table.grid-cols>*>tr>.tableblock:last-child{border-right-width:0}
+table.grid-all>tbody>tr:last-child>.tableblock,table.grid-all>thead:last-child>tr>.tableblock,table.grid-rows>tbody>tr:last-child>.tableblock,table.grid-rows>thead:last-child>tr>.tableblock{border-bottom-width:0}
+table.frame-all{border-width:1px}
+table.frame-sides{border-width:0 1px}
+table.frame-topbot,table.frame-ends{border-width:1px 0}
+table.stripes-all tr,table.stripes-odd tr:nth-of-type(odd),table.stripes-even tr:nth-of-type(even),table.stripes-hover tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{display:table-cell;line-height:1.6;background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+ul.checklist{margin-left:.625em}
+ul.checklist li>p:first-child>.fa-square-o:first-child,ul.checklist li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist li>p:first-child>input[type="checkbox"]:first-child{margin-right:.25em}
+ul.inline{display:-ms-flexbox;display:-webkit-box;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:solid 4px #fff;-webkit-box-shadow:0 0 0 1px #ddd;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+.gist .file-data>table{border:0;background:#fff;width:100%;margin-bottom:0}
+.gist .file-data>table td.line-data{width:99%}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);-webkit-border-radius:100px;border-radius:100px;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,span.alt{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;-webkit-box-shadow:0 1px 4px #e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{-webkit-box-shadow:none!important;box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media print,amzn-kf8{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+</head>
+<body class="article">
+<div id="header">
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="chapter_script">Script</h2>
+<div class="sectionbody">
+<div class="paragraph lead">
+<p>The ability to lock and unlock coins is the mechanism by which we transfer bitcoin.
+<em>Locking</em> is giving some bitcoins to some entity.
+<em>Unlocking</em> is spending some bitcoins that you have received.</p>
+</div>
+<div class="paragraph">
+<p>In this chapter we examine this locking/unlocking mechanism, which is often called a <em>smart contract</em>.
+Elliptic curve cryptography (<a href="#chapter_elliptic_curve_cryptography">[chapter_elliptic_curve_cryptography]</a>) is used by Script to validate that a transaction was properly authorized (<a href="#chapter_tx_parsing">[chapter_tx_parsing]</a>).
+Script essentially allows people to prove that they have the right to spend certain UTXOs.
+We&#8217;re getting a little ahead of ourselves, though, so let&#8217;s start with how Script works and go from there.</p>
+</div>
+<div class="sect2">
+<h3 id="_mechanics_of_script">Mechanics of Script</h3>
+<div class="paragraph">
+<p>If you are confused about what a smart contract is, don&#8217;t worry.
+"Smart contract" is a fancy way of saying "programmable," and the "smart contract language" is simply a programming language.
+In Bitcoin, Script is the smart contract language, or the programming language used to express the conditions under which bitcoins are <span class="keep-together">spendable</span>.</p>
+</div>
+<div class="paragraph">
+<p>Bitcoin has the digital equivalent of a contract in Script.
+Script is a stack-based language similar to Forth.
+It&#8217;s intentionally limited in the sense that it avoids certain features.
+Specifically, Script avoids any mechanism for loops and is therefore not Turing complete.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="title">Why Bitcoin Isn&#8217;t Turing Complete</div>
+<div class="paragraph">
+<p>Turing completeness in a programming language essentially means that the program has the ability to loop.
+Loops are a useful construct in programming, so you may be wondering at this point why Script doesn&#8217;t have the ability to loop.</p>
+</div>
+<div class="paragraph">
+<p>There are a lot of reasons for this, but let&#8217;s start with program execution.
+Anyone can create a Script program that every full node on the network executes.
+If Script were Turing complete, it would be possible for the loop to go on executing forever.
+This would cause validating nodes to enter and never leave that loop.
+This would be an easy way to attack the network through what would be called a denial-of-service (DoS) attack.
+A single Script program with an infinite loop could take down Bitcoin!
+This would be a large systematic vulnerability, and protecting against this vulnerability is one of the major reasons why Turing completeness is avoided.
+Ethereum, which has Turing completeness in its smart contract language, Solidity, handles this problem by forcing contracts to pay for program execution with something called "gas."
+An infinite loop will exhaust whatever gas is in the contract because, by definition, it will run an infinite number of times.</p>
+</div>
+<div class="paragraph">
+<p>Another reason to avoid Turing completeness is because smart contracts with Turing completeness are very difficult to analyze.
+A Turing-complete smart contract&#8217;s execution conditions are very difficult to enumerate, and thus it&#8217;s easy to create unintended behavior, causing bugs.
+Bugs in a smart contract mean that the coins are vulnerable to being unintentionally spent, which means the contract participants could lose money.
+Such bugs are not just theoretical: this was the major problem in the DAO (Decentralized Autonomous Organization), a Turing-complete smart contract that ended with the Ethereum Classic hard fork.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Transactions assign bitcoins to a <em>locking</em> script.
+The locking script is what&#8217;s specified in the ScriptPubKey field (see <a href="#chapter_tx_parsing">[chapter_tx_parsing]</a>).
+You can think of this as a lockbox where some money is deposited that only a particular key can open.
+The money inside, of course, can only be accessed by the owner who has the key.</p>
+</div>
+<div class="paragraph">
+<p>The unlocking of the lockbox is done in the ScriptSig field (see <a href="#chapter_tx_parsing">[chapter_tx_parsing]</a>); this proves ownership of the locked box, which authorizes spending of the funds.</p>
+</div>
+</div>
+<div class="sect2 pagebreak-before">
+<h3 id="_how_script_works">How Script Works</h3>
+<div class="paragraph">
+<p>Script is a programming language, and like most programming languages, it processes one command at a time.
+The commands operate on a stack of elements.
+There are two possible types of commands: elements and operations.</p>
+</div>
+<div class="paragraph">
+<p>Elements are data.
+Technically, processing an element pushes that element onto the stack. Elements are byte strings of length 1 to 520.
+A typical element might be a DER signature or a SEC pubkey (<a href="#elements_chap_six">Elements</a>).</p>
+</div>
+<div id="elements_chap_six" class="imageblock">
+<div class="content">
+<img src="images/prbc_0601.png" alt="Script Elements">
+</div>
+<div class="title">Figure 1. Elements</div>
+</div>
+<div class="paragraph">
+<p>Operations do something to the data (<a href="#operations_chap_six">Operations</a>).
+They consume zero or more elements from the processing stack and push zero or more elements back to the stack.</p>
+</div>
+<div id="operations_chap_six" class="imageblock">
+<div class="content">
+<img src="images/prbc_0602.png" alt="Script Operations">
+</div>
+<div class="title">Figure 2. Operations</div>
+</div>
+<div class="paragraph">
+<p>A typical operation is <code>OP_DUP</code> (<a href="#op_dup_duplicates_the_top_element">OP_DUP duplicates the top element</a>), which will duplicate the top element (consuming 0) and push the new element to the stack (pushing 1).</p>
+</div>
+<div id="op_dup_duplicates_the_top_element" class="imageblock">
+<div class="content">
+<img src="images/prbc_0603.png" alt="OP_DUP">
+</div>
+<div class="title">Figure 3. OP_DUP duplicates the top element</div>
+</div>
+<div class="paragraph">
+<p>After all the commands are evaluated, the top element of the stack must be nonzero for the script to resolve as valid.
+Having no elements in the stack or the top element being 0 would resolve as invalid.
+Resolving as invalid means that the transaction that includes the unlocking script is not accepted on the network.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_example_operations">Example Operations</h3>
+<div class="paragraph">
+<p>There are many other operations besides <code>OP_DUP</code>.
+<code>OP_HASH160</code> (<a href="#op_hash160_does_a_sha256_followed_by_ripemd160_to_the_top_element">OP_HASH160 does a sha256 followed by ripemd160 to the top element</a>) does a sha256 followed by a ripemd160 (aka a hash160) to the top element of the stack (consuming 1) and pushes a new element to the stack (pushing 1).
+Note in the diagram that <code>y = hash160(x)</code>.</p>
+</div>
+<div id="op_hash160_does_a_sha256_followed_by_ripemd160_to_the_top_element" class="imageblock">
+<div class="content">
+<img src="images/prbc_0604.png" alt="OP_HASH160">
+</div>
+<div class="title">Figure 4. OP_HASH160 does a sha256 followed by ripemd160 to the top element</div>
+</div>
+<div class="paragraph">
+<p>Another very important operation is <code>OP_CHECKSIG</code> (<a href="#op_checksig_checks_if_the_signature_for_the_pubkey_is_valid_or_not">OP_CHECKSIG checks if the signature for the pubkey is valid or not</a>).
+<code>OP_CHECKSIG</code> consumes two elements from the stack, the first being the pubkey and the second being a signature, and examines whether the signature is good for the given pubkey.
+If so, <code>OP_CHECKSIG</code> pushes a 1 to the stack; otherwise, it pushes a 0 to the stack.</p>
+</div>
+<div id="op_checksig_checks_if_the_signature_for_the_pubkey_is_valid_or_not" class="imageblock">
+<div class="content">
+<img src="images/prbc_0605.png" alt="OP_CHECKSIG">
+</div>
+<div class="title">Figure 5. OP_CHECKSIG checks if the signature for the pubkey is valid or not</div>
+</div>
+<div class="sect3">
+<h4 id="_coding_opcodes">Coding Opcodes</h4>
+<div class="paragraph">
+<p>We can now code <code>OP_DUP</code>, given a stack.
+<code>OP_DUP</code> simply duplicates the top element of the stack:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">def op_dup(stack):
+    if len(stack) &lt; 1:  # <b class="conum">(1)</b>
+        return False
+    stack.append(stack[-1])  # <b class="conum">(2)</b>
+    return True
+...
+OP_CODE_FUNCTIONS = {
+...
+    118: op_dup,  # <b class="conum">(3)</b>
+...
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We have to have at least one element to duplicate; otherwise, we can&#8217;t execute this opcode.</p>
+</li>
+<li>
+<p>This is how we duplicate the top element of the stack.</p>
+</li>
+<li>
+<p><code>118 = 0x76</code>, which is the code for <code>OP_DUP</code>.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Note that we return a Boolean with this opcode, as a way to tell whether the operation was successful.
+A failed operation automatically fails script evaluation.</p>
+</div>
+<div class="paragraph pagebreak-after">
+<p>Here&#8217;s another one, for <code>OP_HASH256</code>.
+This opcode will consume the top element, perform a hash256 operation on it, and push the result onto the stack:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">def op_hash256(stack):
+    if len(stack) &lt; 1:
+        return False
+    element = stack.pop()
+    stack.append(hash256(element))
+    return True
+...
+OP_CODE_FUNCTIONS = {
+...
+    170: op_hash256,
+...
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_exercise_1">Exercise 1</h4>
+<div class="paragraph">
+<p>Write the <code>op_hash160</code> function.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_parsing_the_script_fields">Parsing the Script Fields</h3>
+<div class="paragraph">
+<p>Both the ScriptPubKey and ScriptSig are parsed the same way.
+If the byte is between <code>0x01</code> and <code>0x4b</code> (whose value we call <em>n</em>), we read the next <em>n</em> bytes as an element.
+Otherwise, the byte represents an operation, which we have to look up.
+Here are some operations and their byte codes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>0x00</code> - <code>OP_0</code></p>
+</li>
+<li>
+<p><code>0x51</code> - <code>OP_1</code></p>
+</li>
+<li>
+<p><code>0x60</code> - <code>OP_16</code></p>
+</li>
+<li>
+<p><code>0x76</code> - <code>OP_DUP</code></p>
+</li>
+<li>
+<p><code>0x93</code> - <code>OP_ADD</code></p>
+</li>
+<li>
+<p><code>0xa9</code> - <code>OP_HASH160</code></p>
+</li>
+<li>
+<p><code>0xac</code> - <code>OP_CHECKSIG</code></p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="title">Elements Longer Than 75 Bytes</div>
+<div class="paragraph">
+<p>You might be wondering what would happen if you had an element with a length greater than <code>0x4b</code> (75 in decimal).
+There are three specific opcodes for handling such elements: <code>OP_PUSHDATA1</code>, <code>OP_PUSHDATA2</code>, and <code>OP_PUSHDATA4</code>.
+<code>OP_PUSHDATA1</code> means that the next byte contains how many bytes we need to read for the element.
+<code>OP_PUSHDATA2</code> means that the next 2 bytes contain how many bytes we need to read for the element.
+<code>OP_PUSHDATA4</code> means that the next 4 bytes contain how many bytes we need to read for the element.</p>
+</div>
+<div class="paragraph">
+<p>Practically speaking, this means if we have an element that&#8217;s between 76 and 255 bytes inclusive, we use <code>OP_PUSHDATA1</code> &lt;__1-byte length of the element__&gt; &lt;__element__&gt;.
+For anything between 256 bytes and 520 bytes inclusive, we use <code>OP_PUSHDATA2</code> &lt;__2-byte length of the element in little-endian__&gt; &lt;__element__&gt;.
+Anything larger than 520 bytes is not allowed on the network, so <code>OP_PUSHDATA4</code> is unnecessary, though <code>OP_PUSHDATA4</code> &lt;__4-byte length of the element in little-endian, but value less than or equal to 520__&gt; &lt;__element__&gt; is still legal.</p>
+</div>
+<div class="paragraph">
+<p>It is possible to encode a number below 76 using <code>OP_PUSHDATA1</code> or a number below 256 using <code>OP_PUSHDATA2</code> or even any number below 521 using <code>OP_PUSHDATA4</code>.
+However, these are considered nonstandard transactions, meaning most Bitcoin nodes (particularly those running Bitcoin Core software) will not relay them.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>There are many more opcodes, which are coded in <em>op.py</em>, and the full list can be found at <a href="https://en.bitcoin.it/wiki/Script" class="bare">https://en.bitcoin.it/wiki/Script</a>.</p>
+</div>
+<div class="sect3">
+<h4 id="_coding_a_script_parser_and_serializer">Coding a Script Parser and Serializer</h4>
+<div class="paragraph">
+<p>Now that we know how Script works, we can write a script parser:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">class Script:
+
+    def __init__(self, cmds=None):
+        if cmds is None:
+            self.cmds = []
+        else:
+            self.cmds = cmds  # <b class="conum">(1)</b>
+    ...
+    @classmethod
+    def parse(cls, s):
+        length = read_varint(s)  # <b class="conum">(2)</b>
+        cmds = []
+        count = 0
+        while count &lt; length:  # <b class="conum">(3)</b>
+            current = s.read(1)  # <b class="conum">(4)</b>
+            count += 1
+            current_byte = current[0]  # <b class="conum">(5)</b>
+            if current_byte &gt;= 1 and current_byte &lt;= 75:  # <b class="conum">(6)</b>
+                n = current_byte
+                cmds.append(s.read(n))
+                count += n
+            elif current_byte == 76:  # <b class="conum">(7)</b>
+                data_length = little_endian_to_int(s.read(1))
+                cmds.append(s.read(data_length))
+                count += data_length + 1
+            elif current_byte == 77:  # <b class="conum">(8)</b>
+                data_length = little_endian_to_int(s.read(2))
+                cmds.append(s.read(data_length))
+                count += data_length + 2
+            else:  # <b class="conum">(9)</b>
+                op_code = current_byte
+                cmds.append(op_code)
+        if count != length:  # <b class="conum">(10)</b>
+            raise SyntaxError('parsing script failed')
+        return cls(cmds)</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Each command is either an opcode to be executed or an element to be pushed onto the stack.</p>
+</li>
+<li>
+<p>Script serialization always starts with the length of the entire script.</p>
+</li>
+<li>
+<p>We parse until the right amount of bytes are consumed.</p>
+</li>
+<li>
+<p>The byte determines if we have an opcode or element.</p>
+</li>
+<li>
+<p>This converts the byte into an integer in Python.</p>
+</li>
+<li>
+<p>For a number between 1 and 75 inclusive, we know the next n bytes are an <span class="keep-together">element</span>.</p>
+</li>
+<li>
+<p>76 is <code>OP_PUSHDATA1</code>, so the next byte tells us how many bytes to read.</p>
+</li>
+<li>
+<p>77 is <code>OP_PUSHDATA2</code>, so the next two bytes tell us how many bytes to read.</p>
+</li>
+<li>
+<p>We have an opcode that we store.</p>
+</li>
+<li>
+<p>The script should have consumed exactly the length of bytes we expected; otherwise, we raise an error.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph pagebreak-before">
+<p>We can similarly write a script serializer:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">class Script:
+...
+    def raw_serialize(self):
+        result = b''
+        for cmd in self.cmds:
+            if type(cmd) == int:  # <b class="conum">(1)</b>
+                result += int_to_little_endian(cmd, 1)
+            else:
+                length = len(cmd)
+                if length &lt; 75:  # <b class="conum">(2)</b>
+                    result += int_to_little_endian(length, 1)
+                elif length &gt; 75 and length &lt; 0x100:  # <b class="conum">(3)</b>
+                    result += int_to_little_endian(76, 1)
+                    result += int_to_little_endian(length, 1)
+                elif length &gt;= 0x100 and length &lt;= 520:  # <b class="conum">(4)</b>
+                    result += int_to_little_endian(77, 1)
+                    result += int_to_little_endian(length, 2)
+                else:  # <b class="conum">(5)</b>
+                    raise ValueError('too long an cmd')
+                result += cmd
+        return result
+
+    def serialize(self):
+        result = self.raw_serialize()
+        total = len(result)
+        return encode_varint(total) + result  # <b class="conum">(6)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>If the command is an integer, we know that&#8217;s an opcode.</p>
+</li>
+<li>
+<p>If the length is between 1 and 75 inclusive, we encode the length as a single byte.</p>
+</li>
+<li>
+<p>For any element with length from 76 to 255, we put <code>OP_PUSHDATA1</code> first, then encode the length as a single byte, followed by the element.</p>
+</li>
+<li>
+<p>For an element with a length from 256 to 520, we put <code>OP_PUSHDATA2</code> first, then encode the length as two bytes in little endian, followed by the element.</p>
+</li>
+<li>
+<p>Any element longer than 520 bytes cannot be serialized.</p>
+</li>
+<li>
+<p>Script serialization starts with the length of the entire script.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Note that both the parser and the serializer were used in <a href="#chapter_tx_parsing">[chapter_tx_parsing]</a>, for parsing/serializing the ScriptSig and ScriptPubKey fields.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_combining_the_script_fields">Combining the Script Fields</h3>
+<div class="paragraph">
+<p>The Script object represents the command set that requires evaluation.
+To evaluate a script, we need to combine the ScriptPubKey and ScriptSig fields.
+The lockbox (ScriptPubKey) and the unlocking mechanism (ScriptSig) are in <em>different</em> transactions.
+Specifically, the lockbox is where the bitcoins are received, and the unlocking script is where the bitcoins are spent.
+The input in the spending transaction <em>points to the receiving transaction</em>.
+Essentially, we have a situation like <a href="#scriptpubkey_and_scriptsig">Combining the ScriptPubKey and ScriptSig</a>.</p>
+</div>
+<div id="scriptpubkey_and_scriptsig" class="imageblock">
+<div class="content">
+<img src="images/prbc_0606.png" alt="ScriptPubKey and ScriptSig">
+</div>
+<div class="title">Figure 6. Combining the ScriptPubKey and ScriptSig</div>
+</div>
+<div class="paragraph">
+<p>Since the ScriptSig unlocks a ScriptPubKey, we need a mechanism by which the two scripts combine.
+To evaluate the two together, we take the commands from the ScriptSig and ScriptPubKey and combine them as in <a href="#scriptpubkey_and_scriptsig">Combining the ScriptPubKey and ScriptSig</a>.
+The commands from the ScriptSig go on top of all the commands from the ScriptPubKey.
+Instructions are processed one at a time until no commands are left to be processed (or the script fails).</p>
+</div>
+<div class="sect3">
+<h4 id="_coding_the_combined_instruction_set">Coding the Combined Instruction Set</h4>
+<div class="paragraph">
+<p>The evaluation of a script requires that we take the ScriptSig and ScriptPubKey, combine them into a single command set, and execute the commands.
+To do this, we require a way to combine the scripts:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">class Script:
+...
+    def __add__(self, other):
+        return Script(self.cmds + other.cmds)  # <b class="conum">(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We are combining the command set to create a new, combined Script object.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>We will use this ability to combine scripts for evaluation later in this chapter.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_standard_scripts">Standard Scripts</h3>
+<div class="paragraph">
+<p>There are many types of standard scripts in Bitcoin, including the following:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">p2pk</dt>
+<dd>
+<p>Pay-to-pubkey</p>
+</dd>
+<dt class="hdlist1">p2pkh</dt>
+<dd>
+<p>Pay-to-pubkey-hash</p>
+</dd>
+<dt class="hdlist1">p2sh</dt>
+<dd>
+<p>Pay-to-script-hash</p>
+</dd>
+<dt class="hdlist1">p2wpkh</dt>
+<dd>
+<p>Pay-to-witness-pubkey-hash</p>
+</dd>
+<dt class="hdlist1">p2wsh</dt>
+<dd>
+<p>Pay-to-witness-script-hash</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Addresses are known script templates like these.
+Wallets know how to interpret various address types (p2pkh, p2sh, p2wpkh) and create the appropriate ScriptPubKeys.
+All of the examples here have a particular type of address format (Base58, Bech32) so wallets can pay to them.</p>
+</div>
+<div class="paragraph">
+<p>To show exactly how all this works, we&#8217;ll start with one of the original scripts, pay-to-pubkey.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_p2pk">p2pk</h3>
+<div class="paragraph">
+<p>Pay-to-pubkey (p2pk) was used largely during the early days of Bitcoin.
+Most coins thought to belong to Satoshi are in p2pk UTXOs—that is, transaction outputs whose ScriptPubKeys have the p2pk form.
+There are some limitations that we&#8217;ll discuss in <a href="#problemsp2pk">Problems with p2pk</a>, but first, let&#8217;s look at how p2pk works.</p>
+</div>
+<div class="paragraph">
+<p>Back in <a href="#chapter_elliptic_curve_cryptography">[chapter_elliptic_curve_cryptography]</a>, we learned about both ECDSA signing and verification.
+To verify an ECDSA signature, we need the message, <em>z</em>, the public key, <em>P</em>, and the signature, <em>r</em> and <em>s</em>.
+In p2pk, bitcoins are sent to a public key, and the owner of the private key can unlock or spend the bitcoins by creating a signature.
+The ScriptPubKey of a transaction puts the assigned bitcoins under the control of the private key owner.</p>
+</div>
+<div class="paragraph">
+<p>Specifying where the bitcoins go is the job of the ScriptPubKey—this is the lockbox that receives the bitcoins.
+The p2pk ScriptPubKey looks like <a href="#pay_to_pubkey_p2pk_scriptpubkey">Pay-to-pubkey (p2pk) ScriptPubKey</a>.</p>
+</div>
+<div id="pay_to_pubkey_p2pk_scriptpubkey" class="imageblock">
+<div class="content">
+<img src="images/prbc_0607.png" alt="P2PK ScriptPubKey">
+</div>
+<div class="title">Figure 7. Pay-to-pubkey (p2pk) ScriptPubKey</div>
+</div>
+<div class="paragraph">
+<p>Note the <code>OP_CHECKSIG</code>, as that will be very important.
+The ScriptSig is the part that unlocks the received bitcoins.
+The pubkey can be compressed or uncompressed, though early on in Bitcoin&#8217;s history when p2pk was more prominent, the uncompressed format was the only one being used (see <a href="#chapter_serialization">[chapter_serialization]</a>).</p>
+</div>
+<div class="paragraph">
+<p>For p2pk, the ScriptSig required to unlock the corresponding ScriptPubKey is the signature followed by a single sighash byte, as shown in <a href="#pay_to_pubkey_p2pk_scriptsig">Pay-to-pubkey (p2pk) ScriptSig</a>.</p>
+</div>
+<div id="pay_to_pubkey_p2pk_scriptsig" class="imageblock">
+<div class="content">
+<img src="images/prbc_0608.png" alt="P2PK ScriptSig">
+</div>
+<div class="title">Figure 8. Pay-to-pubkey (p2pk) ScriptSig</div>
+</div>
+<div class="paragraph">
+<p>The ScriptPubKey and ScriptSig combine to make a command set that looks like <a href="#p2pk_combined">p2pk combined</a>.</p>
+</div>
+<div id="p2pk_combined" class="imageblock">
+<div class="content">
+<img src="images/prbc_0609.png" alt="P2PK Combination">
+</div>
+<div class="title">Figure 9. p2pk combined</div>
+</div>
+<div class="paragraph">
+<p>The two columns in <a href="#p2pk_start">p2pk start</a> are Script commands and the elements stack.
+At the end of the processing, the top element of the stack must be nonzero to be considered a valid ScriptSig.
+The Script commands are processed one at a time.
+In <a href="#p2pk_start">p2pk start</a>, we start with the commands as combined in <a href="#p2pk_combined">p2pk combined</a>.</p>
+</div>
+<div id="p2pk_start" class="imageblock">
+<div class="content">
+<img src="images/prbc_0610.png" alt="P2PK Start">
+</div>
+<div class="title">Figure 10. p2pk start</div>
+</div>
+<div class="paragraph">
+<p>The first command is the signature, which is an element.
+This is data that is pushed to the stack (<a href="#pspk_step_1">p2pk step 1</a>).</p>
+</div>
+<div id="pspk_step_1" class="imageblock">
+<div class="content">
+<img src="images/prbc_0611.png" alt="P2PK Step 1">
+</div>
+<div class="title">Figure 11. p2pk step 1</div>
+</div>
+<div class="paragraph">
+<p>The second command is the pubkey, which is also an element.
+Again, this is data that is pushed to the stack (<a href="#pspk_step_2">p2pk step 2</a>).</p>
+</div>
+<div id="pspk_step_2" class="imageblock">
+<div class="content">
+<img src="images/prbc_0612.png" alt="P2PK Step 2">
+</div>
+<div class="title">Figure 12. p2pk step 2</div>
+</div>
+<div class="paragraph">
+<p><code>OP_CHECKSIG</code> consumes two stack commands (pubkey and signature) and determines if they are valid for this transaction.
+<code>OP_CHECKSIG</code> will push a 1 to the stack if the signature is valid, and a 0 if not.
+Assuming that the signature is valid for this public key, we have the situation shown in <a href="#pspk_step_3">p2pk step 3</a>.</p>
+</div>
+<div id="pspk_step_3" class="imageblock">
+<div class="content">
+<img src="images/prbc_0613.png" alt="P2PK End 1">
+</div>
+<div class="title">Figure 13. p2pk step 3</div>
+</div>
+<div class="paragraph">
+<p>We&#8217;re finished processing all the Script commands, and we&#8217;ve ended up with a single element on the stack.
+Since the top element is nonzero (1 is definitely not 0), this script is valid.</p>
+</div>
+<div class="paragraph">
+<p>If this transaction instead had an invalid signature, the result from <code>OP_CHECKSIG</code> would be 0, ending our script processing (as shown in <a href="#p2pk_end">p2pk end</a>).</p>
+</div>
+<div id="p2pk_end" class="imageblock">
+<div class="content">
+<img src="images/prbc_0614.png" alt="P2PK End 2">
+</div>
+<div class="title">Figure 14. p2pk end</div>
+</div>
+<div class="paragraph">
+<p>If the top element is 0, the combined script is invalid and a transaction with this ScriptSig in the input is invalid.</p>
+</div>
+<div class="paragraph">
+<p>The combined script will validate if the signature is valid, but fail if the signature is invalid.
+The ScriptSig will only unlock the ScriptPubKey if the signature is valid for that public key.
+In other words, only someone with knowledge of the private key can produce a valid ScriptSig.</p>
+</div>
+<div class="paragraph">
+<p>Incidentally, we can see where ScriptPubKey got its name.
+The public key in uncompressed SEC format is the main command in the ScriptPubKey for p2pk (the other command being <code>OP_CHECKSIG</code>).
+Similarly, ScriptSig is named as such because the ScriptSig for p2pk has the DER signature.</p>
+</div>
+<div class="sect3">
+<h4 id="_coding_script_evaluation">Coding Script Evaluation</h4>
+<div class="paragraph">
+<p>We&#8217;ll now code a way to evaluate scripts.
+This requires us to go through each command and evaluate whether the script is valid.
+What we want to be able to do is this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">&gt;&gt;&gt; from script import Script
+&gt;&gt;&gt; z = 0x7c076ff316692a3d7eb3c3bb0f8b1488cf72e1afcd929e29307032997a838a3d
+&gt;&gt;&gt; sec = bytes.fromhex('04887387e452b8eacc4acfde10d9aaf7f6d9a0f975aabb10d006e\
+4da568744d06c61de6d95231cd89026e286df3b6ae4a894a3378e393e93a0f45b666329a0ae34')
+&gt;&gt;&gt; sig = bytes.fromhex('3045022000eff69ef2b1bd93a66ed5219add4fb51e11a840f4048\
+76325a1e8ffe0529a2c022100c7207fee197d27c618aea621406f6bf5ef6fca38681d82b2f06fd\
+dbdce6feab601')
+&gt;&gt;&gt; script_pubkey = Script([sec, 0xac])  # <b class="conum">(1)</b>
+&gt;&gt;&gt; script_sig = Script([sig])
+&gt;&gt;&gt; combined_script = script_sig + script_pubkey  # <b class="conum">(2)</b>
+&gt;&gt;&gt; print(combined_script.evaluate(z))  # <b class="conum">(3)</b>
+True</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>The p2pk ScriptPubkey is the SEC format pubkey followed by <code>OP_CHECKSIG</code>, which is <code>0xac</code> or 172.</p>
+</li>
+<li>
+<p>We can do this because of the <code><em>add</em></code> method we just created.</p>
+</li>
+<li>
+<p>We want to evaluate the commands and see if the script validates.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Here is the method that we&#8217;ll use for the <em>combined</em> command set (combination of the ScriptPubKey of the previous transaction and the ScriptSig of the current <span class="keep-together">transaction</span>):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from op import OP_CODE_FUNCTIONS, OP_CODE_NAMES
+...
+class Script:
+...
+    def evaluate(self, z):
+        cmds = self.cmds[:]  # <b class="conum">(1)</b>
+        stack = []
+        altstack = []
+        while len(cmds) &gt; 0:  # <b class="conum">(2)</b>
+            cmd = cmds.pop(0)
+            if type(cmd) == int:
+                operation = OP_CODE_FUNCTIONS[cmd]  # <b class="conum">(3)</b>
+                if cmd in (99, 100):  # <b class="conum">(4)</b>
+                    if not operation(stack, cmds):
+                        LOGGER.info('bad op: {}'.format(OP_CODE_NAMES[cmd]))
+                        return False
+                elif cmd in (107, 108):  # <b class="conum">(5)</b>
+                    if not operation(stack, altstack):
+                        LOGGER.info('bad op: {}'.format(OP_CODE_NAMES[cmd]))
+                        return False
+                elif cmd in (172, 173, 174, 175):  # <b class="conum">(6)</b>
+                    if not operation(stack, z):
+                        LOGGER.info('bad op: {}'.format(OP_CODE_NAMES[cmd]))
+                        return False
+                else:
+                    if not operation(stack):
+                        LOGGER.info('bad op: {}'.format(OP_CODE_NAMES[cmd]))
+                        return False
+            else:
+                stack.append(cmd)  # <b class="conum">(7)</b>
+        if len(stack) == 0:
+            return False  # <b class="conum">(8)</b>
+        if stack.pop() == b'':
+            return False  # <b class="conum">(9)</b>
+        return True  # <b class="conum">(10)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>As the commands list will change, we make a copy.</p>
+</li>
+<li>
+<p>We execute until the commands list is empty.</p>
+</li>
+<li>
+<p>The function that executes the opcode is in the <code>OP_CODE_FUNCTIONS</code> array (e.g.,
+<code>OP_DUP</code>, <code>OP_CHECKSIG</code>, etc.).</p>
+</li>
+<li>
+<p>99 and 100 are <code>OP_IF</code> and <code>OP_NOTIF</code>, respectively.
+They require manipulation of the <code>cmds</code> array based on the top element of the stack.</p>
+</li>
+<li>
+<p>107 and 108 are <code>OP_TOALTSTACK</code> and <code>OP_FROMALTSTACK</code>, respectively.
+They move stack elements to/from an "alternate" stack, which we call <code>altstack</code>.</p>
+</li>
+<li>
+<p>172, 173, 174, and 175 are <code>OP_CHECKSIG</code>, <code>OP_CHECKSIGVERIFY</code>, <code>OP_CHECKMULTISIG</code>, and <code>OP_CHECKMULTISIGVERIFY</code>, which all require the signature hash, <code>z</code>, from <a href="#chapter_elliptic_curve_cryptography">[chapter_elliptic_curve_cryptography]</a> for signature validation.</p>
+</li>
+<li>
+<p>If the command is not an opcode, it&#8217;s an element, so we push that element to the stack.</p>
+</li>
+<li>
+<p>If the stack is empty at the end of processing all the commands, we fail the script by returning <code>False</code>.</p>
+</li>
+<li>
+<p>If the stack&#8217;s top element is an empty byte string (which is how the stack stores a 0), then we also fail the script by returning <code>False</code>.</p>
+</li>
+<li>
+<p>Any other result means that the script has validated.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+<div class="title">Making Script Evaluation Safe</div>
+<div class="paragraph">
+<p>The code shown here is a little bit of a cheat, as the combined script is not exactly executed this way.
+The ScriptSig is evaluated separately from the ScriptPubKey so as to not allow operations from the ScriptSig to affect the ScriptPubKey commands.</p>
+</div>
+<div class="paragraph">
+<p>Specifically, the stack after all the ScriptSig commands are evaluated is stored, and then the ScriptPubkey commands are evaluated on their own with the stack from the first execution.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_stack_elements_under_the_hood">Stack Elements Under the Hood</h4>
+<div class="paragraph">
+<p>It may be confusing that the stack elements are sometimes numbers like 0 or 1 and other times byte strings like a DER signature or SEC pubkey.
+Under the hood, they&#8217;re all bytes, but some are interpreted as numbers for certain opcodes.
+For example, 1 is stored on the stack as the <code>01</code> byte, 2 is stored as the <code>02</code> byte, 999 as the <code>e703</code> byte, and so on.
+Any byte string is interpreted as a little-endian number for arithmetic opcodes.
+The integer 0 is <em>not</em> stored as the <code>00</code> byte, but as the empty byte string.</p>
+</div>
+<div class="paragraph">
+<p>The code in <em>op.py</em> can clarify what&#8217;s going on:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">def encode_num(num):
+    if num == 0:
+        return b''
+    abs_num = abs(num)
+    negative = num &lt; 0
+    result = bytearray()
+    while abs_num:
+        result.append(abs_num &amp; 0xff)
+        abs_num &gt;&gt;= 8
+    if result[-1] &amp; 0x80:
+        if negative:
+            result.append(0x80)
+        else:
+            result.append(0)
+    elif negative:
+        result[-1] |= 0x80
+    return bytes(result)
+
+
+def decode_num(element):
+    if element == b'':
+        return 0
+    big_endian = element[::-1]
+    if big_endian[0] &amp; 0x80:
+        negative = True
+        result = big_endian[0] &amp; 0x7f
+    else:
+        negative = False
+        result = big_endian[0]
+    for c in big_endian[1:]:
+        result &lt;&lt;= 8
+        result += c
+    if negative:
+        return -result
+    else:
+        return result
+
+
+def op_0(stack):
+    stack.append(encode_num(0))
+    return True</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Numbers being pushed to the stack are encoded into bytes and decoded from bytes when the numerical value is needed.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_exercise_2">Exercise 2</h4>
+<div class="paragraph">
+<p>Write the <code>op_checksig</code> function in <em>op.py</em>.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="problemsp2pk">Problems with p2pk</h3>
+<div class="paragraph">
+<p>Pay-to-pubkey is intuitive in the sense that there is a public key that anyone can send bitcoins to and a signature that can only be produced by the owner of the private key.
+This works well, but there are some problems.</p>
+</div>
+<div class="paragraph">
+<p>First, the public keys are long.
+We know from <a href="#chapter_serialization">[chapter_serialization]</a> that secp256k1 public points are 33 bytes in compressed SEC and 65 bytes in uncompressed SEC format.
+Unfortunately, humans can&#8217;t interpret 33 or 65 raw bytes easily.
+Most character encodings don&#8217;t render certain byte ranges, as they are control characters, newlines, or similar.
+The SEC format is typically encoded instead in hexadecimal, doubling the length (hex encodes 4 bits per character instead of 8).
+This makes the compressed and uncompressed SEC formats 66 and 130 characters, respectively, which is bigger than most identifiers (your username on a website, for instance, is usually less than 20 characters).
+To compound this, early Bitcoin transactions didn&#8217;t use the compressed versions, so the hexadecimal addresses were 130 characters each!
+This is not fun or easy for people to transcribe, much less communicate by voice.</p>
+</div>
+<div class="paragraph">
+<p>That said, the original use cases for p2pk were for IP-to-IP payments and mining outputs.
+For IP-to-IP payments, IP addresses were queried for their public keys; communicating the public keys was done machine-to-machine, which meant that human communication wasn&#8217;t necessarily a problem.
+Use for mining outputs also doesn&#8217;t require human communication.
+Incidentally, this IP-to-IP payment system was phased out because it&#8217;s not secure and prone to man-in-the-middle attacks.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Why Did Satoshi Use the Uncompressed SEC Format?</div>
+<div class="paragraph">
+<p>It seems the uncompressed SEC format doesn&#8217;t make sense for Bitcoin given that block space is at a premium. So why did Satoshi use it?
+Satoshi was using the OpenSSL library to do the SEC format conversions, and the OpenSSL library at the time Satoshi wrote Bitcoin (circa 2008) did not document the compressed format very well.
+It&#8217;s speculated this is why Satoshi used the uncompressed SEC format.</p>
+</div>
+<div class="paragraph">
+<p>When Pieter Wuille discovered that the compressed SEC format existed in OpenSSL, more people started using the compressed SEC format in Bitcoin.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Second, the length of the public keys causes a subtler problem: because they have to be kept around and indexed to see if the outputs are spendable, the UTXO set becomes bigger.
+This requires more resources on the part of full nodes.</p>
+</div>
+<div class="paragraph">
+<p>Third, because we&#8217;re storing the public keys in the ScriptPubKey field, they&#8217;re known to everyone.
+That means should ECDSA someday be broken, these outputs could be stolen. For example, quantum computing has the potential to reduce the calculation times significantly for RSA and ECDSA, so having something else in addition to protect these outputs would be more secure. However, this is not a very big threat since ECDSA is used in a lot of applications besides Bitcoin and breaking it would affect all of those things, too.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_solving_the_problems_with_p2pkh">Solving the Problems with p2pkh</h3>
+<div class="paragraph">
+<p>Pay-to-pubkey-hash (p2pkh) is an alternative script format that has two key advantages over p2pk:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>The addresses are shorter.</p>
+</li>
+<li>
+<p>It&#8217;s additionally protected by sha256 and ripemd160.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The addresses are shorter because it uses the sha256 and ripemd160 hashing algorithms.
+We do both in succession and call that hash160.
+The result of hash160 is 160 bits or 20 bytes, which are encoded into an address.</p>
+</div>
+<div class="paragraph">
+<p>The result is what you may have seen on the Bitcoin network and coded in <a href="#chapter_serialization">[chapter_serialization]</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>1PMycacnJaSqwwJqjawXBErnLsZ7RkXUAs</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This address encodes within 20 bytes that look like this in hexadecimal:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>f54a5851e9372b87810a8e60cdd2e7cfd80b6e31</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>These 20 bytes are the result of doing a hash160 operation on this (compressed) SEC public key:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>0250863ad64a87ae8a2fe83c1af1a8403cb53f53e486d8511dad8a04887e5b2352</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Given that p2pkh is shorter and more secure, p2pk use declined significantly after 2010, though it&#8217;s still fully supported today.</p>
+</div>
+<div class="sect3">
+<h4 id="_p2pkh">p2pkh</h4>
+<div class="paragraph">
+<p>Pay-to-pubkey-hash was used during the early days of Bitcoin, though not as much as p2pk.</p>
+</div>
+<div class="paragraph">
+<p>The p2pkh ScriptPubKey, or locking script, looks like <a href="#pay_to_pubkey_hash_p2pkh_scriptpubkey">Pay-to-pubkey-hash (p2pkh) ScriptPubKey</a>.</p>
+</div>
+<div id="pay_to_pubkey_hash_p2pkh_scriptpubkey" class="imageblock">
+<div class="content">
+<img src="images/prbc_0615.png" alt="P2PKH ScriptPubKey">
+</div>
+<div class="title">Figure 15. Pay-to-pubkey-hash (p2pkh) ScriptPubKey</div>
+</div>
+<div class="paragraph">
+<p>Like p2pk, <code>OP_CHECKSIG</code> is here and <code>OP_HASH160</code> makes an appearance.
+Unlike p2pk, the SEC pubkey is not here, but a 20-byte hash is.
+There is also a new opcode here: <code>OP_EQUALVERIFY</code>.</p>
+</div>
+<div class="paragraph">
+<p>The p2pkh ScriptSig, or unlocking script, looks like <a href="#pay_to_pubkey_hash_p2pkh_scriptsig">Pay-to-pubkey-hash (p2pkh) ScriptSig</a>.</p>
+</div>
+<div id="pay_to_pubkey_hash_p2pkh_scriptsig" class="imageblock">
+<div class="content">
+<img src="images/prbc_0616.png" alt="P2PKH ScriptSig">
+</div>
+<div class="title">Figure 16. Pay-to-pubkey-hash (p2pkh) ScriptSig</div>
+</div>
+<div class="paragraph">
+<p>Like p2pk, the ScriptSig has the DER signature.
+Unlike p2pk, the ScriptSig also has the SEC pubkey.
+The main difference between p2pk and p2pkh ScriptSigs is that the SEC pubkey has moved from the ScriptPubKey to the ScriptSig.</p>
+</div>
+<div class="paragraph">
+<p>The ScriptPubKey and ScriptSig combine to form a list of commands that looks like <a href="#p2pkh_combined">p2pkh combined</a>.</p>
+</div>
+<div id="p2pkh_combined" class="imageblock">
+<div class="content">
+<img src="images/prbc_0617.png" alt="P2PKH Combination">
+</div>
+<div class="title">Figure 17. p2pkh combined</div>
+</div>
+<div class="paragraph">
+<p>At this point, the script is processed one command at a time.
+We start with the commands as combined in <a href="#p2pkh_start">p2pkh start</a>.</p>
+</div>
+<div id="p2pkh_start" class="imageblock">
+<div class="content">
+<img src="images/prbc_0618.png" alt="P2PKH Start">
+</div>
+<div class="title">Figure 18. p2pkh start</div>
+</div>
+<div class="paragraph">
+<p>The first two commands are elements, so they are pushed to the stack (<a href="#p2pkh_step_1">p2pkh step 1</a>).</p>
+</div>
+<div id="p2pkh_step_1" class="imageblock">
+<div class="content">
+<img src="images/prbc_0619.png" alt="P2PKH Step 1">
+</div>
+<div class="title">Figure 19. p2pkh step 1</div>
+</div>
+<div class="paragraph">
+<p><code>OP_DUP</code> duplicates the top element, so the pubkey gets duplicated (<a href="#p2pkh_step_2">p2pkh step 2</a>).</p>
+</div>
+<div id="p2pkh_step_2" class="imageblock">
+<div class="content">
+<img src="images/prbc_0620.png" alt="P2PKH Step 2">
+</div>
+<div class="title">Figure 20. p2pkh step 2</div>
+</div>
+<div class="paragraph">
+<p><code>OP_HASH160</code> takes the top element and performs the hash160 operation on it (sha256 followed by ripemd160), creating a 20-byte hash (<a href="#p2pkh_step_3">p2pkh step 3</a>).</p>
+</div>
+<div id="p2pkh_step_3" class="imageblock">
+<div class="content">
+<img src="images/prbc_0621.png" alt="P2PKH Step 3">
+</div>
+<div class="title">Figure 21. p2pkh step 3</div>
+</div>
+<div class="paragraph">
+<p>The 20-byte hash is an element and is pushed to the stack (<a href="#p2pkh_step_4">p2pkh step 4</a>).</p>
+</div>
+<div id="p2pkh_step_4" class="imageblock">
+<div class="content">
+<img src="images/prbc_0622.png" alt="P2PKH Step 4">
+</div>
+<div class="title">Figure 22. p2pkh step 4</div>
+</div>
+<div class="paragraph">
+<p>We are now at <code>OP_EQUALVERIFY</code>.
+This opcode consumes the top two elements and checks if they&#8217;re equal.
+If they are equal, the script continues execution.
+If they are not equal, the script stops immediately and fails.
+We assume here that they&#8217;re equal, leading to <a href="#p2pkh_step_5">p2pkh step 5</a>.</p>
+</div>
+<div id="p2pkh_step_5" class="imageblock">
+<div class="content">
+<img src="images/prbc_0623.png" alt="P2PKH Step 5">
+</div>
+<div class="title">Figure 23. p2pkh step 5</div>
+</div>
+<div class="paragraph">
+<p>We are now exactly where we were during the <code>OP_CHECKSIG</code> part of processing p2pk.
+Once again, we assume that the signature is valid (<a href="#p2pkh_end">p2pkh end</a>).</p>
+</div>
+<div id="p2pkh_end" class="imageblock">
+<div class="content">
+<img src="images/prbc_0624.png" alt="P2PKH End">
+</div>
+<div class="title">Figure 24. p2pkh end</div>
+</div>
+<div class="paragraph">
+<p>There are two ways this script can fail.
+If the ScriptSig provides a public key that does not hash160 to the 20-byte hash in the ScriptPubKey, the script will fail at <code>OP_EQUALVERIFY</code> (<a href="#p2pkh_step_4">p2pkh step 4</a>).
+The other failure condition is if the ScriptSig has a public key that hash160s to the 20-byte hash in the ScriptPubKey, but has an invalid signature.
+That would end the combined script evaluation with a 0, ending in failure.</p>
+</div>
+<div class="paragraph">
+<p>This is why we call this type of script pay-to-pubkey-<em>hash</em>.
+The ScriptPubKey has the 20-byte <em>hash160</em> of the public key and not the public key itself.
+We are locking bitcoins to a <em>hash</em> of the public key, and the spender is responsible for revealing the public key as part of constructing the ScriptSig.</p>
+</div>
+<div class="paragraph">
+<p>The major advantages are that the ScriptPubKey is shorter (just 25 bytes) and a thief would not only have to solve the discrete log problem in ECDSA, but also figure out a way to find preimages of both ripemd160 and sha256.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_scripts_can_be_arbitrarily_constructed">Scripts Can Be Arbitrarily Constructed</h3>
+<div class="paragraph">
+<p>Note that a script can be any arbitrary program.
+Script is a smart contract language and can lock bitcoins in many different ways.
+<a href="#example_scriptpubkey">Example ScriptPubKey</a> is an example ScriptPubKey.</p>
+</div>
+<div id="example_scriptpubkey" class="imageblock">
+<div class="content">
+<img src="images/prbc_0625.png" alt="Example 1 ScriptPubKey">
+</div>
+<div class="title">Figure 25. Example ScriptPubKey</div>
+</div>
+<div class="paragraph">
+<p><a href="#example_scriptsig">Example ScriptSig</a> is a ScriptSig that will unlock the the ScriptPubKey from <a href="#example_scriptpubkey">Example ScriptPubKey</a>.</p>
+</div>
+<div id="example_scriptsig" class="imageblock">
+<div class="content">
+<img src="images/prbc_0626.png" alt="Example 1 ScriptSig">
+</div>
+<div class="title">Figure 26. Example ScriptSig</div>
+</div>
+<div class="paragraph">
+<p>The combined script is shown in <a href="#example_combined">Example combined</a>.</p>
+</div>
+<div id="example_combined" class="imageblock">
+<div class="content">
+<img src="images/prbc_0627.png" alt="Example 1 Combination">
+</div>
+<div class="title">Figure 27. Example combined</div>
+</div>
+<div class="paragraph">
+<p>Script evaluation will start as shown in <a href="#example_start">Example start</a>.</p>
+</div>
+<div id="example_start" class="imageblock">
+<div class="content">
+<img src="images/prbc_0628.png" alt="Example 1 Start">
+</div>
+<div class="title">Figure 28. Example start</div>
+</div>
+<div class="paragraph">
+<p><code>OP_4</code> will push a 4 to the stack (<a href="#example_step_1">Example step 1</a>).</p>
+</div>
+<div id="example_step_1" class="imageblock">
+<div class="content">
+<img src="images/prbc_0629.png" alt="Example 1 Step 1">
+</div>
+<div class="title">Figure 29. Example step 1</div>
+</div>
+<div class="paragraph">
+<p><code>OP_5</code> will likewise push a 5 to the stack (<a href="#example_step_2">Example step 2</a>).</p>
+</div>
+<div id="example_step_2" class="imageblock">
+<div class="content">
+<img src="images/prbc_0630.png" alt="Example 1 Step 2">
+</div>
+<div class="title">Figure 30. Example step 2</div>
+</div>
+<div class="paragraph">
+<p><code>OP_ADD</code> will consume the top two elements of the stack, add them together, and push the sum to the stack (<a href="#example_step_3">Example step 3</a>).</p>
+</div>
+<div id="example_step_3" class="imageblock">
+<div class="content">
+<img src="images/prbc_0631.png" alt="Example 1 Step 3">
+</div>
+<div class="title">Figure 31. Example step 3</div>
+</div>
+<div class="paragraph">
+<p><code>OP_9</code> will push a 9 to the stack (<a href="#example_step_4">Example step 4</a>).</p>
+</div>
+<div id="example_step_4" class="imageblock">
+<div class="content">
+<img src="images/prbc_0632.png" alt="Example 1 Step 4">
+</div>
+<div class="title">Figure 32. Example step 4</div>
+</div>
+<div class="paragraph">
+<p><code>OP_EQUAL</code> will consume two elements and push a 1 if they&#8217;re equal and a 0 if not (<a href="#example_end">Example end</a>).</p>
+</div>
+<div id="example_end" class="imageblock">
+<div class="content">
+<img src="images/prbc_0633.png" alt="Example 1 End">
+</div>
+<div class="title">Figure 33. Example end</div>
+</div>
+<div class="paragraph">
+<p>Note that the ScriptSig here isn&#8217;t particularly hard to figure out and contains no signature.
+As a result, the ScriptPubKey is vulnerable to being taken by anyone who can solve it.
+Think of this ScriptPubKey as a lockbox with a very flimsy lock that anyone can break into.
+It is for this reason that most transactions have a signature requirement in the ScriptSig.</p>
+</div>
+<div class="paragraph">
+<p>Once a UTXO has been spent, included in a block, and secured by proof-of-work, the coins are locked to a different ScriptPubKey and no longer as easily spendable.
+Someone attempting to spend already spent coins would have to provide proof-of-work, which is expensive (see <a href="#chapter_blocks">[chapter_blocks]</a>).</p>
+</div>
+<div class="sect3">
+<h4 id="_exercise_3">Exercise 3</h4>
+<div class="paragraph">
+<p>Create a ScriptSig that can unlock this ScriptPubKey:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>767695935687</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that <code>OP_MUL</code> multiplies the top two elements of the stack.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>56 = OP_6</code></p>
+</li>
+<li>
+<p><code>76 = OP_DUP</code></p>
+</li>
+<li>
+<p><code>87 = OP_EQUAL</code></p>
+</li>
+<li>
+<p><code>93 = OP_ADD</code></p>
+</li>
+<li>
+<p><code>95 = OP_MUL</code></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_utility_of_scripts">Utility of Scripts</h4>
+<div class="paragraph">
+<p>The previous exercise was a bit of a cheat, as <code>OP_MUL</code> is no longer allowed on the Bitcoin network.
+Version 0.3.5 of Bitcoin disabled a lot of different opcodes (anything that had even a little bit of potential to create vulnerabilities on the network).</p>
+</div>
+<div class="paragraph">
+<p>This is just as well, since most of the functionality in Script is actually not used much.
+From a software maintenance standpoint, this is not a great situation as the code has to be maintained despite its lack of usage.
+Simplifying and getting rid of certain capabilities can be seen as a way to make Bitcoin more secure.</p>
+</div>
+<div class="paragraph">
+<p>This is in stark contrast to other projects, which try to expand their smart contract languages, often increasing the attack surface along with new features.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_exercise_4">Exercise 4</h4>
+<div class="paragraph">
+<p>Figure out what this script is doing:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>6e879169a77ca787</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>69 = OP_VERIFY</code></p>
+</li>
+<li>
+<p><code>6e = OP_2DUP</code></p>
+</li>
+<li>
+<p><code>7c = OP_SWAP</code></p>
+</li>
+<li>
+<p><code>87 = OP_EQUAL</code></p>
+</li>
+<li>
+<p><code>91 = OP_NOT</code></p>
+</li>
+<li>
+<p><code>a7 = OP_SHA1</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Use the <code>Script.parse</code> method and look up what various opcodes do at <a href="https://en.bitcoin.it/wiki/Script" class="bare">https://en.bitcoin.it/wiki/Script</a>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_sha_1_piñata">SHA-1 Piñata</h4>
+<div class="paragraph">
+<p>In 2013, Peter Todd created a script very similar to the one in Exercise 4 and put some bitcoins into it to create an economic incentive for people to find hash collisions.
+The donations reached 2.49153717 BTC, and when Google actually found a <a href="https://security.googleblog.com/2017/02/announcing-first-sha1-collision.html">hash collision for SHA-1 in February 2017</a>, this script was promptly redeemed.
+The transaction output was 2.48 BTC, which was 2,848.88 USD at the time.</p>
+</div>
+<div class="paragraph">
+<p>Peter created more piñatas for sha256, hash256, and hash160, which add economic incentives to find collisions for these hashing functions.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_conclusion">Conclusion</h3>
+<div class="paragraph">
+<p>We&#8217;ve covered Script and how it works.
+We can now proceed to the creation and validation of transactions.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2019-06-19 11:10:39 -0400
+</div>
+</div>
+</body>
+</html>

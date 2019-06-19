@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.9">
+<title>Elliptic Curve Cryptography</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment @import statement to use as custom stylesheet */
+/*@import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700";*/
+article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section{display:block}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+abbr[title]{border-bottom:1px dotted}
+b,strong{font-weight:bold}
+dfn{font-style:italic}
+hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type="button"],input[type="reset"],input[type="submit"]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type="checkbox"],input[type="radio"]{box-sizing:border-box;padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,*::before,*::after{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;font-weight:400;font-style:normal;line-height:1;position:relative;cursor:auto;tab-size:4;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0;direction:ltr}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{font-family:inherit;font-weight:400;font-size:1em;line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em;height:0}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{font-size:1em;line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0;font-size:1em}
+ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
+ul.square{list-style-type:square}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+abbr,acronym{text-transform:uppercase;font-size:90%;color:rgba(0,0,0,.8);border-bottom:1px dotted #ddd;cursor:help}
+abbr{text-transform:none}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote cite{display:block;font-size:.9375em;color:rgba(0,0,0,.6)}
+blockquote cite::before{content:"\2014 \0020"}
+blockquote cite a,blockquote cite a:visited{color:rgba(0,0,0,.6)}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:solid 1px #dedede}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{display:table-cell;line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;-webkit-border-radius:4px;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed;word-wrap:break-word}
+:not(pre)>code.nobreak{word-wrap:normal}
+:not(pre)>code.nowrap{white-space:nowrap}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;-webkit-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em white inset;box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em #fff inset;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin-left:auto;margin-right:auto;margin-top:0;margin-bottom:0;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:-ms-flexbox;display:-webkit-flex;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border-style:solid;border-width:1px;border-color:#e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;-webkit-border-radius:4px;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:100%;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:rgba(255,255,255,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details>summary:first-of-type{cursor:pointer;display:list-item;outline:none;margin-bottom:.75em}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+table.tableblock #preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:inherit}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6)}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border-style:solid;border-width:1px;border-color:#e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;-webkit-border-radius:4px;border-radius:4px}
+.exampleblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child{margin-bottom:0}
+.sidebarblock{border-style:solid;border-width:1px;border-color:#dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;-webkit-border-radius:4px;border-radius:4px}
+.sidebarblock>:first-child{margin-top:0}
+.sidebarblock>:last-child{margin-bottom:0}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{-webkit-border-radius:4px;border-radius:4px;word-wrap:break-word;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class="highlight"],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;-webkit-border-radius:4px;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos{border-right:1px solid currentColor;opacity:.35;padding-right:.5em}
+pre.pygments .lineno{border-right:1px solid currentColor;opacity:.35;display:inline-block;margin-right:.75em}
+pre.pygments .lineno::before{content:"";margin-right:-.125em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin:0 0 1.25em;padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;text-align:left;margin-right:0}
+table.tableblock{max-width:100%;border-collapse:separate}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+td.tableblock>.content>:last-child.sidebarblock{margin-bottom:0}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>thead>tr>.tableblock,table.grid-all>tbody>tr>.tableblock{border-width:0 1px 1px 0}
+table.grid-all>tfoot>tr>.tableblock{border-width:1px 1px 0 0}
+table.grid-cols>*>tr>.tableblock{border-width:0 1px 0 0}
+table.grid-rows>thead>tr>.tableblock,table.grid-rows>tbody>tr>.tableblock{border-width:0 0 1px}
+table.grid-rows>tfoot>tr>.tableblock{border-width:1px 0 0}
+table.grid-all>*>tr>.tableblock:last-child,table.grid-cols>*>tr>.tableblock:last-child{border-right-width:0}
+table.grid-all>tbody>tr:last-child>.tableblock,table.grid-all>thead:last-child>tr>.tableblock,table.grid-rows>tbody>tr:last-child>.tableblock,table.grid-rows>thead:last-child>tr>.tableblock{border-bottom-width:0}
+table.frame-all{border-width:1px}
+table.frame-sides{border-width:0 1px}
+table.frame-topbot,table.frame-ends{border-width:1px 0}
+table.stripes-all tr,table.stripes-odd tr:nth-of-type(odd),table.stripes-even tr:nth-of-type(even),table.stripes-hover tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{display:table-cell;line-height:1.6;background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+ul.checklist{margin-left:.625em}
+ul.checklist li>p:first-child>.fa-square-o:first-child,ul.checklist li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist li>p:first-child>input[type="checkbox"]:first-child{margin-right:.25em}
+ul.inline{display:-ms-flexbox;display:-webkit-box;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:solid 4px #fff;-webkit-box-shadow:0 0 0 1px #ddd;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+.gist .file-data>table{border:0;background:#fff;width:100%;margin-bottom:0}
+.gist .file-data>table td.line-data{width:99%}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);-webkit-border-radius:100px;border-radius:100px;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,span.alt{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;-webkit-box-shadow:0 1px 4px #e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{-webkit-box-shadow:none!important;box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media print,amzn-kf8{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+</head>
+<body class="article">
+<div id="header">
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="chapter_elliptic_curve_cryptography">Elliptic Curve Cryptography</h2>
+<div class="sectionbody">
+<div class="paragraph lead">
+<p>The previous two chapters covered some fundamental math.
+We learned how finite fields work and what an elliptic curve is.
+In this chapter, we&#8217;re going to combine the two concepts to learn elliptic curve cryptography.
+Specifically, we&#8217;re going to build the primitives needed to sign and verify messages, which is at the heart of what Bitcoin does.</p>
+</div>
+<div class="sect2">
+<h3 id="_elliptic_curves_over_reals">Elliptic Curves over Reals</h3>
+<div class="paragraph">
+<p>We discussed in <a href="#chapter_elliptic_curves">[chapter_elliptic_curves]</a> what an elliptic curve looks like visually because we were plotting the curve over <em>real</em> numbers.
+Specifically, it&#8217;s not just integers or even rational numbers, but all real numbers.
+Pi, <em>sqrt</em>(2), <em>e</em>+7th root of 19, and the like are all real numbers.</p>
+</div>
+<div class="paragraph">
+<p>This worked because real numbers are also a field.
+Unlike a <em>finite</em> field, there are an <em>infinite</em> number of real numbers, but otherwise the same properties hold:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>If <em>a</em> and <em>b</em> are in the set, <em>a</em> + <em>b</em> and <em>a</em> ⋅ <em>b</em> are in the set.</p>
+</li>
+<li>
+<p>0 exists and has the property <em>a</em> + 0 = <em>a</em>.</p>
+</li>
+<li>
+<p>1 exists and has the property <em>a</em> ⋅ 1 = <em>a</em>.</p>
+</li>
+<li>
+<p>If <em>a</em> is in the set, <em>–a</em> is in the set, which is defined as the value that makes <em>a</em> + (–<em>a</em>) = 0.</p>
+</li>
+<li>
+<p>If <em>a</em> is in the set and is not 0, <em>a</em><sup>–1</sup> is in the set, which is defined as the value that makes <em>a</em> ⋅ <em>a</em><sup>–1</sup> = 1.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Clearly, all of these are true: normal addition and multiplication apply for the first part, the additive and multiplicative identities 0 and 1 exist, –<em>x</em> is the additive inverse, and 1/<em>x</em> is the multiplicative inverse.</p>
+</div>
+<div class="paragraph">
+<p>Real numbers are easy to plot on a graph.
+For example, <em>y</em><sup>2</sup> = <em>x</em><sup>3</sup> + 7 can be plotted like <a href="#secp256k1_over_real_numbers">secp256k1 over real numbers</a>.</p>
+</div>
+<div id="secp256k1_over_real_numbers" class="imageblock">
+<div class="content">
+<img src="images/prbc_0209.png" alt="secp256k1 Curve">
+</div>
+<div class="title">Figure 1. secp256k1 over real numbers</div>
+</div>
+<div class="paragraph">
+<p>It turns out we can use the point addition equations over any field, including the finite fields we learned about in <a href="#chapter_finite_fields">[chapter_finite_fields]</a>.
+The only difference is that we have to use the addition/subtraction/multiplication/division as defined in <a href="#chapter_finite_fields">[chapter_finite_fields]</a>, not the "normal" versions that the real numbers use.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_elliptic_curves_over_finite_fields">Elliptic Curves over Finite Fields</h3>
+<div class="paragraph">
+<p>So what does an elliptic curve over a finite field look like?
+Let&#8217;s look at the equation <em>y</em><sup>2</sup> = <em>x</em><sup>3</sup> + 7 over <em>F</em><sub>103</sub>.
+We can verify that the point (17,64) is on the curve by calculating both sides of the equation:</p>
+</div>
+<ul class="simplelist">
+<li><em>y</em><sup>2</sup> = 64<sup>2</sup> % 103 = 79</li>
+<li><em>x</em><sup>3</sup> + 7 = (17<sup>3</sup>+7) % 103 = 79</li>
+</ul>
+<div class="paragraph">
+<p>We&#8217;ve verified that the point is on the curve using finite field math.</p>
+</div>
+<div class="paragraph pagebreak-before">
+<p>Because we&#8217;re evaluating the equation over a finite field, the plot of the equation looks vastly different (<a href="#elliptic_curve_over_a_finite_field">Elliptic curve over a finite field</a>).</p>
+</div>
+<div id="elliptic_curve_over_a_finite_field" class="imageblock">
+<div class="content">
+<img src="images/prbc_0302.png" alt="Elliptic curve over a finite field">
+</div>
+<div class="title">Figure 2. Elliptic curve over a finite field</div>
+</div>
+<div class="paragraph">
+<p>As you can see, it&#8217;s very much a scattershot of points and there&#8217;s no smooth curve here.
+This is not surprising since the points are discrete.
+About the only pattern is that the curve is symmetric right around the middle, because of the <em>y</em><sup>2</sup> term.
+The graph is not symmetric over the x-axis as in the curve over reals, but about halfway up the y-axis due to there not being negative numbers in a finite field.</p>
+</div>
+<div class="paragraph">
+<p>What&#8217;s amazing is that we can use the same point addition equations with the addition, subtraction, multiplication, division, and exponentiation as we defined them for finite fields, and everything still works.
+This may seem surprising, but abstract math has regularities like this despite being different from the traditional modes of calculation you may be familiar with.</p>
+</div>
+<div class="sect3">
+<h4 id="_exercise_1">Exercise 1</h4>
+<div class="paragraph">
+<p>Evaluate whether these points are on the curve <em>y</em><sup>2</sup> = <em>x</em><sup>3</sup> + 7 over <em>F</em><sub>223</sub>:</p>
+</div>
+<ul class="simplelist">
+<li>(192,105), (17,56), (200,119), (1,193), (42,99)</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_coding_elliptic_curves_over_finite_fields">Coding Elliptic Curves over Finite Fields</h3>
+<div class="paragraph">
+<p>Because we defined an elliptic curve point and defined the <code>+</code>, <code>-</code> ,<code>*</code> and <code>/</code> operators for finite fields, we can combine the two classes to create elliptic curve points over a finite field:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">&gt;&gt;&gt; from ecc import FieldElement, Point
+&gt;&gt;&gt; a = FieldElement(num=0, prime=223)
+&gt;&gt;&gt; b = FieldElement(num=7, prime=223)
+&gt;&gt;&gt; x = FieldElement(num=192, prime=223)
+&gt;&gt;&gt; y = FieldElement(num=105, prime=223)
+&gt;&gt;&gt; p1 = Point(x, y, a, b)
+&gt;&gt;&gt; print(p1)
+Point(192,105)_0_7 FieldElement(223)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When initializing <code>Point</code>, we will run through this part of the code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">class Point:
+
+    def __init__(self, x, y, a, b):
+        self.a = a
+        self.b = b
+        self.x = x
+        self.y = y
+        if self.x is None and self.y is None:
+            return
+        if self.y**2 != self.x**3 + a * x + b:
+            raise ValueError('({}, {}) is not on the curve'.format(x, y))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The addition (<code>+</code>), multiplication (<code><strong></code>), exponentiation (<code></strong>*</code>), and not equals (<code>!=</code>) operators here use the <code><em>add</em></code>, <code><em>mul</em></code>, <code><em>pow</em></code>, and <code><em>ne</em></code> methods from <code>FiniteField</code>, respectively, and <em>not</em> the integer equivalents.
+Being able to do the same equation but with different definitions for the basic arithmetic operators is how we construct an elliptic curve cryptography library.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;ve already coded the two classes that we need to implement elliptic curve points over a finite field.
+However, to check our work, it will be useful to create a test suite.
+We will do this using the results of Exercise 1:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">class ECCTest(TestCase):
+
+    def test_on_curve(self):
+        prime = 223
+        a = FieldElement(0, prime)
+        b = FieldElement(7, prime)
+        valid_points = ((192, 105), (17, 56), (1, 193))
+        invalid_points = ((200, 119), (42, 99))
+        for x_raw, y_raw in valid_points:
+            x = FieldElement(x_raw, prime)
+            y = FieldElement(y_raw, prime)
+            Point(x, y, a, b)  # <b class="conum">(1)</b>
+        for x_raw, y_raw in invalid_points:
+            x = FieldElement(x_raw, prime)
+            y = FieldElement(y_raw, prime)
+            with self.assertRaises(ValueError):
+                Point(x, y, a, b)  # <b class="conum">(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We pass in <code>FieldElement</code> objects to the <code>Point</code> class for initialization.
+This will, in turn, use all the overloaded math operations in <code>FieldElement</code>.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>We can now run this test like so:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-pycon" data-lang="pycon">&gt;&gt;&gt; import ecc
+&gt;&gt;&gt; from helper import run  # <b class="conum">(1)</b>
+&gt;&gt;&gt; run(ecc.ECCTest('test_on_curve'))
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+OK</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p><code>helper</code> is a module with some very useful utility functions, including the ability to run unit tests individually.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_point_addition_over_finite_fields">Point Addition over Finite Fields</h3>
+<div class="paragraph">
+<p>We can use all the same equations over finite fields, including the linear equation:</p>
+</div>
+<ul class="simplelist">
+<li><em>y</em> = <em>mx</em> + <em>b</em></li>
+</ul>
+<div class="paragraph">
+<p>It turns out that a "line" in a finite field is not quite what you&#8217;d expect (<a href="#line_over_a_finite_field">Line over a finite field</a>).</p>
+</div>
+<div id="line_over_a_finite_field" class="imageblock">
+<div class="content">
+<img src="images/prbc_0303.png" alt="Line over a finite field">
+</div>
+<div class="title">Figure 3. Line over a finite field</div>
+</div>
+<div class="paragraph">
+<p>The equation nevertheless works, and we can calculate what <em>y</em> should be for a given <em>x</em>.</p>
+</div>
+<div class="paragraph">
+<p>Remarkably, point addition works over finite fields as well.
+This is because elliptic curve point addition works over all fields!
+The same exact formulas we used to calculate point addition over reals work over finite fields.
+Specifically, when <em>x</em><sub>1</sub> ≠ <em>x</em><sub>2</sub>:</p>
+</div>
+<ul class="simplelist">
+<li><em>P</em><sub>1</sub> = (<em>x</em><sub>1</sub>,<em>y</em><sub>1</sub>), <em>P</em><sub>2</sub> = (<em>x</em><sub>2</sub>,<em>y</em><sub>2</sub>), <em>P</em><sub>3</sub> = (<em>x</em><sub>3</sub>,<em>y</em><sub>3</sub>)</li>
+<li><em>P</em><sub>1</sub> + <em>P</em><sub>2</sub> = <em>P</em><sub>3</sub></li>
+<li><em>s</em> = (<em>y</em><sub>2</sub> – <em>y</em><sub>1</sub>)/(<em>x</em><sub>2</sub> – <em>x</em><sub>1</sub>)</li>
+<li><em>x</em><sub>3</sub> = <em>s</em><sup>2</sup> – <em>x</em><sub>1</sub> – <em>x</em><sub>2</sub></li>
+<li><em>y</em><sub>3</sub> = <em>s</em>(<em>x</em><sub>1</sub> – <em>x</em><sub>3</sub>) – <em>y</em><sub>1</sub></li>
+</ul>
+<div class="paragraph">
+<p>And when <em>P</em><sub>1</sub> = <em>P</em><sub>2</sub>:</p>
+</div>
+<ul class="simplelist">
+<li><em>P</em><sub>1</sub> = (<em>x</em><sub>1</sub>,<em>y</em><sub>1</sub>), <em>P</em><sub>3</sub> = (<em>x</em><sub>3</sub>,<em>y</em><sub>3</sub>)</li>
+<li><em>P</em><sub>1</sub> + <em>P</em><sub>1</sub> = <em>P</em><sub>3</sub></li>
+<li><em>s</em> = (3<em>x</em><sub>1</sub><sup>2</sup> + <em>a</em>)/(2<em>y</em><sub>1</sub>)</li>
+<li><em>x</em><sub>3</sub> = <em>s</em><sup>2</sup> – 2<em>x</em><sub>1</sub></li>
+<li><em>y</em><sub>3</sub> = <em>s</em>(<em>x</em><sub>1</sub> – <em>x</em><sub>3</sub>) – <em>y</em><sub>1</sub></li>
+</ul>
+<div class="paragraph">
+<p>All of the equations for elliptic curves work over finite fields, which sets us up to create some cryptographic primitives.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_coding_point_addition_over_finite_fields">Coding Point Addition over Finite Fields</h3>
+<div class="paragraph">
+<p>Because we coded FieldElement in such a way as to define <code><em>add</em></code>, <code><em>sub</em></code>, <code><em>mul</em></code>, <code><em>truediv</em></code>, <code><em>pow</em></code>, <code><em>eq</em></code>, and <code><em>ne</em></code>, we can simply initialize <code>Point</code> with <code>FieldElement</code> objects and point addition will work:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">&gt;&gt;&gt; from ecc import FieldElement, Point
+&gt;&gt;&gt; prime = 223
+&gt;&gt;&gt; a = FieldElement(num=0, prime=prime)
+&gt;&gt;&gt; b = FieldElement(num=7, prime=prime)
+&gt;&gt;&gt; x1 = FieldElement(num=192, prime=prime)
+&gt;&gt;&gt; y1 = FieldElement(num=105, prime=prime)
+&gt;&gt;&gt; x2 = FieldElement(num=17, prime=prime)
+&gt;&gt;&gt; y2 = FieldElement(num=56, prime=prime)
+&gt;&gt;&gt; p1 = Point(x1, y1, a, b)
+&gt;&gt;&gt; p2 = Point(x2, y2, a, b)
+&gt;&gt;&gt; print(p1+p2)
+Point(170,142)_0_7 FieldElement(223)</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_exercise_2">Exercise 2</h4>
+<div class="paragraph">
+<p>For the curve <em>y</em><sup>2</sup> = <em>x</em><sup>3</sup> + 7 over <em>F</em><sub>223</sub>, find:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>(170,142) + (60,139)</p>
+</li>
+<li>
+<p>(47,71) + (17,56)</p>
+</li>
+<li>
+<p>(143,98) + (76,66)</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_exercise_3">Exercise 3</h4>
+<div class="paragraph">
+<p>Extend <code>ECCTest</code> to test for the additions from the previous exercise. Call this <code>test_add</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_scalar_multiplication_for_elliptic_curves">Scalar Multiplication for Elliptic Curves</h3>
+<div class="paragraph">
+<p>Because we can add a point to itself, we can introduce some new notation:</p>
+</div>
+<ul class="simplelist">
+<li>(170,142) + (170,142) = 2 ⋅ (170,142)</li>
+</ul>
+<div class="paragraph">
+<p>Similarly, because we have associativity, we can actually add the point again:</p>
+</div>
+<ul class="simplelist">
+<li>2 ⋅ (170,142) + (170,142) = 3 ⋅ (170, 142)</li>
+</ul>
+<div class="paragraph">
+<p>We can do this as many times as we want.
+This is what we call <em>scalar multiplication</em>.
+That is, we have a <em>scalar</em> number in front of the point.
+We can do this because we have defined point addition and point addition is associative.</p>
+</div>
+<div class="paragraph">
+<p>One property of scalar multiplication is that it&#8217;s really hard to predict without calculating (see <a href="#scalar_multiplication_results_for_y_2_x_3_7">Scalar multiplication results for y<sup>2</sup> = x<sup>3</sup> + 7 over F<sub>223</sub> for point (170,142)</a>).</p>
+</div>
+<div id="scalar_multiplication_results_for_y_2_x_3_7" class="imageblock">
+<div class="content">
+<img src="images/prbc_0304.png" alt="Scalar Multiplication Results">
+</div>
+<div class="title">Figure 4. Scalar multiplication results for y<sup>2</sup> = x<sup>3</sup> + 7 over F<sub>223</sub> for point (170,142)</div>
+</div>
+<div class="paragraph">
+<p>Each point is labeled by how many times we&#8217;ve added the point.
+You can see that this is a complete scattershot.
+This is because point addition is nonlinear and not easy to calculate.
+Performing scalar multiplication is straightforward, but doing the opposite, point division, is not.</p>
+</div>
+<div class="paragraph">
+<p>This is called the <em>discrete log problem</em> and is the basis of elliptic curve cryptography.</p>
+</div>
+<div class="paragraph">
+<p>Another property of scalar multiplication is that at a certain multiple, we get to the point at infinity (remember, the point at infinity is the additive identity or 0).
+If we imagine a point <em>G</em> and scalar-multiply until we get the point at infinity, we end up with a set:</p>
+</div>
+<ul class="simplelist">
+<li>{ <em>G</em>, 2<em>G</em>, 3<em>G</em>, 4<em>G</em>, ... <em>nG</em> } where <em>nG</em> = 0</li>
+</ul>
+<div class="paragraph">
+<p>It turns out that this set is called a <em>group</em>, and because <em>n</em> is finite, we have a <em>finite group</em> (or more specifically, a <em>finite cyclic group</em>).
+Groups are interesting mathematically because they behave well with respect to addition:</p>
+</div>
+<ul class="simplelist">
+<li><em>G</em> + 4<em>G</em> = 5<em>G</em> or <em>aG</em> + <em>bG</em> = (<em>a</em> + <em>b</em>)<em>G</em></li>
+</ul>
+<div class="paragraph">
+<p>When we combine the fact that scalar multiplication is easy to do in one direction but hard in the other and the mathematical properties of a group, we have exactly what we need for elliptic curve cryptography.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Why Is This Called the Discrete Log Problem?</div>
+<div class="paragraph">
+<p>You may be wondering why the problem of reversing scalar <em>multiplication</em> is referred to as the discrete <em>log</em> problem.</p>
+</div>
+<div class="paragraph">
+<p>We called the operation between the points "addition," but we could easily have called it a point "operation."
+Typically, a new operation that you define in math is denoted with the dot operator (⋅).
+The dot operator is also used for multiplication, and it sometimes helps to think that way:</p>
+</div>
+<ul class="simplelist">
+<li><em>P</em><sub>1</sub> ⋅ <em>P</em><sub>2</sub> = <em>P</em><sub>3</sub></li>
+</ul>
+<div class="paragraph">
+<p>When you do lots of multiplying, that&#8217;s the same as exponentiation.
+Scalar multiplication when we called it "point addition" becomes scalar exponentiation when thinking "point multiplication":</p>
+</div>
+<ul class="simplelist">
+<li><em>P</em><sup>7</sup> = <em>Q</em></li>
+</ul>
+<div class="paragraph">
+<p>The discrete log problem in this context is the ability to reverse this equation, which ends up being:</p>
+</div>
+<ul class="simplelist">
+<li>log<sub>P</sub><em>Q</em> = 7</li>
+</ul>
+<div class="paragraph">
+<p>The log equation on the left has no analytically calculable algorithm.
+That is, there is no known formula that you can plug in to get the answer generally.
+This is all a bit confusing, but it&#8217;s fair to say that we could call the problem the "discrete point division" problem instead of the discrete log problem.</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_exercise_4">Exercise 4</h4>
+<div class="paragraph">
+<p>For the curve <em>y</em><sup>2</sup> = <em>x</em><sup>3</sup> + 7 over <em>F</em><sub>223</sub>, find:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>2 ⋅ (192,105)</p>
+</li>
+<li>
+<p>2 ⋅ (143,98)</p>
+</li>
+<li>
+<p>2 ⋅ (47,71)</p>
+</li>
+<li>
+<p>4 ⋅ (47,71)</p>
+</li>
+<li>
+<p>8 ⋅ (47,71)</p>
+</li>
+<li>
+<p>21 ⋅ (47,71)</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_scalar_multiplication_redux">Scalar Multiplication Redux</h3>
+<div class="paragraph">
+<p>Scalar multiplication is adding the same point to itself some number of times.
+The key to making scalar multiplication into public key cryptography is using the fact that scalar multiplication on elliptic curves is very hard to reverse.
+Note the previous exercise.
+Most likely, you calculated the point <em>s</em> ⋅ (47,71) in <em>F</em><sub>223</sub> for <em>s</em> from 1 until 21.
+Here are the results:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">&gt;&gt;&gt; from ecc import FieldElement, Point
+&gt;&gt;&gt; prime = 223
+&gt;&gt;&gt; a = FieldElement(0, prime)
+&gt;&gt;&gt; b = FieldElement(7, prime)
+&gt;&gt;&gt; x = FieldElement(47, prime)
+&gt;&gt;&gt; y = FieldElement(71, prime)
+&gt;&gt;&gt; p = Point(x, y, a, b)
+&gt;&gt;&gt; for s in range(1,21):
+...     result = s*p
+...     print('{}*(47,71)=({},{})'.format(s,result.x.num,result.y.num))
+1*(47,71)=(47,71)
+2*(47,71)=(36,111)
+3*(47,71)=(15,137)
+4*(47,71)=(194,51)
+5*(47,71)=(126,96)
+6*(47,71)=(139,137)
+7*(47,71)=(92,47)
+8*(47,71)=(116,55)
+9*(47,71)=(69,86)
+10*(47,71)=(154,150)
+11*(47,71)=(154,73)
+12*(47,71)=(69,137)
+13*(47,71)=(116,168)
+14*(47,71)=(92,176)
+15*(47,71)=(139,86)
+16*(47,71)=(126,127)
+17*(47,71)=(194,172)
+18*(47,71)=(15,86)
+19*(47,71)=(36,112)
+20*(47,71)=(47,152)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you look closely at the numbers, there&#8217;s no real discernible pattern to the scalar multiplication.
+The <em>x</em> coordinates don&#8217;t always increase or decrease, and neither do the <em>y</em> coordinates.
+About the only pattern is that between 10 and 11, the <em>x</em> coordinates are equal (10 and 11 have the same <em>x</em>, as do 9 and 12, 8 and 13, and so on).
+This is due to the fact that 21 ⋅ (47,71) = 0.</p>
+</div>
+<div class="paragraph pagebreak-before">
+<p>Scalar multiplication looks really random, and that&#8217;s what gives this equation <em>asymmetry</em>.
+An <em>asymmetric</em> problem is one that&#8217;s easy to calculate in one direction, but hard to reverse.
+For example, it&#8217;s easy enough to calculate 12 ⋅ (47,71).
+But if we were presented with this:</p>
+</div>
+<ul class="simplelist">
+<li><em>s</em> ⋅ (47,71) = (194,172)</li>
+</ul>
+<div class="paragraph">
+<p>would we be able to solve for <em>s</em>?
+We can look up the results shown earlier, but that&#8217;s because we have a small group.
+We&#8217;ll see in <a href="#definingCurveBC">Defining the Curve for Bitcoin</a> that when we have numbers that are a lot larger, discrete log becomes an intractable problem.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_mathematical_groups">Mathematical Groups</h3>
+<div class="paragraph">
+<p>The preceding math (finite fields, elliptic curves, combining the two) was really to bring us to this point.
+What we actually want to generate for the purposes of public key cryptography are finite cyclic groups, and it turns out that if we take a generator point from an elliptic curve over a finite field, we can generate a finite cyclic group.</p>
+</div>
+<div class="paragraph">
+<p>Unlike fields, groups have only a single operation.
+In our case, point addition is the operation.
+Groups also have a few other properties, like closure, invertibility, commutativity, and associativity.
+Lastly, we need the identity.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s look at each property, starting with that last one.</p>
+</div>
+<div class="sect3">
+<h4 id="_identity">Identity</h4>
+<div class="paragraph">
+<p>If you haven&#8217;t guessed by now, the identity is defined as the point at infinity, which is guaranteed to be in the group since we generate the group when we get to the point at infinity.
+So:</p>
+</div>
+<ul class="simplelist">
+<li>0 + <em>A</em> = <em>A</em></li>
+</ul>
+<div class="paragraph">
+<p>We call 0 the point at infinity because visually, it&#8217;s the point that exists to help the math work out (<a href="#vertical_line_intersects_a_third_time">Vertical line "intersects" a third time at the point at infinity</a>).</p>
+</div>
+<div id="vertical_line_intersects_a_third_time" class="imageblock width-75">
+<div class="content">
+<img src="images/prbc_0212.png" alt="Vertical Line">
+</div>
+<div class="title">Figure 5. Vertical line "intersects" a third time at the point at infinity</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_closure">Closure</h4>
+<div class="paragraph">
+<p>This is perhaps the easiest property to prove since we generated the group in the first place by adding <em>G</em> over and over.
+Thus, if we have two different elements that look like this:</p>
+</div>
+<ul class="simplelist">
+<li><em>aG</em> + <em>bG</em></li>
+</ul>
+<div class="paragraph">
+<p>We know that the result is going to be:</p>
+</div>
+<ul class="simplelist">
+<li>(<em>a</em> + <em>b</em>)<em>G</em></li>
+</ul>
+<div class="paragraph">
+<p>How do we know if this element is in the group?
+If <em>a+b &lt; n</em> (where <em>n</em> is the order of the group), then we know it&#8217;s in the group by definition.
+If <em>a</em>+<em>b</em> &gt;= <em>n</em>, then we know <em>a</em> &lt; <em>n</em> and <em>b</em> &lt; <em>n</em>, so <em>a</em>+<em>b</em> &lt; 2<em>n</em>, so <em>a</em>+<em>b</em>–<em>n</em> &lt; <em>n</em>:</p>
+</div>
+<ul class="simplelist">
+<li>(<em>a</em> + <em>b</em> – <em>n</em>)<em>G</em> = <em>aG</em> + <em>bG</em> – <em>nG</em> = <em>aG</em> + <em>bG</em> – 0 = <em>aG</em> + <em>bG</em></li>
+</ul>
+<div class="paragraph">
+<p>More generally, (<em>a</em> + <em>b</em>)<em>G</em> = ((<em>a</em> + <em>b</em>) % <em>n</em>)<em>G</em>, where <em>n</em> is the order of the group.</p>
+</div>
+<div class="paragraph">
+<p>So we know that this element is in the group, proving closure.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_invertibility">Invertibility</h4>
+<div class="paragraph">
+<p>Invertibility is easy to depict (<a href="#each_point_is_invertible_by_taking_the_reflection_over_the_x_axis">Each point is invertible by taking the reflection over the x-axis</a>).</p>
+</div>
+<div id="each_point_is_invertible_by_taking_the_reflection_over_the_x_axis" class="imageblock width-75">
+<div class="content">
+<img src="images/prbc_0212.png" alt="Vertical Line">
+</div>
+<div class="title">Figure 6. Each point is invertible by taking the reflection over the x-axis</div>
+</div>
+<div class="paragraph">
+<p>Mathematically, we know that if <em>aG</em> is in the group, (<em>n</em> – <em>a</em>)<em>G</em> is also in the group.
+You can add them together to get <em>aG</em> + (<em>n</em> – <em>a</em>)<em>G</em> = (<em>a</em> + <em>n</em> – <em>a</em>)<em>G</em> = <em>nG</em> = 0.</p>
+</div>
+</div>
+<div class="sect3 pagebreak-before">
+<h4 id="_commutativity">Commutativity</h4>
+<div class="paragraph">
+<p>We know from point addition that <em>A</em> + <em>B</em> = <em>B</em> + <em>A</em> (<a href="#the_line_through_the_points_doesnt_change">The line through the points doesn&#8217;t change</a>).</p>
+</div>
+<div id="the_line_through_the_points_doesnt_change" class="imageblock width-75">
+<div class="content">
+<img src="images/prbc_0214.png" alt="Point addition">
+</div>
+<div class="title">Figure 7. The line through the points doesn&#8217;t change</div>
+</div>
+<div class="paragraph">
+<p>This means that <em>aG</em> + <em>bG</em> = <em>bG</em> + <em>aG</em>, which proves commutativity.</p>
+</div>
+</div>
+<div class="sect3 pagebreak-before">
+<h4 id="_associativity">Associativity</h4>
+<div class="paragraph">
+<p>We know from point addition that <em>A</em> + (<em>B</em> + <em>C</em>) = (<em>A</em> + <em>B</em>) + <em>C</em> (see Figures <a data-type="xref" data-xrefstyle="select:labelnumber"  href="#a_b_c_case_one">#a_b_c_case_one</a> and <a data-type="xref" data-xrefstyle="select:labelnumber" href="#a_b_c_case_two">#a_b_c_case_two</a>).</p>
+</div>
+<div id="a_b_c_case_one" class="imageblock width-75">
+<div class="content">
+<img src="images/prbc_0216.png" alt="Case 1">
+</div>
+<div class="title">Figure 8. (A + B) + C: A + B is computed first before C is added</div>
+</div>
+<div id="a_b_c_case_two" class="imageblock width-75">
+<div class="content">
+<img src="images/prbc_0217.png" alt="Case 2">
+</div>
+<div class="title">Figure 9. A + (B + C): B + C is added first before adding A (note that this results in the same point as in <a href="#a_b_c_case_one">(A + B) + C: A + B is computed first before C is added</a>)</div>
+</div>
+<div class="paragraph">
+<p>Thus, <em>aG</em> + (<em>bG</em> + <em>cG</em>) = (<em>aG</em> + <em>bG</em>) + <em>cG</em>, proving associativity.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_exercise_5">Exercise 5</h4>
+<div class="paragraph">
+<p>For the curve <em>y</em><sup>2</sup> = <em>x</em><sup>3</sup> + 7 over <em>F</em><sub>223</sub>, find the order of the group generated by (15,86).</p>
+</div>
+</div>
+</div>
+<div class="sect2 pagebreak-before">
+<h3 id="_coding_scalar_multiplication">Coding Scalar Multiplication</h3>
+<div class="paragraph">
+<p>What we&#8217;re trying to do with Exercise 5 is this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">&gt;&gt;&gt; from ecc import FieldElement, Point
+&gt;&gt;&gt; prime = 223
+&gt;&gt;&gt; a = FieldElement(0, prime)
+&gt;&gt;&gt; b = FieldElement(7, prime)
+&gt;&gt;&gt; x = FieldElement(15, prime)
+&gt;&gt;&gt; y = FieldElement(86, prime)
+&gt;&gt;&gt; p = Point(x, y, a, b)
+&gt;&gt;&gt; print(7*p)
+Point(infinity)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We want to be able to scalar-multiply the point with some number.
+Thankfully, there&#8217;s a method in Python called <code><em>rmul</em></code> that can be used to override the front multiplication.
+A naive implementation looks something like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">class Point:
+    ...
+    def __rmul__(self, coefficient):
+        product = self.__class__(None, None, self.a, self.b) # <b class="conum">(1)</b>
+        for _ in range(coefficient): # <b class="conum">(2)</b>
+            product += self
+        return product</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We start the <code>product</code> at 0, which in the case of point addition is the point at infinity.</p>
+</li>
+<li>
+<p>We loop <code>coefficient</code> times and add the point each time.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This is fine for small coefficients, but what if we have a very large coefficient—that is, a number that&#8217;s so large that we won&#8217;t be able to get out of this loop in a reasonable amount of time?
+For example, a coefficient of 1 trillion is going to take a really long time.</p>
+</div>
+<div class="paragraph">
+<p>There&#8217;s a cool technique called <em>binary expansion</em> that allows us to perform multiplication in log<sub>2</sub>(<em>n</em>) loops, which dramatically reduces the calculation time for large numbers.
+For example, 1 trillion is 40 bits in binary, so we only have to loop 40 times for a number that&#8217;s generally considered very large:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">class Point:
+    ...
+    def __rmul__(self, coefficient):
+        coef = coefficient
+        current = self  # <b class="conum">(1)</b>
+        result = self.__class__(None, None, self.a, self.b)  # <b class="conum">(2)</b>
+        while coef:
+            if coef &amp; 1:  # <b class="conum">(3)</b>
+                result += current
+            current += current  # <b class="conum">(4)</b>
+            coef &gt;&gt;= 1  # <b class="conum">(5)</b>
+        return result</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p><code>current</code> represents the point that&#8217;s at the current bit.
+The first time through the loop it represents 1 &#xd7; self; the second time it will be 2 &#xd7; self, the third time 4 &#xd7; self, then 8 &#xd7; self, and so on.
+We double the point each time.
+In binary the coefficients are 1, 10, 100, 1000, 10000, etc.</p>
+</li>
+<li>
+<p>We start the result at 0, or the point at infinity.</p>
+</li>
+<li>
+<p>We are looking at whether the rightmost bit is a 1.
+If it is, then we add the value of the current bit.</p>
+</li>
+<li>
+<p>We need to double the point until we&#8217;re past how big the coefficient can be.</p>
+</li>
+<li>
+<p>We bit-shift the coefficient to the right.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This is an advanced technique. If you don&#8217;t understand bitwise operators, think of representing the coefficient in binary and only adding the point where there are 1&#8217;s.</p>
+</div>
+<div class="paragraph">
+<p>With <code><em>add</em></code> and <code><em>rmul</em></code>, we can start defining some more complicated elliptic curves.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="definingCurveBC">Defining the Curve for Bitcoin</h3>
+<div class="paragraph">
+<p>While we&#8217;ve been using relatively small primes for the sake of examples, we are not restricted to such small numbers.
+Small primes mean that we can use a computer to search through the entire group.
+If the group has a size of 301, the computer can easily do 301 computations to reverse scalar multiplication or break discrete log.</p>
+</div>
+<div class="paragraph">
+<p>But what if we made the prime larger?
+It turns out that we can choose much larger primes than we&#8217;ve been using.
+The security of elliptic curve cryptography depends on computers <em>not</em> being able to go through an appreciable fraction of the group.</p>
+</div>
+<div class="paragraph">
+<p>An elliptic curve for public key cryptography is defined with the following <span class="keep-together">parameters</span>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>We specify the <em>a</em> and <em>b</em> of the curve <em>y</em><sup>2</sup> = <em>x</em><sup>3</sup> + <em>ax</em> + <em>b</em>.</p>
+</li>
+<li>
+<p>We specify the prime of the finite field, <em>p</em>.</p>
+</li>
+<li>
+<p>We specify the <em>x</em> and <em>y</em> coordinates of the generator point <em>G</em>.</p>
+</li>
+<li>
+<p>We specify the order of the group generated by <em>G</em>, <em>n</em>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These numbers are known publicly and together form the cryptographic curve.
+There are many cryptographic curves and they have different security/convenience trade-offs, but the one we&#8217;re most interested in is the one Bitcoin uses: secp256k1.
+The parameters for secp256k1 are these:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><em>a</em> = 0, <em>b</em> = 7, making the equation <em>y</em><sup>2</sup> = <em>x</em><sup>3</sup> + 7</p>
+</li>
+<li>
+<p><em>p</em> = 2<sup>256</sup> – 2<sup>32</sup> – 977</p>
+</li>
+<li>
+<p><em>G<sub>x</sub></em> = <br/>0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798</p>
+</li>
+<li>
+<p><em>G<sub>y</sub></em> = <br/>0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8</p>
+</li>
+<li>
+<p><em>n</em> = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><em>G<sub>x</sub></em> refers to the <em>x</em> coordinate of the point <em>G</em> and <em>G<sub>y</sub></em> the <em>y</em> coordinate.
+The numbers starting with 0x are hexadecimal numbers.</p>
+</div>
+<div class="paragraph">
+<p>There are a few things to notice about this curve. First, the equation is relatively simple.
+Many curves have <em>a</em> and <em>b</em> values that are much bigger.</p>
+</div>
+<div class="paragraph">
+<p>Second, <em>p</em> is extremely close to 2<sup>256</sup>.
+This means that most numbers under 2<sup>256</sup> are in the prime field, and thus any point on the curve has <em>x</em> and <em>y</em> coordinates that are expressible in 256 bits each.
+<em>n</em> is also very close to 2<sup>256</sup>.
+This means any scalar multiple can also be expressed in 256 bits.</p>
+</div>
+<div class="paragraph">
+<p>Third, 2<sup>256</sup> is a huge number (see sidebar).
+Amazingly, any number below 2<sup>256</sup> can be stored in 32 bytes.
+This means that we can store the private key relatively easily.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">How Big is 2<sup>256</sup>?</div>
+<div class="paragraph">
+<p>2<sup>256</sup> doesn&#8217;t seem that big because we can express it succinctly, but in reality, it is an enormous number.
+To give you an idea, here are some relative scales:</p>
+</div>
+<dl><dt class="plain">2<sup>256</sup> ~ 10<sup>77</sup></dt>
+<dd>
+<ul>
+<li>Number of atoms in and on Earth ~ 10<sup>50</sup></li>
+<li>Number of atoms in the solar system ~ 10<sup>57</sup></li>
+<li>Number of atoms in the Milky Way ~ 10<sup>68</sup></li>
+<li>Number of atoms in the universe ~ 10<sup>80</sup></li></ul>
+</dd></dl>
+<div class="paragraph">
+<p>A trillion (10<sup>12</sup>) computers doing a trillion computations every trillionth (10<sup>–12</sup>) of a second for a trillion years is still less than 10<sup>56</sup> computations.</p>
+</div>
+<div class="paragraph">
+<p>Think of finding a private key this way: there are as many possible private keys in Bitcoin as there are atoms in a billion galaxies.</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_working_with_secp256k1">Working with secp256k1</h4>
+<div class="paragraph">
+<p>Since we know all of the parameters for secp256k1, we can verify in Python whether the generator point, <em>G</em>, is on the curve <em>y</em><sup>2</sup> = <em>x</em><sup>3</sup> + 7:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">&gt;&gt;&gt; gx = 0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798
+&gt;&gt;&gt; gy = 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8
+&gt;&gt;&gt; p = 2**256 - 2**32 - 977
+&gt;&gt;&gt; print(gy**2 % p == (gx**3 + 7) % p)
+True</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Furthermore, we can verify in Python whether the generator point, <em>G</em>, has the order <em>n</em>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">&gt;&gt;&gt; from ecc import FieldElement, Point
+&gt;&gt;&gt; gx = 0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798
+&gt;&gt;&gt; gy = 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8
+&gt;&gt;&gt; p = 2**256 - 2**32 - 977
+&gt;&gt;&gt; n = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
+&gt;&gt;&gt; x = FieldElement(gx, p)
+&gt;&gt;&gt; y = FieldElement(gy, p)
+&gt;&gt;&gt; seven = FieldElement(7, p)
+&gt;&gt;&gt; zero = FieldElement(0, p)
+&gt;&gt;&gt; G = Point(x, y, zero, seven)
+&gt;&gt;&gt; print(n*G)
+Point(infinity)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Since we know the curve we will work in, this is a good time to create a subclass in Python to work exclusively with the parameters for secp256k1.
+We&#8217;ll define the equivalent <code>FieldElement</code> and <code>Point</code> objects, but specific to the secp256k1 curve.
+Let&#8217;s start by defining the field we&#8217;ll be working in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">P = 2**256 - 2**32 - 977
+...
+class S256Field(FieldElement):
+
+    def __init__(self, num, prime=None):
+        super().__init__(num=num, prime=P)
+
+    def __repr__(self):
+        return '{:x}'.format(self.num).zfill(64)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We&#8217;re subclassing the <code>FieldElement</code> class so we don&#8217;t have to pass in <em>P</em> all the time.
+We also want to display a 256-bit number consistently by filling 64 characters so we can see any leading zeros.</p>
+</div>
+<div class="paragraph">
+<p>Similarly, we can define a point on the secp256k1 curve and call it <code>S256Point</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">A = 0
+B = 7
+...
+class S256Point(Point):
+
+    def __init__(self, x, y, a=None, b=None):
+        a, b = S256Field(A), S256Field(B)
+        if type(x) == int:
+            super().__init__(x=S256Field(x), y=S256Field(y), a=a, b=b)
+        else:
+            super().__init__(x=x, y=y, a=a, b=b)  # <b class="conum">(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>In case we initialize with the point at infinity, we need to let <em>x</em> and <em>y</em> through directly instead of using the <code>S256Field</code> class.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>We now have an easier way to initialize a point on the secp256k1 curve, without having to define a and b every time like we have to with the <code>Point</code> class.</p>
+</div>
+<div class="paragraph">
+<p>We can also define <code><em>rmul</em></code> a bit more efficiently, since we know the order of the group, <em>n</em>.
+Since we&#8217;re coding Python, we&#8217;ll name this with a capital <code>N</code> to make it clear that <code>N</code> is a constant:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">N = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
+...
+class S256Point(Point):
+    ...
+    def __rmul__(self, coefficient):
+        coef = coefficient % N  # <b class="conum">(1)</b>
+        return super().__rmul__(coef)</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We can mod by <em>n</em> because <em>nG</em> = 0.
+That is, every <em>n</em> times we cycle back to zero or the point at infinity.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>We can now define <em>G</em> directly and keep it around since we&#8217;ll be using it a lot going forward:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">G = S256Point(
+    0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,
+    0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now checking that the order of <em>G</em> is <em>n</em> is trivial:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">&gt;&gt;&gt; from ecc import G, N
+&gt;&gt;&gt; print(N*G)
+S256Point(infinity)</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_public_key_cryptography">Public Key Cryptography</h3>
+<div class="paragraph">
+<p>At last, we have the tools that we need to do public key cryptography operations.
+The key operation that we need is <em>P</em> = <em>eG</em>, which is an asymmetric equation.
+We can easily compute <em>P</em> when we know <em>e</em> and <em>G</em>, but we cannot easily compute <em>e</em> when we know <em>P</em> and <em>G</em>.
+This is the discrete log problem described earlier.</p>
+</div>
+<div class="paragraph">
+<p>The difficulty of discrete log will be essential to understanding signing and verification algorithms.</p>
+</div>
+<div class="paragraph">
+<p>Generally, we call <em>e</em> the <em>private key</em> and <em>P</em> the <em>public key</em>.
+Note here that the private key is a single 256-bit number and the public key is a coordinate (<em>x</em>,<em>y</em>), where <em>x</em> and <em>y</em> are <em>each</em> 256-bit numbers.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_signing_and_verification">Signing and Verification</h3>
+<div class="paragraph">
+<p>To set up the motivation for why signing and verification exists, imagine this scenario.
+You want to prove that you are a really good archer, like at the level where you can hit any target you want within 500 yards as opposed to being able to hit any particular target.</p>
+</div>
+<div class="paragraph">
+<p>Now, if someone could observe you and interact with you, proving this would be easy.
+Perhaps they would position your son 400 yards away with an apple on his head and challenge you to hit that apple with an arrow.
+You, being a very good archer, could do this and prove your expertise.
+The target, if specified by the challenger, makes your archery skill easy to verify.</p>
+</div>
+<div class="paragraph">
+<p>Unfortunately, this doesn&#8217;t scale very well.
+If, for example you wanted to prove this to 10 people, you would have to shoot 10 different arrows at 10 different targets from 10 different challenges.
+You could try to do something like have 10 people watch you shoot a single arrow, but since they can&#8217;t all choose the target, they can never be sure that you&#8217;re not just good at hitting one particular target instead of an arbitrary target.
+What we want is something that you can do once, that requires no interaction back and forth with the verifiers, but that still proves that you are indeed, a good archer that can hit <em>any</em> target.</p>
+</div>
+<div class="paragraph">
+<p>If, for example, you simply shot an arrow into a target of your choosing, the people observing afterward wouldn&#8217;t necessarily be convinced.
+After all, you might have painted the target around wherever your arrow happened to land.
+So what can you do?</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s a very clever thing you can do.
+Inscribe the tip of the arrow with the position of the target that you&#8217;re hitting ("apple on top of my son&#8217;s head") and then hit that target with your arrow.
+Now anyone seeing the target can take an X-ray machine and look at the tip of the embedded arrow and see that the tip indeed says exactly where it was going to hit.
+The tip clearly had to be inscribed before the arrow was shot, so this can prove you are actually  a good archer (provided the actual target isn&#8217;t just one that you&#8217;ve practiced hitting over and over).</p>
+</div>
+<div class="paragraph">
+<p>This is the same technique we&#8217;re using with signing and verification, except what we&#8217;re proving isn&#8217;t that we&#8217;re good archers, but that we know a secret number.
+We want to prove possession of the secret without revealing the secret itself.
+We do this by putting the target into our calculation and hitting that target.</p>
+</div>
+<div class="paragraph">
+<p>Ultimately this is going to be used in transactions, which will prove that the rightful owners of the secrets are spending the bitcoins.</p>
+</div>
+<div class="sect3">
+<h4 id="_inscribing_the_target">Inscribing the Target</h4>
+<div class="paragraph">
+<p>The inscribing of the target depends on the <em>signature algorithm</em>, and in our case that algorithm is called the Elliptic Curve Digital Signature Algorithm, or ECDSA for short.</p>
+</div>
+<div class="paragraph">
+<p>The secret in our case is <em>e</em> satisfying the following:</p>
+</div>
+<ul class="simplelist">
+<li><em>eG</em> = <em>P</em></li>
+</ul>
+<div class="paragraph">
+<p>where <em>P</em> is the public key and <em>e</em> is the private key.</p>
+</div>
+<div class="paragraph">
+<p>The target that we&#8217;re going to aim at is a random 256-bit number, <em>k</em>.
+We then do this:</p>
+</div>
+<ul class="simplelist">
+<li><em>kG</em> = <em>R</em></li>
+</ul>
+<div class="paragraph">
+<p><em>R</em> is now the target that we&#8217;re aiming for.
+In fact, we&#8217;re only going to care about the <em>x</em> coordinate of <em>R</em>, which we&#8217;ll call <em>r</em>.
+You may have guessed already that <em>r</em> here stands for <em>random</em>.</p>
+</div>
+<div class="paragraph">
+<p>We claim at this point that the following equation is equivalent to the discrete log problem:</p>
+</div>
+<ul class="simplelist">
+<li><em>uG</em> + <em>vP</em> = <em>kG</em></li>
+</ul>
+<div class="paragraph">
+<p>where <em>k</em> was chosen randomly, <em>u</em>,<em>v</em> ≠ 0 can be chosen by the signer, and <em>G</em> and <em>P</em> are known. This is due to the fact that:</p>
+</div>
+<ul class="simplelist">
+<li><em>uG</em> + <em>vP</em> = <em>kG</em> implies <em>vP</em> = (<em>k</em> – <em>u</em>)<em>G</em></li>
+</ul>
+<div class="paragraph">
+<p>Since <em>v</em> ≠ 0, we can divide by the scalar multiple <em>v</em>:</p>
+</div>
+<ul class="simplelist">
+<li><em>P</em> = ((<em>k</em> – <em>u</em>)/<em>v</em>)<em>G</em></li>
+</ul>
+<div class="paragraph">
+<p>If we know <em>e</em>, we have:</p>
+</div>
+<ul class="simplelist">
+<li><em>eG</em> = ((<em>k</em> – <em>u</em>)/<em>v</em>)<em>G</em> or <em>e</em> = (<em>k</em> – <em>u</em>)/<em>v</em></li>
+</ul>
+<div class="paragraph">
+<p>This means that any (<em>u</em>,<em>v</em>) combination that satisfies the preceding equation will suffice.</p>
+</div>
+<div class="paragraph">
+<p>Now suppose we don&#8217;t know <em>e</em>, but we can solve <em>uG + vP = kG</em> with some (<em>u</em>,<em>v</em>) combination.
+Then <em>e = (k–u)/v</em> gives a solution to <em>P</em> = <em>eG</em> while knowing only <em>P</em> and <em>G</em>.
+In other words, we&#8217;d have broken the discrete log problem.</p>
+</div>
+<div class="paragraph">
+<p>This means to provide a correct <em>u</em> and <em>v</em>, we either have to break the discrete log problem or know the secret <em>e</em>.
+Since we assume discrete log is hard, we can say <em>e</em> is assumed to be known by the one who came up with <em>u</em> and <em>v</em>.</p>
+</div>
+<div class="paragraph">
+<p>One subtle thing that we haven&#8217;t talked about is that we have to incorporate the purpose of our shooting.
+This is a contract that gets fulfilled as a result of shooting at the target.
+William Tell, for example, was shooting so that he could save his son (shoot the target and you get to save your son).
+You can imagine there would be other reasons to hit the target and other "rewards" that the person hitting the target would receive.
+This has to be incorporated into our equations.</p>
+</div>
+<div class="paragraph">
+<p>In signature/verification parlance, this is called the <em>signature hash</em>.
+A hash is a deterministic function that takes arbitrary data into data of fixed size.
+This is a fingerprint of the message containing the intent of the shooter, which anyone verifying the message already knows.
+We denote this with the letter <em>z</em>.
+This is incorporated into our <em>uG</em> + <em>vP</em> calculation this way:</p>
+</div>
+<ul class="simplelist">
+<li><em>u</em> = <em>z</em>/<em>s</em>, <em>v</em> = <em>r</em>/<em>s</em></li>
+</ul>
+<div class="paragraph">
+<p>Since <em>r</em> is used in the calculation of <em>v</em>, we now have the tip of the arrow inscribed.
+We also have the intent of the shooter incorporated into <em>u</em>, so both the reason for shooting and the target that is being aimed at are now part of the equation.</p>
+</div>
+<div class="paragraph">
+<p>To make the equation work, we can calculate <em>s</em>:</p>
+</div>
+<ul class="simplelist">
+<li><em>uG</em> + <em>vP</em> = <em>R</em> = <em>kG</em></li>
+<li><em>uG</em> + <em>veG</em> = <em>kG</em></li>
+<li><em>u</em> + <em>ve</em> = <em>k</em></li>
+<li><em>z</em>/<em>s</em> + <em>re</em>/<em>s</em> = <em>k</em></li>
+<li>(<em>z</em> + <em>re</em>)/<em>s</em> = <em>k</em></li>
+<li><em>s</em> = (<em>z</em> + <em>re</em>)/<em>k</em></li>
+</ul>
+<div class="paragraph">
+<p>This is the basis of the signature algorithm, and the two numbers in a signature are <em>r</em> and <em>s</em>.</p>
+</div>
+<div class="paragraph">
+<p>Verification is straightforward:</p>
+</div>
+<ul class="simplelist">
+<li><em>uG</em> + <em>vP</em> where <em>u</em>,<em>v</em> ≠ 0</li>
+<li><em>uG</em> + <em>vP</em> = (<em>z</em>/<em>s</em>)<em>G</em> + (<em>re</em>/<em>s</em>)<em>G</em> = ((<em>z</em> + <em>re</em>)/<em>s</em>)<em>G</em> = ((<em>z</em> + <em>re</em>)/((<em>z</em> + <em>re</em>)/<em>k</em>))<em>G</em> = <em>kG</em> = (<em>r</em>,<em>y</em>)</li>
+</ul>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+<div class="title">Why We Don&#8217;t Reveal <code>k</code></div>
+<div class="paragraph">
+<p>At this point, you might be wondering why we don&#8217;t reveal <em>k</em> and instead reveal the <em>x</em> coordinate of <em>R</em>, or <em>r</em>.
+If we were to reveal <em>k</em>, then:</p>
+</div>
+<ul class="simplelist">
+<li><em>uG</em> + <em>vP</em> = <em>R</em></li>
+<li><em>uG</em> + <em>veG</em> = <em>kG</em></li>
+<li><em>kG</em> – <em>uG</em> = <em>veG</em></li>
+<li>(<em>k</em> – <em>u</em>)<em>G</em> = <em>veG</em></li>
+<li>(<em>k</em> – <em>u</em>) = <em>ve</em></li>
+<li>(<em>k</em> – <em>u</em>)/<em>v</em> = <em>e</em></li>
+</ul>
+<div class="paragraph">
+<p>means that our secret would be revealed, which would defeat the whole purpose of the signature.
+We can, however, reveal <em>R</em>.</p>
+</div>
+<div class="paragraph">
+<p>It&#8217;s worth mentioning again: make sure you&#8217;re using truly random numbers for <em>k</em>, as even accidentally revealing <em>k</em> for a known signature is the equivalent of revealing your secret and losing your funds!</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_verification_in_depth">Verification in Depth</h4>
+<div class="paragraph">
+<p>Signatures sign some fixed-length value (our "contract")—in our case, something that&#8217;s 32 bytes.
+The fact that 32 bytes is 256 bits is not a coincidence, as the thing we&#8217;re signing will be a scalar for <em>G</em>.</p>
+</div>
+<div class="paragraph">
+<p>To guarantee that the thing we&#8217;re signing is 32 bytes, we hash the document first.
+In Bitcoin, the hashing function is hash256, or two rounds of sha256.
+This guarantees the thing that we&#8217;re signing is exactly 32 bytes.
+We will call the result of the hash the <em>signature hash</em>, or <em>z</em>.</p>
+</div>
+<div class="paragraph">
+<p>The signature that we are verifying has two components, (<em>r</em>,<em>s</em>).
+<em>r</em> is the <em>x</em> coordinate of some point <em>R</em> that we&#8217;ll come back to.
+The formula for <em>s</em> is as above:</p>
+</div>
+<ul class="simplelist">
+<li><em>s</em> = (<em>z</em>+<em>re</em>)/<em>k</em></li>
+</ul>
+<div class="paragraph">
+<p>Keep in mind that we know <em>e</em> (<em>P</em> = <em>eG</em>, or what we&#8217;re proving we know in the first place), we know <em>k</em> (<em>kG</em> = <em>R</em>, remember?), and we know <em>z</em>.</p>
+</div>
+<div class="paragraph">
+<p>We will now construct <em>R</em> = <em>uG</em> + <em>vP</em> by defining <em>u</em> and <em>v</em> this way:</p>
+</div>
+<ul class="simplelist">
+<li><em>u</em> = <em>z</em>/<em>s</em></li>
+<li><em>v</em> = <em>r</em>/<em>s</em></li>
+</ul>
+<div class="paragraph">
+<p>Thus:</p>
+</div>
+<ul class="simplelist">
+<li><em>uG</em> + <em>vP</em> = (<em>z</em>/<em>s</em>)<em>G</em> + (<em>r</em>/<em>s</em>)<em>P</em> = (<em>z</em>/<em>s</em>)<em>G</em> + (<em>re</em>/<em>s</em>)<em>G</em> = ((<em>z</em> + <em>re</em>)/<em>s</em>)<em>G</em></li>
+</ul>
+<div class="paragraph">
+<p>We know <em>s</em> = (<em>z</em> + <em>re</em>)/<em>k</em>, so:</p>
+</div>
+<ul class="simplelist">
+<li><em>uG</em> + <em>vP</em> = ((<em>z</em> + <em>re</em>) / ((<em>z</em> + <em>re</em>)/<em>k</em>))<em>G</em> = <em>kG</em> = <em>R</em></li>
+</ul>
+<div class="paragraph">
+<p>We&#8217;ve successfully chosen <em>u</em> and <em>v</em> in such a way as to generate <em>R</em> as we intended.
+Furthermore, we used <em>r</em> in the calculation of <em>v</em>, proving we knew what <em>R</em> would be.
+The only way we can know the details of <em>R</em> beforehand is if we know <em>e</em>.</p>
+</div>
+<div class="paragraph">
+<p>To wit, here are the steps:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>We are given (<em>r</em>,<em>s</em>) as the signature, <em>z</em> as the hash of the thing being signed, and <em>P</em> as the public key (or public point) of the signer.</p>
+</li>
+<li>
+<p>We calculate <em>u</em> = <em>z</em>/<em>s</em>, <em>v</em> = <em>r</em>/<em>s</em>.</p>
+</li>
+<li>
+<p>We calculate <em>uG</em> + <em>vP</em> = <em>R</em>.</p>
+</li>
+<li>
+<p>If <em>R</em>'s <em>x</em> coordinate equals <em>r</em>, the signature is valid.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="title">Why Two Rounds of sha256?</div>
+<div class="paragraph">
+<p>The calculation of <em>z</em> requires two rounds of sha256, or hash256.
+You may be wondering why there are two rounds when only one is necessary to get a 256-bit number.
+The reason is for security.</p>
+</div>
+<div class="paragraph">
+<p>There is a well-known hash collision attack on SHA-1 called a <em>birthday attack</em> that makes finding collisions much easier.
+<a href="https://security.googleblog.com/2017/02/announcing-first-sha1-collision.html">Google found a SHA-1 collision</a> using some modifications of a birthday attack and a lot of other things in 2017.
+Using SHA-1 twice, or <em>double SHA-1</em>, is the way to defeat or slow down some forms of this attack.</p>
+</div>
+<div class="paragraph">
+<p>Two rounds of sha256 don&#8217;t necessarily prevent all possible attacks, but doing two rounds is a defense against some potential <span class="keep-together">weaknesses</span>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_verifying_a_signature">Verifying a Signature</h4>
+<div class="paragraph">
+<p>We can now verify a signature using some of the primitives that we have:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">&gt;&gt;&gt; from ecc import S256Point, G, N
+&gt;&gt;&gt; z = 0xbc62d4b80d9e36da29c16c5d4d9f11731f36052c72401a76c23c0fb5a9b74423
+&gt;&gt;&gt; r = 0x37206a0610995c58074999cb9767b87af4c4978db68c06e8e6e81d282047a7c6
+&gt;&gt;&gt; s = 0x8ca63759c1157ebeaec0d03cecca119fc9a75bf8e6d0fa65c841c8e2738cdaec
+&gt;&gt;&gt; px = 0x04519fac3d910ca7e7138f7013706f619fa8f033e6ec6e09370ea38cee6a7574
+&gt;&gt;&gt; py = 0x82b51eab8c27c66e26c858a079bcdf4f1ada34cec420cafc7eac1a42216fb6c4
+&gt;&gt;&gt; point = S256Point(px, py)
+&gt;&gt;&gt; s_inv = pow(s, N-2, N)  # <b class="conum">(1)</b>
+&gt;&gt;&gt; u = z * s_inv % N  # <b class="conum">(2)</b>
+&gt;&gt;&gt; v = r * s_inv % N  # <b class="conum">(3)</b>
+&gt;&gt;&gt; print((u*G + v*point).x.num == r)  # <b class="conum">(4)</b>
+True</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Note that we use Fermat&#8217;s little theorem for 1/<em>s</em>, since <em>n</em> is prime.</p>
+</li>
+<li>
+<p><em>u</em> = <em>z</em>/<em>s</em>.</p>
+</li>
+<li>
+<p><em>v</em> = <em>r</em>/<em>s</em>.</p>
+</li>
+<li>
+<p><em>uG</em> + <em>vP</em> = (<em>r</em>,<em>y</em>).
+We need to check that the <em>x</em> coordinate is <em>r</em>.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_exercise_6">Exercise 6</h4>
+<div class="paragraph">
+<p>Verify whether these signatures are valid:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>P = (0x887387e452b8eacc4acfde10d9aaf7f6d9a0f975aabb10d006e4da568744d06c,
+     0x61de6d95231cd89026e286df3b6ae4a894a3378e393e93a0f45b666329a0ae34)
+
+# signature 1
+z = 0xec208baa0fc1c19f708a9ca96fdeff3ac3f230bb4a7ba4aede4942ad003c0f60
+r = 0xac8d1c87e51d0d441be8b3dd5b05c8795b48875dffe00b7ffcfac23010d3a395
+s = 0x68342ceff8935ededd102dd876ffd6ba72d6a427a3edb13d26eb0781cb423c4
+
+# signature 2
+z = 0x7c076ff316692a3d7eb3c3bb0f8b1488cf72e1afcd929e29307032997a838a3d
+r = 0xeff69ef2b1bd93a66ed5219add4fb51e11a840f404876325a1e8ffe0529a2c
+s = 0xc7207fee197d27c618aea621406f6bf5ef6fca38681d82b2f06fddbdce6feab6</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_programming_signature_verification">Programming Signature Verification</h4>
+<div class="paragraph">
+<p>We already have a class <code>S256Point</code>, which is the public point for the private key.
+We create a <code>Signature</code> class that houses the <em>r</em> and <em>s</em> values:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">class Signature:
+
+    def __init__(self, r, s):
+        self.r = r
+        self.s = s
+
+    def __repr__(self):
+        return 'Signature({:x},{:x})'.format(self.r, self.s)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We will be doing more with this class in <a href="#chapter_serialization">[chapter_serialization]</a>.</p>
+</div>
+<div class="paragraph">
+<p>We can now write the <code>verify</code> method on <code>S256Point</code> based on this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">class S256Point(Point):
+    ...
+    def verify(self, z, sig):
+        s_inv = pow(sig.s, N - 2, N)  # <b class="conum">(1)</b>
+        u = z * s_inv % N  # <b class="conum">(2)</b>
+        v = sig.r * s_inv % N  # <b class="conum">(3)</b>
+        total = u * G + v * self  # <b class="conum">(4)</b>
+        return total.x.num == sig.r  # <b class="conum">(5)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p><code>s_inv</code> (1/<em>s</em>) is calculated using Fermat&#8217;s little theorem on the order of the group, <em>n</em>, which is prime.</p>
+</li>
+<li>
+<p><em>u</em> = <em>z</em>/<em>s</em>.
+Note that we can mod by <em>n</em> as that&#8217;s the order of the group.</p>
+</li>
+<li>
+<p><em>v</em> = <em>r</em>/<em>s</em>.
+Note that we can mod by <em>n</em> as that&#8217;s the order of the group.</p>
+</li>
+<li>
+<p><em>uG</em> + <em>vP</em> should be <em>R</em>.</p>
+</li>
+<li>
+<p>We check that the <em>x</em> coordinate is <em>r</em>.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>So, given a public key that is a point on the secp256k1 curve and a signature hash, <em>z</em>, we can verify whether a signature is valid or not.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_signing_in_depth">Signing in Depth</h4>
+<div class="paragraph">
+<p>Given that we know how verification should work, signing is straightforward.
+The only missing step is figuring out what <em>k</em>, and thus <em>R</em> = <em>kG</em>, to use.
+We do this by choosing a random <em>k</em>.</p>
+</div>
+<div class="paragraph">
+<p>The signing procedure is as follows:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>We are given <em>z</em> and know <em>e</em> such that <em>eG</em> = <em>P</em>.</p>
+</li>
+<li>
+<p>Choose a random <em>k</em>.</p>
+</li>
+<li>
+<p>Calculate <em>R</em> = <em>kG</em> and <em>r</em> = <em>x</em> coordinate of <em>R</em>.</p>
+</li>
+<li>
+<p>Calculate <em>s</em> = (<em>z</em> + <em>re</em>)/<em>k</em>.</p>
+</li>
+<li>
+<p>Signature is (<em>r</em>,<em>s</em>).</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Note that the public key (pubkey) <em>P</em> has to be transmitted to whoever wants to verify it, and <em>z</em> must be known by the verifier.
+We&#8217;ll see later that <em>z</em> is computed and <em>P</em> is sent along with the signature.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_creating_a_signature">Creating a Signature</h4>
+<div class="paragraph">
+<p>We can now create a signature.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+<div class="title">Be Careful with Random Number Generation</div>
+<div class="paragraph">
+<p>Note that using something like the <code>random</code> library from Python to do cryptography is generally not a good idea.
+This library is for teaching purposes only, so please don&#8217;t use any of the code explained to you here for production purposes.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>We do this using some of the primitives that we have:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-pycon" data-lang="pycon">&gt;&gt;&gt; from ecc import S256Point, G, N
+&gt;&gt;&gt; from helper import hash256
+&gt;&gt;&gt; e = int.from_bytes(hash256(b'my secret'), 'big')  # <b class="conum">(1)</b>
+&gt;&gt;&gt; z = int.from_bytes(hash256(b'my message'), 'big')  # <b class="conum">(2)</b>
+&gt;&gt;&gt; k = 1234567890  # <b class="conum">(3)</b>
+&gt;&gt;&gt; r = (k*G).x.num  # <b class="conum">(4)</b>
+&gt;&gt;&gt; k_inv = pow(k, N-2, N)
+&gt;&gt;&gt; s = (z+r*e) * k_inv % N  # <b class="conum">(5)</b>
+&gt;&gt;&gt; point = e*G  # <b class="conum">(6)</b>
+&gt;&gt;&gt; print(point)
+S256Point(028d003eab2e428d11983f3e97c3fa0addf3b42740df0d211795ffb3be2f6c52, \
+0ae987b9ec6ea159c78cb2a937ed89096fb218d9e7594f02b547526d8cd309e2)
+&gt;&gt;&gt; print(hex(z))
+0x231c6f3d980a6b0fb7152f85cee7eb52bf92433d9919b9c5218cb08e79cce78
+&gt;&gt;&gt; print(hex(r))
+0x2b698a0f0a4041b77e63488ad48c23e8e8838dd1fb7520408b121697b782ef22
+&gt;&gt;&gt; print(hex(s))
+0xbb14e602ef9e3f872e25fad328466b34e6734b7a0fcd58b1eb635447ffae8cb9</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>This is an example of a "brain wallet," which is a way to keep the private key in your head without having to memorize something too difficult.
+Please don&#8217;t use this for a real secret.</p>
+</li>
+<li>
+<p>This is the signature hash, or hash of the message that we&#8217;re signing.</p>
+</li>
+<li>
+<p>We&#8217;re going to use a fixed <em>k</em> here for demonstration purposes.</p>
+</li>
+<li>
+<p><em>kG</em> = (<em>r</em>,<em>y</em>), so we take the <em>x</em> coordinate only.</p>
+</li>
+<li>
+<p><em>s</em> = (<em>z</em> + <em>re</em>)/<em>k</em>.
+We can mod by <em>n</em> because we know this is a cyclical group of order <em>n</em>.</p>
+</li>
+<li>
+<p>The public point needs to be known by the verifier.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_exercise_7">Exercise 7</h4>
+<div class="paragraph">
+<p>Sign the following message with the secret:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>e = 12345
+z = int.from_bytes(hash256('Programming Bitcoin!'), 'big')</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_programming_message_signing">Programming Message Signing</h4>
+<div class="paragraph">
+<p>To program message signing, we now create a <code>PrivateKey</code> class, which will house our secret:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">class PrivateKey:
+
+    def __init__(self, secret):
+        self.secret = secret
+        self.point = secret * G  # <b class="conum">(1)</b>
+
+    def hex(self):
+        return '{:x}'.format(self.secret).zfill(64)</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We keep around the public key, <code>self.point</code>, for convenience.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>We then create the <code>sign</code> method:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from random import randint
+...
+class PrivateKey:
+...
+    def sign(self, z):
+        k = randint(0, N)  # <b class="conum">(1)</b>
+        r = (k*G).x.num  # <b class="conum">(2)</b>
+        k_inv = pow(k, N-2, N)  # <b class="conum">(3)</b>
+        s = (z + r*self.secret) * k_inv % N  # <b class="conum">(4)</b>
+        if s &gt; N/2:  # <b class="conum">(5)</b>
+            s = N - s
+        return Signature(r, s) # <b class="conum">(6)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p><code>randint</code> chooses a random integer from [0,__n__).
+Please don&#8217;t use this function in production, because the random number from this library is not nearly random enough.</p>
+</li>
+<li>
+<p><em>r</em> is the <em>x</em> coordinate of <em>kG</em>.</p>
+</li>
+<li>
+<p>We use Fermat&#8217;s little theorem again, and <em>n</em>, which is prime.</p>
+</li>
+<li>
+<p><em>s</em> = (<em>z</em> + <em>re</em>)/<em>k</em>.</p>
+</li>
+<li>
+<p>It turns out that using the low-<em>s</em> value will get nodes to relay our transactions.
+This is for malleability reasons.</p>
+</li>
+<li>
+<p>We return a <code>Signature</code> object from the class defined earlier.</p>
+</li>
+</ol>
+</div>
+<div class="sidebarblock pagebreak-before less_space">
+<div class="content">
+<div class="title">Importance of a Unique <code>k</code></div>
+<div class="paragraph">
+<p>There&#8217;s an important rule in signatures that utilize a random component like we have here: the <em>k</em> needs to be unique per signature.
+That is, it cannot get reused.
+In fact, a <em>k</em> that&#8217;s reused will result in you revealing your secret!
+Why?</p>
+</div>
+<div class="paragraph">
+<p>If our secret is <em>e</em> and we are reusing <em>k</em> to sign <em>z</em><sub>1</sub> and <em>z</em><sub>2</sub>:</p>
+</div>
+<ul class="simplelist">
+<li><em>kG</em> = (<em>r</em>,<em>y</em>)</li>
+<li><em>s</em><sub>1</sub> = (<em>z</em><sub>1</sub> + <em>re</em>) / <em>k</em>, <em>s</em><sub>2</sub> = (<em>z</em><sub>2</sub> + <em>re</em>) / <em>k</em></li>
+<li><em>s</em><sub>1</sub>/<em>s</em><sub>2</sub> = (<em>z</em><sub>1</sub> + <em>re</em>) / (<em>z</em><sub>2</sub> + <em>re</em>)</li>
+<li><em>s</em><sub>1</sub>(<em>z</em><sub>2</sub> + <em>re</em>) = <em>s</em><sub>2</sub>(<em>z</em><sub>1</sub> + <em>re</em>)</li>
+<li><em>s</em><sub>1</sub><em>z</em><sub>2</sub> + <em>s</em><sub>1</sub><em>re</em> = <em>s</em><sub>2</sub><em>z</em><sub>1</sub> + <em>s</em><sub>2</sub><em>re</em></li>
+<li><em>s</em><sub>1</sub><em>re</em> – <em>s</em><sub>2</sub><em>re</em> = <em>s</em><sub>2</sub><em>z</em><sub>1</sub> – <em>s</em><sub>1</sub><em>z</em><sub>2</sub></li>
+<li><em>e</em> = (<em>s</em><sub>2</sub><em>z</em><sub>1</sub> – <em>s</em><sub>1</sub><em>z</em><sub>2</sub>) / (<em>rs</em><sub>1</sub> – <em>rs</em><sub>2</sub>)</li>
+</ul>
+<div class="paragraph">
+<p>If anyone sees both signatures, they can use this formula and find our secret!
+The <a href="https://arstechnica.com/gaming/2010/12/ps3-hacked-through-poor-implementation-of-cryptography/">PlayStation 3 hack</a> back in 2010 was due to the reuse of the <em>k</em> value in multiple signatures.</p>
+</div>
+<div class="paragraph">
+<p>To combat this, there is a deterministic <em>k</em> generation standard that uses the secret and <em>z</em> to create a unique, deterministic <em>k</em> every time.
+The specification is in <a href="https://tools.ietf.org/html/rfc6979">RFC 6979</a> and the code changes to look like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">class PrivateKey:
+...
+    def sign(self, z):
+        k = self.deterministic_k(z)  # <b class="conum">(1)</b>
+        r = (k * G).x.num
+        k_inv = pow(k, N - 2, N)
+        s = (z + r * self.secret) * k_inv % N
+        if s &gt; N / 2:
+            s = N - s
+        return Signature(r, s)
+
+    def deterministic_k(self, z):
+        k = b'\x00' * 32
+        v = b'\x01' * 32
+        if z &gt; N:
+            z -= N
+        z_bytes = z.to_bytes(32, 'big')
+        secret_bytes = self.secret.to_bytes(32, 'big')
+        s256 = hashlib.sha256
+        k = hmac.new(k, v + b'\x00' + secret_bytes + z_bytes, s256).digest()
+        v = hmac.new(k, v, s256).digest()
+        k = hmac.new(k, v + b'\x01' + secret_bytes + z_bytes, s256).digest()
+        v = hmac.new(k, v, s256).digest()
+        while True:
+            v = hmac.new(k, v, s256).digest()
+            candidate = int.from_bytes(v, 'big')
+            if candidate &gt;= 1 and candidate &lt; N:
+                return candidate  # <b class="conum">(2)</b>
+            k = hmac.new(k, v + b'\x00', s256).digest()
+            v = hmac.new(k, v, s256).digest()</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We are using the deterministic <em>k</em> instead of a random one.
+Everything else about <code>sign</code> remains the same.</p>
+</li>
+<li>
+<p>This algorithm returns a candidate that&#8217;s suitable.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>A deterministic <em>k</em> will be unique with very high probability.
+This is because sha256 is collision-resistant, and no collisions have been found to date.</p>
+</div>
+<div class="paragraph">
+<p>Another benefit from a testing perspective is that the signature for a given <em>z</em> and the same private key will be the same every time.
+This makes debugging much easier and unit tests a lot easier to write.
+In addition, transactions that use deterministic <em>k</em> will create the same transaction every time, as the signature will not change.
+This makes transactions less malleable (more on that in <a href="#chapter_segwit">[chapter_segwit]</a>).</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_conclusion">Conclusion</h3>
+<div class="paragraph">
+<p>We&#8217;ve covered elliptic curve cryptography and can now prove that we know a secret by signing something. We can also verify that the person with the secret actually signed a message.
+Even if you don&#8217;t read another page in this book, you&#8217;ve learned to implement what was once considered <a href="https://en.wikipedia.org/wiki/Export_of_cryptography_from_the_United_States">"weapons-grade munitions"</a>.
+This is a major step in your journey and will be essential for the rest of the book!</p>
+</div>
+<div class="paragraph">
+<p>We now turn to serializing a lot of these structures so that we can store them on disk and send them over the network.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2019-06-19 11:10:39 -0400
+</div>
+</div>
+</body>
+</html>
