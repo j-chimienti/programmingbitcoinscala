@@ -1,9 +1,8 @@
 package models
 
-import models.HashHelper.p2pkh_script
+import fr.acinq.bitcoin.Base58Check
 import org.scalatest.AsyncFlatSpec
 import scodec.bits.ByteVector
-import services.TransactionService
 
 class TransactionAsyncTest extends AsyncFlatSpec {
 
@@ -69,36 +68,35 @@ class TransactionAsyncTest extends AsyncFlatSpec {
 
   it should "verify input" in {
 
-    for {
-      result <- tx.verifyInput(0)
-
-    } yield {
-      assert(result)
-    }
+    tx.verifyInput(0).map(isVerified => assert(isVerified))
   }
 
   it should "sign input" in {
 
-    val private_key = PrivateKey(BigInt(8675309))
+    val privateKey = PrivateKey(8675309)
     val txIns = Seq(
       TxIn(
         "0025bc3c0fa8b7eb55b9437fdbd016870d18e0df0ace7bc9864efc38414147c8",
-        0
+        0,
+        ByteVector.empty,
+        0xffffffff
       )
     )
-    val h160 = ByteVector.fromValidBase58("mzx5YhAH9kNHtcN481u6WkjeHjYtVeKVh2")
     val out1 =
       TxOut(
         amount = (BigDecimal(0.99) * 100000000).toLong,
-        scriptPubKey = p2pkh_script(h160)
+        scriptPubKey = OP_DUP :: OP_HASH160 :: OP_PUSHDATA(
+          Base58Check.decode("mzx5YhAH9kNHtcN481u6WkjeHjYtVeKVh2")._2
+        ) :: OP_EQUALVERIFY :: OP_CHECKSIG :: Nil
       )
 
-    val h160__ =
-      ByteVector.fromValidBase58("mnrVtF8DWjMu839VW3rBfgYaAfKk8983Xf")
     val out2 =
       TxOut(
         amount = (BigDecimal(0.1) * 100000000).toLong,
-        scriptPubKey = p2pkh_script(h160__)
+        scriptPubKey = OP_DUP :: OP_HASH160 :: OP_PUSHDATA(
+          Base58Check.decode("mnrVtF8DWjMu839VW3rBfgYaAfKk8983Xf")._2
+        )
+          :: OP_EQUALVERIFY :: OP_CHECKSIG :: Nil
       )
     val tx_outs = Seq(out1, out2)
     val tx =
@@ -111,14 +109,62 @@ class TransactionAsyncTest extends AsyncFlatSpec {
       )
 
     val SIGHASH_ALL = 1
-    for {
 
-      result <- tx
-        .signInput(0, private_key, SIGHASH_ALL)
-        .flatMap(response => response.map(res => res))
-    } yield {
-      assert(result)
-    }
+    tx.signInput(0, privateKey, SIGHASH_ALL)
+      .map(tx => assert(true))
+  }
+
+  it should "create testnet tx" in {
+
+    val key =
+      "100101670600421896928058468371021333732585646060773712455132778496481965499204"
+    val key2 =
+      "113034659463690134968056054716646373354929880089725093972680027214452886864239"
+
+    val to = "mwJn1YPMq7y5F8J3LkC5Hxg9PHyZ5K4cFv"
+
+    val pk = PrivateKey(BigInt(key))
+
+    // mwoUNPQkCfNHaRnkcCHUMgbHvXWaAELWRG
+    val addr = pk.publicKey.address(compressed = true, testnet = true)
+
+    val txId =
+      "0c216789ab3266438f6e977d450a19eb6c983f73905fe9bed4eb9e37fa592159"
+
+    val pk2 = PrivateKey(BigInt(key2))
+    // n4Mdcq3x2Fzt6HekzzDp5tedv8yavhVhLy
+    val changeAddr = pk2.publicKey.address(true, true)
+
+    val input =
+      TxIn(txId, 0, ByteVector.empty, 0xffffffff)
+
+    val foo: Seq[ScriptElt] = Script.pay2pkh(to)
+    val bar: Seq[ScriptElt] = Script.pay2pkh(changeAddr)
+
+    val value = (0.01 * 1e8).toInt
+    val sendAmt = (0.6 * value).toInt
+    val changeAmt = value - sendAmt - 50000
+    val outputs = Seq(
+      TxOut(amount = sendAmt, scriptPubKey = foo),
+      TxOut(amount = changeAmt, scriptPubKey = bar)
+    )
+
+    val tx = Transaction(
+      version = 1,
+      inputs = Seq(input),
+      outputs = outputs,
+      locktime = 0L,
+      testnet = true
+    )
+
+    tx.signInput(0, pk, SIGHASH_ALL)
+      .map(tx1 => {
+
+        val j = tx1
+
+        assert(true)
+      })
+
   }
 
 }

@@ -1,17 +1,19 @@
 package models
 
 import java.io._
-import scodec.bits._
 import java.nio.charset.StandardCharsets
 import java.nio.{ByteBuffer, ByteOrder}
-import scala.language.implicitConversions
+
+import fr.acinq.bitcoin.Base58Check
 import org.spongycastle.crypto.Digest
 import org.spongycastle.crypto.digests.{
   RIPEMD160Digest,
   SHA1Digest,
   SHA256Digest
 }
-import fr.acinq.bitcoin.Base58Check
+import scodec.bits._
+
+import scala.language.implicitConversions
 
 class NotImplementedException extends Exception
 
@@ -89,6 +91,15 @@ object HashHelper {
     Base58Check.encode(prefix, h160)
 
   def ripemd160: ByteVector => ByteVector = hash(new RIPEMD160Digest)
+
+  /**
+    * 160 bits bitcoin hash, used mostly for address encoding
+    * hash160(input) = RIPEMD160(SHA256(input))
+    *
+    * @param input array of byte
+    * @return the 160 bits BTC hash of input
+    */
+  def hash160(input: ByteVector): ByteVector = ripemd160(sha256(input))
 
   def h1602p2sh(hex: String, testnet: Boolean): String =
     Base58Check.encode(

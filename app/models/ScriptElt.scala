@@ -118,8 +118,8 @@ case object OP_NOP10 extends ScriptElt
 case object OP_SMALLINTEGER extends ScriptElt
 case object OP_INVALIDOPCODE extends ScriptElt
 object OP_PUSHDATA {
-  def apply(data: ByteVector) = if (data.length < 0x4c) new OP_PUSHDATA(data, data.size.toInt)
-  else if (data.length < 0xff) new OP_PUSHDATA(data, 0x4c)
+  def apply(data: ByteVector) = if (data.length < 76) new OP_PUSHDATA(data, data.size.toInt)
+  else if (data.length < 0xff) new OP_PUSHDATA(data, 76)
   else if (data.length < 0xffff) new OP_PUSHDATA(data, 0x4d)
   else if (data.length < 0xffffffff) new OP_PUSHDATA(data, 0x4e)
   else throw new IllegalArgumentException(s"data is ${data.length}, too big for OP_PUSHDATA")
