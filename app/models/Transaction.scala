@@ -45,8 +45,8 @@ object Transaction extends BtcSerializer[Transaction] {
   // if lockTime >= LOCKTIME_THRESHOLD it is a unix timestamp otherwise it is a block height
   val LOCKTIME_THRESHOLD = 500000000L
 
-  def parse(txId: String, testnet: Boolean): Transaction =
-    parse(txId).copy(testnet = testnet)
+  def parse(hexStr: String, testnet: Boolean): Transaction =
+    parse(hexStr).copy(testnet = testnet)
 
   def parse(hexStr: String): Transaction = {
     val stream = new ByteArrayInputStream(

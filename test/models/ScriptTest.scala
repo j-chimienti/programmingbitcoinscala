@@ -8,7 +8,7 @@ class ScriptTest extends FlatSpec {
 
   behavior of "ScriptTest"
 
-  it should "ScriptSig for the Genesis Block’s Coinbase Transaction" in {
+  it should "Decode ScriptSig for the Genesis Block’s Coinbase Transaction" in {
 
     val tx = "0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098"
     val ss =
@@ -29,17 +29,19 @@ class ScriptTest extends FlatSpec {
 
   }
 
-  it should "unlock" in {
-//
-    val scriptPubKey = List(OP_5, OP_ADD, OP_9, OP_EQUAL)
+  it should "parse" in {
 
-    val script = Script(scriptPubKey)
+    val script_pubkey =
+      "6a47304402207899531a52d59a6de200179928ca900254a36b8dff8bb75f5f5d71b1cdc26125022008b422690b8461cb52c3cc30330b23d574351872b7c361e9aae3649071c1a7160121035d5c93d9ac96881f19ba1f686f15f009ded7c62efe85a872e6a19b43c15a2937"
+    val script = Script.parse(script_pubkey)
+    val want =
+      "304402207899531a52d59a6de200179928ca900254a36b8dff8bb75f5f5d71b1cdc26125022008b422690b8461cb52c3cc30330b23d574351872b7c361e9aae3649071c1a71601"
 
-    val scriptSig = OP_4
-
-    //val s = Script(ByteVector.fromLong(767695935687L))
-
-//    assert(script.elements sameElements s.elements)
+    val elem = script.elements.head.asInstanceOf[OP_PUSHDATA].data
+    assert(elem.toHex == want)
+    val want1 =
+      "035d5c93d9ac96881f19ba1f686f15f009ded7c62efe85a872e6a19b43c15a2937"
+    assert(script.elements(1).asInstanceOf[OP_PUSHDATA].data.toHex == want1)
 
   }
 

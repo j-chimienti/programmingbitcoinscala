@@ -177,12 +177,12 @@ class TransactionService @Inject()(cache: AsyncCacheApi,
 
   def verifyInput(transaction: Transaction, index: Int): Future[Boolean] = {
 
-    val tx = transaction.txIn(index)
-    val pubKey = tx.secPubKey()
+    val txIn = transaction.txIn(index)
+    val pubKey = txIn.secPubKey()
     val point = S256Point.parse(pubKey)
-    val der = tx.derSignature()
+    val der = txIn.derSignature()
     val signature = Signature.parse(der)
-    val ht = tx.hashType()
+    val ht = txIn.hashType()
 
     // fixme: combined = tx_in.script_sig + script_pubkey
     //        # evaluate the combined script
@@ -196,18 +196,17 @@ class TransactionService @Inject()(cache: AsyncCacheApi,
 
     fee(tx) map { fee =>
       if (fee < 0) FastFuture.successful(false)
-      else {
-        val who = tx.txIn.indices.map(idx => verifyInput(tx, idx))
-        for {
-          isVerifiedList <- Future.sequence(who)
-        } yield {
-          val foundUnverified: Option[Boolean] =
-            isVerifiedList.find(isVerified => !isVerified)
-          if (foundUnverified.isDefined) false else true
-        }
-
+      val who = tx.txIn.indices.map(idx => verifyInput(tx, idx))
+      for {
+        isVerifiedList <- Future.sequence(who)
+      } yield {
+        val foundUnverified: Option[Boolean] =
+          isVerifiedList.find(isVerified => !isVerified)
+        if (foundUnverified.isDefined) false else true
       }
+
     }
+
   }
 
   /** fixme p2sh

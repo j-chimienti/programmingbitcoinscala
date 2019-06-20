@@ -171,6 +171,7 @@ object Script extends BtcSerializer[Script] {
     }
   }
 
+  def parse(data: String): Script = parse(ByteVector.fromValidHex(data))
   def apply(data: String): Script = parse(ByteVector.fromValidHex(data))
 
   def apply(input: ByteVector): Script = parse(input)

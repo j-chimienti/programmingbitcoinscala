@@ -40,10 +40,12 @@ object PythonConverter extends App {
 
   val raw9 =
     """
-      |  tx = TxFetcher.fetch('452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03')
-      |        self.assertTrue(tx.verify())
-      |        tx = TxFetcher.fetch('5418099cc755cb9dd3ebc6cf1a7888ad53a1a3beb5a025bce89eb1bf7f1650a2', testnet=True)
-      |        self.assertTrue(tx.verify())
+      |script_pubkey = BytesIO(bytes.fromhex('6a47304402207899531a52d59a6de200179928ca900254a36b8dff8bb75f5f5d71b1cdc26125022008b422690b8461cb52c3cc30330b23d574351872b7c361e9aae3649071c1a7160121035d5c93d9ac96881f19ba1f686f15f009ded7c62efe85a872e6a19b43c15a2937'))
+      |        script = Script.parse(script_pubkey)
+      |        want = bytes.fromhex('304402207899531a52d59a6de200179928ca900254a36b8dff8bb75f5f5d71b1cdc26125022008b422690b8461cb52c3cc30330b23d574351872b7c361e9aae3649071c1a71601')
+      |        self.assertEqual(script.cmds[0].hex(), want.hex())
+      |        want = bytes.fromhex('035d5c93d9ac96881f19ba1f686f15f009ded7c62efe85a872e6a19b43c15a2937')
+      |        self.assertEqual(script.cmds[1], want)
     """.stripMargin
 
   val result = convert(raw9)
