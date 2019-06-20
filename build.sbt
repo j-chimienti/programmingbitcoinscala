@@ -34,7 +34,8 @@ libraryDependencies ++= Seq(
   // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on
   "org.bouncycastle" % "bcprov-jdk15on" % "1.61",
   "fr.acinq" % "bitcoin-lib_2.11" % "0.11",
-  "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+  "org.scalatest" %% "scalatest" % "3.0.5" % "test",
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0" % "test"
   // "org.mongodb.scala" %% "mongo-scala-driver" % "2.3.0",
   // "org.mongodb.scala" % "mongo-scala-bson_2.11" % "2.3.0",
   // "org.mongodb" % "bson" % "3.7.0",

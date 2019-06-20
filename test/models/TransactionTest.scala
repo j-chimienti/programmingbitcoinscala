@@ -25,7 +25,7 @@ class TransactionTest extends FlatSpec {
     assert(tx.txIn.length == 1)
     val want =
       "d1c789a9c60383bf715f3f6ad9d14b91fe55f3deb369fe5d9280cb1a01793f81"
-    assert(tx.txIn.head.txId.toHex == want)
+    assert(tx.txIn.head.prevTxId.toHex == want)
     assert(tx.txIn.head.prevIdx == 0)
     assert(tx.txIn.head.sequence == 4294967294L)
     val scriptSig =

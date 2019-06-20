@@ -39,9 +39,9 @@ case class TxIn(prevTx: ByteVector32,
   require(prevIdx >= -1)
 
   override def serializer: BtcSerializer[TxIn] = TxIn
-  lazy val txId: ByteVector = prevTx.reverse
+  lazy val prevTxId: ByteVector = prevTx.reverse
 
-  override def toString: String = s"TxIn(${txId.toHex}, $prevIdx)"
+  override def toString: String = s"TxIn(${prevTxId.toHex}, $prevIdx)"
 
   def derSignature(idx: Int = 0) =
     Script(scriptSig).signature(idx).dropRight(1)

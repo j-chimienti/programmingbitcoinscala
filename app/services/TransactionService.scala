@@ -13,11 +13,13 @@ import play.api.libs.json.{JsArray, Json, OFormat}
 
 import scala.concurrent.duration._
 import akka.actor.ActorSystem
+import akka.http.scaladsl.util.FastFuture
 import akka.stream.ActorMaterializer
 import javax.inject._
 import models.HashHelper.{hash256, writeUInt32}
 import play.api.Logging
 import play.api.cache.AsyncCacheApi
+import play.api.inject.ApplicationLifecycle
 import play.api.libs.ws.ahc.AhcWSClient
 import scodec.bits.ByteVector
 
@@ -27,11 +29,17 @@ import scala.language.postfixOps
 import scala.language.implicitConversions
 
 @Singleton
-class TransactionService @Inject()(cache: AsyncCacheApi) extends Logging {
+class TransactionService @Inject()(cache: AsyncCacheApi,
+                                   applicationLifeCycle: ApplicationLifecycle)
+    extends Logging {
 
   implicit val system: ActorSystem = ActorSystem("TxIn")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   val client: AhcWSClient = AhcWSClient()
+
+  applicationLifeCycle.addStopHook(() => {
+    Future.successful(client.close())
+  })
 
   def baseUri(testnet: Boolean = false): String =
     if (testnet) "https://blockstream.info/testnet/api"
@@ -144,6 +152,8 @@ class TransactionService @Inject()(cache: AsyncCacheApi) extends Logging {
     }
   }
 
+  def fee(tx: Transaction): Future[Long] = fee(tx, tx.testnet)
+
   /**
     *   Fee of the tx in satoshi
     * @param testnet
@@ -152,7 +162,7 @@ class TransactionService @Inject()(cache: AsyncCacheApi) extends Logging {
   def fee(tx: Transaction, testnet: Boolean = false): Future[Long] = {
 
     val list =
-      tx.txIn.map(input => value(input.prevTx.toHex, input.prevIdx, testnet))
+      tx.txIn.map(input => value(input.prevTxId.toHex, input.prevIdx, testnet))
     for {
       txInFound <- Future.sequence(list)
 
@@ -173,12 +183,34 @@ class TransactionService @Inject()(cache: AsyncCacheApi) extends Logging {
     val der = tx.derSignature()
     val signature = Signature.parse(der)
     val ht = tx.hashType()
+
+    // fixme: combined = tx_in.script_sig + script_pubkey
+    //        # evaluate the combined script
+    //        return combined.evaluate(z)
     sigHash(transaction, index, ht)
       .map(z => point.verify(z, signature))
 
   }
 
-  /** fixme
+  def verify(tx: Transaction) = {
+
+    fee(tx) map { fee =>
+      if (fee < 0) FastFuture.successful(false)
+      else {
+        val who = tx.txIn.indices.map(idx => verifyInput(tx, idx))
+        for {
+          isVerifiedList <- Future.sequence(who)
+        } yield {
+          val foundUnverified: Option[Boolean] =
+            isVerifiedList.find(isVerified => !isVerified)
+          if (foundUnverified.isDefined) false else true
+        }
+
+      }
+    }
+  }
+
+  /** fixme p2sh
     * Sign the input w/ the Private Key
     * @param index
     * @param privateKey
@@ -204,7 +236,6 @@ class TransactionService @Inject()(cache: AsyncCacheApi) extends Logging {
           txIn = tx.txIn
             .updated(index, tx.txIn(index).copy(scriptSig = ss))
         )
-
         for {
 
           isVerified <- verifyInput(tx1, index)
