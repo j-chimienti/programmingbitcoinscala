@@ -57,21 +57,11 @@ class HomeController @Inject()(
   }
 
   val chapters: List[Int] = (for (i <- 1 to 14) yield i).toList
-  val ch: Map[Int, String] = chapters
-    .map(ch => {
-      val chapter = if (ch < 10) "0" + ch.toString else ch.toString
-      val file = s"public/ch$chapter.html"
-      val html = scala.io.Source.fromFile(file).mkString
-      (ch, html)
-    })
-    .toMap
-  def book(chapter: Int) = Action {
-    val cc = ch.get(chapter)
-    cc match {
-      case Some(fc) => Ok(views.html.chapter(chapter, fc))
-      case None     => Ok(views.html.toc(chapters))
 
-    }
+  def book(chapter: Int) = {
+    val ch = if (chapter < 10) "0" + chapter.toString else chapter
+    val file = s"ch$ch.html"
+    assets.at("/public", file)
   }
 
   def toc = Action {
