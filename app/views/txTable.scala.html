@@ -1,0 +1,55 @@
+<style>
+
+    transactions-table .transactions-table-row.header, .transactions-table .transactions-table-row.transaction-data {
+      height: 52px;
+    }
+    .transactions-table .transactions-table-row {
+      display: table;
+      table-layout: fixed;
+      width: 100%;
+    }
+    .transactions-table-row {
+      /*color: #FFF !important;*/
+      color: inherit;
+    }
+    *, ::after, ::before {
+      box-sizing: border-box;
+    }
+
+    .transactions-table .transactions-table-row > div:nth-child(1) {
+      width: 590px;
+      padding-left: 12px;
+    }
+    .transactions-table .transactions-table-row.header > * {
+      text-transform: uppercase;
+      color: #78838e;
+      font-weight: 600;
+    }
+    .transactions-table .transactions-table-row.header > *, .transactions-table .transactions-table-row.transaction-data > * {
+      font-size: 16px;
+    }
+    .transactions-table .transactions-table-row > * {
+      display: table-cell;
+      vertical-align: middle;
+    }
+
+  </style>
+
+
+<div class="transactions-table">
+  <div class="transactions-table-row header">
+    <div class="transactions-table-cell">TXID</div>
+    <div class="transactions-table-cell">Value</div>
+    <div class="transactions-table-cell">Size</div>
+    <div class="transactions-table-cell">Fee</div>
+  </div>
+  <div class="transactions-table-link-row">
+    <a class="transactions-table-row transaction-data" href="@routes.HomeController.tx("2c0a452a04d7b729a4f0dcac55dbb25c66043d420b4f29dbc73815515227e83a")">
+      <div class="transactions-table-cell highlighted-text" data-label="TXID">2c0a452a04d7b729a4f0dcac55dbb25c66043d420b4f29dbc73815515227e83a</div>
+      <div class="transactions-table-cell" data-label="Value">0.3969 BTC</div>
+      <div class="transactions-table-cell" data-label="Size">245 vB</div>
+      <div class="transactions-table-cell" data-label="Fee">104.0 sat/vB</div>
+    </a>
+  </div>
+</div>
+
