@@ -5,6 +5,53 @@
 @main("Bitcoin Explorer") {
 
 
+  <style>
+          .blocks-table .blocks-table-row > div:nth-child(2) {
+            width: 350px;
+          }
+
+          .blocks-table .blocks-table-row.header > * {
+            text-transform: uppercase;
+            color: #78838e;
+            font-weight: 600;
+          }
+          .blocks-table .blocks-table-row.header > *, .blocks-table .blocks-table-row.block-data > * {
+            font-size: 16px;
+          }
+          .blocks-table .blocks-table-row > * {
+            display: table-cell;
+            vertical-align: middle;
+          }
+
+          .blocks-table .blocks-table-row.header, .blocks-table .blocks-table-row.block-data {
+            height: 52px;
+          }
+          .blocks-table .blocks-table-row {
+            display: table;
+            table-layout: fixed;
+            width: 100%;
+          }
+
+          @*/*screen only*/*@
+          @*@media only screen and (max-width: 850px)  {*@
+
+          @*.blocks-table .blocks-table-row.block-data > * {*@
+
+          @*  border: none;*@
+          @*  position: relative;*@
+          @*  padding-left: 0 !important;*@
+          @*  padding: 10px;*@
+          @*  display: flex;*@
+          @*  justify-content: space-between;*@
+          @*  align-items: center;*@
+          @*  width: 100% !important;*@
+          @*  text-align: right;*@
+          @*  /* border-top: 1px solid #22242C; */*@
+          @*}*@
+          @*}*@
+
+  </style>
+
 
 <h1>Bitcoin Explorer</h1>
 
@@ -18,14 +65,43 @@
 
 @*}*@
 
-<form id="userInputForm" action="@routes.HomeController.userInput" method="post">
+@searchBar()
 
-  @CSRF.formField
-  <input type="text" class="form-control form-control-lg" name="userInput" id="userInput">
-  <button class="btn btn-primary" type="submit">
-    Search
-  </button>
-</form>
+<div class="row d-flex mb-4">
+  <h3>Blocks</h3>
+  <h3>Transactions</h3>
+</div>
+
+@txTable()
+
+<div class="blocks-table">
+  <div class="blocks-table-row header">
+    <div class="blocks-table-cell">Height</div>
+    <div class="blocks-table-cell">Timestamp</div>
+    <div class="blocks-table-cell">Transactions</div>
+    <div class="blocks-table-cell">Size (KB)</div>
+    <div class="blocks-table-cell">Weight (KWU)</div>
+  </div>
+  <div class="blocks-table-link-row">
+    <a class="blocks-table-row block-data" href="@routes.HomeController.block("0000000000000000001e920ecdc4c42ef579aeaef37fc8e84cd759c6b1f9036a")">
+      <div class="blocks-table-cell highlighted-text" data-label="Height">581 752</div>
+      <div class="blocks-table-cell" data-label="Timestamp">6/21/2019, 12:13:12 PM EDT</div>
+      <div class="blocks-table-cell" data-label="Transactions">1693</div>
+      <div class="blocks-table-cell" data-label="Size (KB)">1129.033</div>
+      <div class="blocks-table-cell" data-label="Weight (KWU)">3992.792</div>
+    </a>
+  </div>
+  <div class="load-more-container">
+    <div>
+      <div class="load-more" role="button" data-loadmore-block-height="581742">
+        <span>Load more</span>
+        <div><img src="img/icons/arrow_down.png" alt=""></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 @*<script type="text/javascript">*@
 @*  const userInputForm = document.getElementById('userInputForm')*@

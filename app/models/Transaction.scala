@@ -1,7 +1,10 @@
 package models
 
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
+
+import fr.acinq.bitcoin.ByteVector32
 import scodec.bits.ByteVector
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -78,8 +81,21 @@ object Transaction extends BtcSerializer[Transaction] {
 
   }
 
+  val Zeroes =
+    "0000000000000000000000000000000000000000000000000000000000000000"
+
+  /**
+    * Coinbase transactions must have exactly one input.
+    *
+    * The one input must have a previous transaction of 32 bytes of 00.
+    *
+    * The one input must have a previous index of ffffffff.
+    *
+    * @param tx
+    * @return
+    */
   def isCoinbase(tx: Transaction): Boolean =
-    tx.txIn.length == 1 && tx.txIn.head.prevIdx == 0xffffffff
+    tx.txIn.length == 1 && tx.txIn.head.prevIdx == 0xffffffff && tx.txIn.head.prevTx.toHex == Zeroes
 
   override def validate(tx: Transaction): Unit = {
 

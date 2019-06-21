@@ -68,12 +68,12 @@ class HomeController @Inject()(
     Ok(views.html.toc(chapters))
   }
 
-  def parseTx(hex: String) = Action {
+  def parseTx(hex: String) = Action { implicit req: RequestHeader =>
     val tx = Transaction.parse(hex)
     Ok(views.html.transaction(tx))
   }
 
-  def tx(id: String) = Action.async { implicit request =>
+  def tx(id: String) = Action.async { implicit req: RequestHeader =>
     for {
       tx <- transactionService.fetch(id, false)
       fee <- transactionService.fee(tx)

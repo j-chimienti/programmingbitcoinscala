@@ -1,30 +1,91 @@
-@(tx: Transaction, fee: Long = 0)
+@(tx: Transaction, fee: Long = 0)(implicit req: RequestHeader)
 
+<style>
+  .stats-table > div > div:nth-child(1) {
+    text-transform: uppercase;
+    color: #78838e;
+    width: auto;
+  }
+  .stats-table > div > * {
+    display: table-cell;
+    vertical-align: middle;
+  }
+
+  .stats-table > div > div:nth-child(2) {
+    text-align: right;
+    word-break: break-word;
+  }
+
+  .stats-table > div {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+  }
+  .stats-table > div {
+    height: 52px;
+    border-top: 1px solid #22242c;
+    font-size: 16px;
+  }
+
+</style>
 
 @main(tx.txId.toHex) {
 
 
-  <div class="container">
-    <h3>Transaction</h3>
-    <p>@tx.txId.toHex</p>
+  @searchBar()
 
-    <p>Inputs = @tx.txIn</p>
-    <p>Outputs = @tx.txOut</p>
-    <p>Locktime = @tx.locktime</p>
-    <p>Version = @tx.version</p>
-    <p>@tx.hash</p>
-
-    @if(tx.isCoinbase) {
-      <p>COINBASE TX</p>
-    }
-
-
-    <p>Tx Fees = @fee</p>
-    <p>Status = </p>
-    <p>Included in Block =</p>
-    <p>Bock Height = </p>
-
+  <div class="jumbotron">
+    <h2>Transaction</h2>
+    <h5>@tx.txId.toHex</h5>
   </div>
+
+  <div class="stats-table">
+    <div>
+      <div>Status</div>
+      <div>Unconfirmed</div>
+    </div>
+    <div>
+      <div>ETA</div>
+      <div>in 144 blocks (2.24 vMB from tip)</div>
+    </div>
+    <div>
+      <div>Transaction fees</div>
+      <div><span class="amount">@fee sat (59.1 sat/vB)</span></div>
+    </div>
+    <div>
+      <div>Size</div>
+      <div>27 341 B</div>
+    </div>
+    <div>
+      <div>Virtual size</div>
+      <div>27 341 vB</div>
+    </div>
+    <div>
+      <div>Weight units</div>
+      <div>109 364 WU</div>
+    </div>
+    <div>
+      <div>Version</div>
+      <div>@tx.version</div>
+    </div>
+    <div>
+      <div>Lock time</div>
+      <div>581738</div>
+    </div>
+    <div>
+      <div>SegWit fee savings</div>
+      <div class="py-2 small-sm"><span class="text-danger">This transaction could save 54% on fees by upgrading to native SegWit-Bech32 or 40% by upgrading to SegWit-P2SH</span></div>
+    </div>
+    <div>
+      <div>Privacy analysis</div>
+      <div class="py-2 small-sm">
+        <ul class="list-unstyled">
+          <li title="Sending exact amounts (with no change) is an indication the bitcoins likely didn't change hands."><a class="text-warning" href="https://en.bitcoin.it/wiki/Privacy#Exact_payment_amounts_.28no_change.29">Likely self-transfer➚</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
 
 
 }

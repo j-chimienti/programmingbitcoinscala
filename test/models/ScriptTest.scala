@@ -8,6 +8,18 @@ class ScriptTest extends FlatSpec {
 
   behavior of "ScriptTest"
 
+  // The entire PDF of Satoshi’s original whitepaper is encoded in this transaction in block 230009:
+  //
+  //54e48e5f5c656b26c3bca14a8c95aa583d07ebe84dde3b7dd4a78f4e4186e713
+
+  // The creator of this transaction split up the whitepaper PDF into 64-byte chunks, which were then made into invalid uncompressed public keys. The whitepaper was encoded into 947 1-of-3 bare multisig outputs. These outputs are not spendable but have to be indexed in the UTXO sets of full nodes. This is a tax every full node has to pay and is in that sense abusive.
+
+  // Biggest tx to data
+
+  // bb41a757f405890fb0f5856228e23b715702d714d59bf2b1feb70d8b2b4e3e08
+
+  // took over a min to validate
+
   it should "Decode ScriptSig for the Genesis Block’s Coinbase Transaction" in {
 
     val tx = "0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098"
@@ -37,11 +49,11 @@ class ScriptTest extends FlatSpec {
     val want =
       "304402207899531a52d59a6de200179928ca900254a36b8dff8bb75f5f5d71b1cdc26125022008b422690b8461cb52c3cc30330b23d574351872b7c361e9aae3649071c1a71601"
 
-    val elem = script.elements.head.asInstanceOf[OP_PUSHDATA].data
+    val elem = script.elements(1).asInstanceOf[OP_PUSHDATA].data
     assert(elem.toHex == want)
     val want1 =
       "035d5c93d9ac96881f19ba1f686f15f009ded7c62efe85a872e6a19b43c15a2937"
-    assert(script.elements(1).asInstanceOf[OP_PUSHDATA].data.toHex == want1)
+    assert(script.elements.last.asInstanceOf[OP_PUSHDATA].data.toHex == want1)
 
   }
 
@@ -69,7 +81,7 @@ class ScriptTest extends FlatSpec {
     )
 
   }
-
+// The main feature of p2sh is that it’s flexible and at the same time reduces the UTXO set size by pushing the burden of storing part of the script back to the user.
   it should "p2sh" in {
 
     val h = "a91474d691da1574e6b3c192ecfb52cc8984ee7b6c5687"

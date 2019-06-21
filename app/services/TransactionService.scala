@@ -1,6 +1,9 @@
 package services
 
+import java.nio.ByteOrder
+
 import models.{
+  HashHelper,
   OP_PUSHDATA,
   PrivateKey,
   S256Point,
@@ -132,9 +135,7 @@ class TransactionService @Inject()(cache: AsyncCacheApi,
     * @param hashType
     * @return the integer of the hash that needs to get signed for index input_index
     */
-  def sigHash(tx: Transaction,
-              index: Int,
-              hashType: Int): Future[ByteVector] = {
+  def sigHash(tx: Transaction, index: Int, hashType: Int) = {
 
     val altTxIns = for (trans <- tx.txIn)
       yield trans.copy(scriptSig = ByteVector.empty)
@@ -147,7 +148,7 @@ class TransactionService @Inject()(cache: AsyncCacheApi,
       val tx1 = tx.copy(txIn = txIns)
       val result = Transaction.serialize(tx1) ++ writeUInt32(hashType)
       val hash = hash256(result)
-      hash
+      (tx1, hash)
 
     }
   }
@@ -188,7 +189,7 @@ class TransactionService @Inject()(cache: AsyncCacheApi,
     //        # evaluate the combined script
     //        return combined.evaluate(z)
     sigHash(transaction, index, ht)
-      .map(z => point.verify(z, signature))
+      .map(result => point.verify(result._2, signature))
 
   }
 
@@ -222,7 +223,9 @@ class TransactionService @Inject()(cache: AsyncCacheApi,
                 hashType: Int): Future[Future[Transaction]] = {
 
     sigHash(tx, index, hashType).map(
-      z => {
+      result => {
+        val z = result._2
+        val tx1 = result._1
         val signature = privateKey.sign(z)
         val der = signature.der
         val sig = ByteVector(der :+ hashType.toByte)
@@ -231,22 +234,31 @@ class TransactionService @Inject()(cache: AsyncCacheApi,
           publicKey
         ) :: Nil
         val ss = Script.serialize(scriptSig)
-        val tx1 = tx.copy(
+        val tx2 = tx1.copy(
           txIn = tx.txIn
             .updated(index, tx.txIn(index).copy(scriptSig = ss))
         )
         for {
 
-          isVerified <- verifyInput(tx1, index)
+          isVerified <- verifyInput(tx2, index)
         } yield {
 
-          require(isVerified)
-
-          tx1
+          println(s"is verified = $isVerified")
+          // require(isVerified)
+          tx2
         }
 
       }
     )
+  }
+
+  def coinbaseHeight(tx: Transaction) = {
+
+//    if (!tx.isCoinbase) {
+//      false
+//    }
+//    val foo = tx.txIn.head.scriptSig.head
+//    HashHelper.uint32(foo, ByteOrder.LITTLE_ENDIAN)
   }
 
 }

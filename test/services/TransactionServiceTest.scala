@@ -157,8 +157,8 @@ class TransactionServiceTest
     } yield {
 
       waiter {
-
-        assert(result.toHex == want)
+        val z = result._2
+        assert(z.toHex == want)
         waiter.dismiss()
       }
       waiter.await(timeout(5 seconds))
@@ -166,18 +166,43 @@ class TransactionServiceTest
 
   }
 
-  "verify tx" in {
+  "verify p2pkh" in {
 
     val waiter = new Waiter
-    txService
-      .verify(tx)
-      .flatMap(result => result)
-      .map(isVerified => {
-        waiter {
-          assert(isVerified)
-          waiter.dismiss()
-        }
-      })
+    val h1 = "452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03"
+    val h2 = "452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03"
+    for {
+
+      tx1 <- txService.fetch(h1, false)
+      tx2 <- txService.fetch(h2, true)
+      v1 <- txService.verify(tx1).flatMap(result => result)
+      v2 <- txService.verify(tx2).flatMap(r => r)
+    } yield {
+
+      waiter {
+        assert(v1)
+        assert(v2)
+        waiter.dismiss()
+      }
+    }
+    waiter.await(timeout(5 seconds))
+  }
+
+  "verify p2sh" in {
+
+    val waiter = new Waiter
+    val h1 = "46df1a9484d0a81d03ce0ee543ab6e1a23ed06175c104a178268fad381216c2b"
+    for {
+
+      tx1 <- txService.fetch(h1, false)
+      v1 <- txService.verify(tx1).flatMap(result => result)
+    } yield {
+
+      waiter {
+        assert(v1)
+        waiter.dismiss()
+      }
+    }
     waiter.await(timeout(5 seconds))
   }
 
