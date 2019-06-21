@@ -58,7 +58,7 @@ class BlockchainService @Inject()(cache: AsyncCacheApi,
   def fetch(txId: String, testnet: Boolean = false): Future[Transaction] = {
 
     cache
-      .getOrElseUpdate[Transaction](txId) {
+      .getOrElseUpdate[Transaction](txId, 30 seconds) {
         fromService(txId, testnet)
       }
 
@@ -66,11 +66,20 @@ class BlockchainService @Inject()(cache: AsyncCacheApi,
 
   def block(blockHex: String,
             testnet: Boolean = false): Future[BlockstreamBlock] = {
-    cache.getOrElseUpdate[BlockstreamBlock](blockHex) {
+    cache.getOrElseUpdate[BlockstreamBlock](blockHex, Duration.Inf) {
       fetchBlock(blockHex, testnet)
     }
   }
 
+  /**
+    *
+    *
+    * The response from this endpoint can be cached indefinitely.
+    *
+    * @param str
+    * @param testnet
+    * @return Returns information about a block.
+    */
   def fetchBlock(str: String, testnet: Boolean): Future[BlockstreamBlock] = {
 
     val url = baseUri(testnet) + s"/block/$str"
