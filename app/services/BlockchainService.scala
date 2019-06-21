@@ -3,6 +3,7 @@ package services
 import java.nio.ByteOrder
 
 import models.{
+  Block,
   HashHelper,
   OP_PUSHDATA,
   PrivateKey,
@@ -32,8 +33,8 @@ import scala.language.postfixOps
 import scala.language.implicitConversions
 
 @Singleton
-class TransactionService @Inject()(cache: AsyncCacheApi,
-                                   applicationLifeCycle: ApplicationLifecycle)
+class BlockchainService @Inject()(cache: AsyncCacheApi,
+                                  applicationLifeCycle: ApplicationLifecycle)
     extends Logging {
 
   implicit val system: ActorSystem = ActorSystem("TxIn")
@@ -59,6 +60,37 @@ class TransactionService @Inject()(cache: AsyncCacheApi,
     cache
       .getOrElseUpdate[Transaction](txId) {
         fromService(txId, testnet)
+      }
+
+  }
+
+  def block(blockHex: String,
+            testnet: Boolean = false): Future[BlockstreamBlock] = {
+    cache.getOrElseUpdate[BlockstreamBlock](blockHex) {
+      fetchBlock(blockHex, testnet)
+    }
+  }
+
+  def fetchBlock(str: String, testnet: Boolean): Future[BlockstreamBlock] = {
+
+    val url = baseUri(testnet) + s"/block/$str"
+    for {
+      response <- client
+        .url(url)
+        .withRequestTimeout(3 seconds)
+        .get()
+    } yield
+      response.status match {
+        case 200 =>
+          response.json.asOpt[BlockstreamBlock] match {
+            case Some(block) =>
+              block
+            case _ =>
+              println()
+              throw new RuntimeException("Invalid Request")
+          }
+        case _ =>
+          throw new RuntimeException("Invalid Response")
       }
 
   }
@@ -135,7 +167,9 @@ class TransactionService @Inject()(cache: AsyncCacheApi,
     * @param hashType
     * @return the integer of the hash that needs to get signed for index input_index
     */
-  def sigHash(tx: Transaction, index: Int, hashType: Int) = {
+  def sigHash(tx: Transaction,
+              index: Int,
+              hashType: Int): Future[(Transaction, HashHelper.ByteVector32)] = {
 
     val altTxIns = for (trans <- tx.txIn)
       yield trans.copy(scriptSig = ByteVector.empty)
@@ -193,7 +227,7 @@ class TransactionService @Inject()(cache: AsyncCacheApi,
 
   }
 
-  def verify(tx: Transaction) = {
+  def verify(tx: Transaction): Future[Future[Boolean]] = {
 
     fee(tx) map { fee =>
       if (fee < 0) FastFuture.successful(false)
@@ -252,7 +286,7 @@ class TransactionService @Inject()(cache: AsyncCacheApi,
     )
   }
 
-  def coinbaseHeight(tx: Transaction) = {
+  def coinbaseHeight(tx: Transaction): Unit = {
 
 //    if (!tx.isCoinbase) {
 //      false
@@ -262,6 +296,37 @@ class TransactionService @Inject()(cache: AsyncCacheApi,
   }
 
 }
+
+object BlockstreamBlock {
+
+  implicit val fm: OFormat[BlockstreamBlock] = Json.format[BlockstreamBlock]
+}
+
+/**
+  * JSON from blockstream GET /block/:hash
+  * @param id
+  * @param height
+  * @param version
+  * @param timestamp
+  * @param tx_count
+  * @param size
+  * @param weight
+  * @param merkle_root
+  * @param previousblockhash
+  * @param nonce
+  * @param bits
+  */
+case class BlockstreamBlock(id: String,
+                            height: Double,
+                            version: Double,
+                            timestamp: Double,
+                            tx_count: Double,
+                            size: Double,
+                            weight: Double,
+                            merkle_root: String,
+                            previousblockhash: String,
+                            nonce: Double,
+                            bits: Double)
 
 /// JSON obj for tx
 

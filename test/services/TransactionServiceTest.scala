@@ -12,13 +12,13 @@ import scodec.bits.ByteVector
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class TransactionServiceTest
+class BlockchainServiceTest
     extends PlaySpec
     with GuiceOneAppPerSuite
     with Waiters {
 
-  val txService: TransactionService =
-    app.injector.instanceOf(classOf[TransactionService])
+  val txService: BlockchainService =
+    app.injector.instanceOf(classOf[BlockchainService])
 
   val txId =
     "d1c789a9c60383bf715f3f6ad9d14b91fe55f3deb369fe5d9280cb1a01793f81"

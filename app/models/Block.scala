@@ -90,19 +90,14 @@ object Block extends BtcSerializer[Block] {
 
   }
 
-  def targetToBits(target: Long): Array[Long] = {
+  def targetToBits(target: Long) = {
 
     val rawBytes = ByteVector.fromLong(target).padLeft(32)
-
-    var foo = rawBytes.dropWhile(_ == 0)
-    val (exponent, coeff): (Long, Array[Byte]) = if (foo.head > 0x7f) {
-
-      (foo.length + 1, foo.take(2).toArray.+:(0x00.toByte))
-
-    } else {
-
-      (foo.length, foo.take(3).toArray)
-    }
-    coeff.reverse :+ exponent
+    val foo: Array[Byte] = rawBytes.dropWhile(_ == 0).toArray
+    val (exponent, coeff): (Long, Array[Byte]) =
+      if (foo.head > 0x7f) (foo.length + 1, foo.take(2).+:(0x00.toByte))
+      else (foo.length, foo.take(3))
+    val result: Array[Byte] = coeff.reverse :+ exponent.toByte
+    result
   }
 }

@@ -6,7 +6,7 @@ import javax.inject._
 import models.{PrivateKey, Transaction, UserInput}
 import play.api.data.Form
 import play.api.mvc._
-import services.TransactionService
+import services.BlockchainService
 import scala.util.Try
 import play.api.data._
 import play.api.data.Forms._
@@ -25,7 +25,7 @@ class HomeController @Inject()(
   cc: ControllerComponents,
   assets: Assets,
   actorSystem: ActorSystem,
-  transactionService: TransactionService
+  blockchainService: BlockchainService
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc) {
 
@@ -50,7 +50,7 @@ class HomeController @Inject()(
 
   def postTx(hex: String, testnet: Boolean = false) = Action.async {
     for {
-      result <- transactionService.post(hex, testnet)
+      result <- blockchainService.post(hex, testnet)
     } yield {
       Ok(result)
     }
@@ -75,8 +75,8 @@ class HomeController @Inject()(
 
   def tx(id: String) = Action.async { implicit req: RequestHeader =>
     for {
-      tx <- transactionService.fetch(id, false)
-      fee <- transactionService.fee(tx)
+      tx <- blockchainService.fetch(id, false)
+      fee <- blockchainService.fee(tx)
     } yield Ok(views.html.transaction(tx, fee))
 
   }
@@ -104,9 +104,12 @@ class HomeController @Inject()(
 
   }
 
-  def block(block: String) = Action {
+  def block(block: String, testnet: Boolean = false) = Action.async {
 
-    Ok(views.html.block())
+    blockchainService
+      .block(block, testnet)
+      .map(result => Ok(views.html.block(result)))
+
   }
 
 }

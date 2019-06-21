@@ -1,6 +1,6 @@
 import com.google.inject.{AbstractModule, Provides}
 // import org.mongodb.scala.{MongoClient, MongoDatabase}
-import services.TransactionService
+import services.BlockchainService
 
 /**
   * This class is a Guice module that tells Guice how to bind several
@@ -15,9 +15,9 @@ import services.TransactionService
 class Module extends AbstractModule {
 
   override def configure() = {
-    // Ask Guice to create an instance of Transactionservice when the
+    // Ask Guice to create an instance of BlockchainService when the
     // application starts.
-    bind(classOf[TransactionService]).asEagerSingleton()
+    bind(classOf[BlockchainService]).asEagerSingleton()
   }
 
 //  @Provides
