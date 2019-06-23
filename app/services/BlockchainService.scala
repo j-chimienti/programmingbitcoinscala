@@ -1,49 +1,23 @@
 package services
 
-import java.nio.ByteOrder
-
-import models.{
-  Block,
-  HashHelper,
-  OP_PUSHDATA,
-  PrivateKey,
-  S256Point,
-  Script,
-  ScriptElt,
-  Signature,
-  Transaction
-}
-import play.api.libs.json.{JsArray, Json, OFormat}
-
+import models._
+import play.api.libs.json.{Json, OFormat}
 import scala.concurrent.duration._
-import akka.actor.ActorSystem
 import akka.http.scaladsl.util.FastFuture
-import akka.stream.ActorMaterializer
 import javax.inject._
 import models.HashHelper.{hash256, writeUInt32}
 import play.api.Logging
 import play.api.cache.AsyncCacheApi
-import play.api.inject.ApplicationLifecycle
-import play.api.libs.ws.ahc.AhcWSClient
+import play.api.libs.ws.WSClient
 import scodec.bits.ByteVector
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.language.implicitConversions
 
 @Singleton
-class BlockchainService @Inject()(cache: AsyncCacheApi,
-                                  applicationLifeCycle: ApplicationLifecycle)
-    extends Logging {
-
-  implicit val system: ActorSystem = ActorSystem("TxIn")
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
-  val client: AhcWSClient = AhcWSClient()
-
-  applicationLifeCycle.addStopHook(() => {
-    Future.successful(client.close())
-  })
+class BlockchainService @Inject()(cache: AsyncCacheApi, client: WSClient)(
+  implicit ec: ExecutionContext
+) extends Logging {
 
   def baseUri(testnet: Boolean = false): String =
     if (testnet) "https://blockstream.info/testnet/api"
@@ -86,7 +60,7 @@ class BlockchainService @Inject()(cache: AsyncCacheApi,
     for {
       response <- client
         .url(url)
-        .withRequestTimeout(3 seconds)
+        //.withRequestTimeout(3 seconds)
         .get()
     } yield
       response.status match {
@@ -95,7 +69,6 @@ class BlockchainService @Inject()(cache: AsyncCacheApi,
             case Some(block) =>
               block
             case _ =>
-              println()
               throw new RuntimeException("Invalid Request")
           }
         case _ =>
@@ -110,7 +83,7 @@ class BlockchainService @Inject()(cache: AsyncCacheApi,
     for {
       response <- client
         .url(url)
-        .withRequestTimeout(3 seconds)
+        //.withRequestTimeout(3 seconds)
         .get()
     } yield {
       response.status match {
@@ -133,7 +106,7 @@ class BlockchainService @Inject()(cache: AsyncCacheApi,
 
     client
       .url(url)
-      .withRequestTimeout(5 seconds)
+      //.withRequestTimeout(5 seconds)
       .post(tx)
       .map(response => {
 

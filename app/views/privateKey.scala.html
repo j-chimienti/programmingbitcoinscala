@@ -1,8 +1,6 @@
 @(privateKey: PrivateKey)
 
 @main("Private Key") {
-
-  <p>@privateKey.toString</p>
   <p>
     Hex = @privateKey.hex
   </p>
@@ -12,13 +10,10 @@
   <p>
     Address (uncompressed) = @privateKey.point.address(compressed = false)
   </p>
-
   <p>
     Wif = @privateKey.wif()
   </p>
-
   <p>
     Wif (uncompressed) = @privateKey.wif(compressed = false)
   </p>
-
 }

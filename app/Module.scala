@@ -16,7 +16,7 @@ class Module extends AbstractModule {
 
   override def configure() = {
     // Ask Guice to create an instance of BlockchainService when the
-    // application starts.
+    // applicat ion starts.
     bind(classOf[BlockchainService]).asEagerSingleton()
   }
 

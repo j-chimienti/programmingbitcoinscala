@@ -6,7 +6,8 @@ import javax.inject._
 import models.{PrivateKey, Transaction, UserInput}
 import play.api.data.Form
 import play.api.mvc._
-import services.BlockchainService
+import services.{BlockchainService, WalletGen}
+
 import scala.util.Try
 import play.api.data._
 import play.api.data.Forms._
@@ -33,6 +34,12 @@ class HomeController @Inject()(
 
     toc
 
+  }
+
+  def newWallet = Action {
+    val wallet = new WalletGen()
+    val foo = wallet.apply(None)
+    Ok(views.html.walletGen(foo))
   }
 
   def serve(file: Asset) = {

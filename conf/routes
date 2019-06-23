@@ -14,6 +14,8 @@ GET     /block/:block               controllers.HomeController.block(block)
 
 GET     /privateKey/:privateKey     controllers.HomeController.privateKey(privateKey)
 
+GET     /wallet/new                 controllers.HomeController.newWallet
+
 #+nocsrf
 POST    /v1/userInput               controllers.HomeController.userInput
 
