@@ -22,9 +22,9 @@ case class Transaction(version: Long,
                        testnet: Boolean = false)
     extends BtcSerializable[Transaction] {
 
-  lazy val hash: HashHelper.ByteVector32 = HashHelper.hash256(serialize)
-  lazy val txId: HashHelper.ByteVector32 = hash.reverse
-  lazy val isCoinbase: Boolean = Transaction.isCoinbase(this)
+  def hash: HashHelper.ByteVector32 = HashHelper.hash256(serialize)
+  def txId: HashHelper.ByteVector32 = hash.reverse
+  def isCoinbase: Boolean = Transaction.isCoinbase(this)
   override def serializer: BtcSerializer[Transaction] = Transaction
 
   def serialize: ByteVector = Transaction.serialize(this)

@@ -1,3 +1,5 @@
+import scodec.bits.ByteVector
+
 import scala.language.{implicitConversions, postfixOps}
 
 package object models {
@@ -35,9 +37,17 @@ package object models {
   final val MaxScriptElementSize: Int = 520
   final val LockTimeThreshold: Long = 500000L
 
-  val SIGHASH_ALL = 1
-  val SIGHASH_NONE = 2
-  val SIGHASH_SINGLE = 3
+  val SIGHASH_ALL: ByteVector = HashHelper.writeUInt32(1)
+  val SIGHASH_NONE: ByteVector = HashHelper.writeUInt32(2)
+  val SIGHASH_SINGLE: ByteVector = HashHelper.writeUInt32(3)
+
+  def mapHashType(i: Int): ByteVector = i match {
+
+    case 1 => SIGHASH_ALL
+    case 2 => SIGHASH_NONE
+    case 3 => SIGHASH_SINGLE
+    case _ => throw new IllegalArgumentException(s"Invalid i = $i")
+  }
 
   implicit final class BitcoinLong(private val long: Long) extends AnyVal {
 

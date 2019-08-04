@@ -6,7 +6,7 @@ import javax.inject._
 import models.{PrivateKey, Transaction, UserInput}
 import play.api.data.Form
 import play.api.mvc._
-import services.{BlockchainService, WalletGen}
+import services.{TransactionService, WalletGen}
 
 import scala.util.Try
 import play.api.data._
@@ -26,7 +26,7 @@ class HomeController @Inject()(
   cc: ControllerComponents,
   assets: Assets,
   actorSystem: ActorSystem,
-  blockchainService: BlockchainService
+  TransactionService: TransactionService
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc) {
 
@@ -57,7 +57,7 @@ class HomeController @Inject()(
 
   def postTx(hex: String, testnet: Boolean = false) = Action.async {
     for {
-      result <- blockchainService.post(hex, testnet)
+      result <- TransactionService.post(hex, testnet)
     } yield {
       Ok(result)
     }
@@ -82,8 +82,8 @@ class HomeController @Inject()(
 
   def tx(id: String) = Action.async { implicit req: RequestHeader =>
     for {
-      tx <- blockchainService.fetch(id, false)
-      fee <- blockchainService.fee(tx)
+      tx <- TransactionService.fetch(id, false)
+      fee <- TransactionService.fee(tx)
     } yield Ok(views.html.transaction(tx, fee))
 
   }
@@ -93,27 +93,27 @@ class HomeController @Inject()(
   }
 
   val userForm: Form[UserInput] = Form(
-    mapping("userInput" -> text)(UserInput.apply)(UserInput.unapply)
+    mapping("userInput" -> nonEmptyText)(UserInput.apply)(UserInput.unapply)
   )
 
   def explorer = Action { implicit req: RequestHeader =>
     Ok(views.html.explorer(userForm))
   }
   def userInput = Action { implicit request =>
-    userForm.bindFromRequest.fold(
-      formWithErrors => {
-        Ok("error")
-      },
-      userInput =>
-        Redirect(routes.HomeController.tx(userInput.input))
-          .flashing("success" -> "Contact saved!")
-    )
+    val errorFunc = { formWithErrors: Form[UserInput] =>
+      Ok("error")
+    }
+    val successFunc = { userInput: UserInput =>
+      Redirect(routes.HomeController.tx(userInput.input))
+        .flashing("success" -> "Contact saved!")
+    }
+    userForm.bindFromRequest.fold(errorFunc, successFunc)
 
   }
 
   def block(block: String, testnet: Boolean = false) = Action.async {
 
-    blockchainService
+    TransactionService
       .block(block, testnet)
       .map(result => Ok(views.html.block(result)))
 

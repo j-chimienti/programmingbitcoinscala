@@ -29,7 +29,12 @@
 
 </style>
 
-@main(tx.txId.toHex) {
+  @req.flash.data.map{ case (name, value) =>
+  <div>@name: @value</div>
+  }
+
+
+  @main(tx.txId.toHex) {
 
 
   @searchBar()

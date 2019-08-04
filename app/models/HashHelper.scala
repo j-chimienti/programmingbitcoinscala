@@ -43,9 +43,10 @@ object HashHelper {
 
   def littleEndianToInt(data: Array[Byte], allocate: Int): Long =
     allocate match {
-
       case 4 => uint32(data, ByteOrder.LITTLE_ENDIAN)
       case 8 => uint64(data, ByteOrder.LITTLE_ENDIAN)
+      case _ =>
+        throw new IllegalArgumentException(s"Invalid allocate = $allocate")
     }
 
   // https://stackoverflow.com/questions/3842828/converting-little-endian-to-big-endian

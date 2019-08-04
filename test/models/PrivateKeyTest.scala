@@ -6,6 +6,19 @@ class PrivateKeyTest extends WordSpec {
 
   "PrivateKeyTest" should {
 
+    "get key" in {
+
+      val pk =
+        "7ecd4c3b77ea6afa6698248c595fee1d66255887cfe6732d3973661f27e21613"
+
+      val privateKey = PrivateKey(pk)
+
+      val wif = "L1UCPwc8nVDJmr7UsqgKz8oNstusJRS2HqQxz3sPsvgjXYra9nQi"
+
+      assert(privateKey.wif() == wif)
+
+    }
+
     // https://bitcointalk.org/index.php?topic=1716322.0
     "create address" in {
       val key = 1

@@ -19,6 +19,8 @@ case class TxOut(amount: Long, scriptPubKey: ByteVector)
 
   override def serializer: BtcSerializer[TxOut] = TxOut
 
+  def serialize = TxOut.serialize(this)
+
 }
 
 object TxOut extends BtcSerializer[TxOut] {

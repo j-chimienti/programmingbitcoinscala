@@ -61,6 +61,7 @@ class TransactionTest extends FlatSpec {
     val der = tx.txIn.head.derSignature()
     val hashType = tx.txIn.head.hashType()
 
+    // fixme
     assert(der.toHex == want)
     assert(hashType == SIGHASH_ALL)
 

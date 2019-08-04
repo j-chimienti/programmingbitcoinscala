@@ -2,20 +2,22 @@ package services
 
 import models._
 import play.api.libs.json.{Json, OFormat}
+
 import scala.concurrent.duration._
 import akka.http.scaladsl.util.FastFuture
 import javax.inject._
-import models.HashHelper.{hash256, writeUInt32}
+import models.HashHelper.{ByteVector32, hash256, writeUInt32}
 import play.api.Logging
 import play.api.cache.AsyncCacheApi
 import play.api.libs.ws.WSClient
 import scodec.bits.ByteVector
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.language.implicitConversions
 
 @Singleton
-class BlockchainService @Inject()(cache: AsyncCacheApi, client: WSClient)(
+class TransactionService @Inject()(cache: AsyncCacheApi, client: WSClient)(
   implicit ec: ExecutionContext
 ) extends Logging {
 
@@ -125,8 +127,8 @@ class BlockchainService @Inject()(cache: AsyncCacheApi, client: WSClient)(
 
   }
 
-  def scriptPubKey(tx: Transaction, index: Int): Future[ByteVector] =
-    scriptPubKey(tx.txId.toHex, index, tx.testnet)
+  def scriptPubKey(txIn: TxIn, testnet: Boolean): Future[ByteVector] =
+    scriptPubKey(txIn.prevTxId.toHex, txIn.prevIdx, testnet)
 
   /**
     *   Get the scriptPubKey by looking up tx hash on server
@@ -144,28 +146,27 @@ class BlockchainService @Inject()(cache: AsyncCacheApi, client: WSClient)(
   }
 
   /**
-    *
+    * Returns the integer representation of the hash that needs to get
+    * signed for index input_index
     * @param index
     * @param hashType
     * @return the integer of the hash that needs to get signed for index input_index
     */
   def sigHash(tx: Transaction,
               index: Int,
-              hashType: Int): Future[(Transaction, HashHelper.ByteVector32)] = {
+              hashType: ByteVector,
+              redeemScript: Option[String] = None): Future[ByteVector32] = {
 
-    val altTxIns = for (trans <- tx.txIn)
-      yield trans.copy(scriptSig = ByteVector.empty)
-    val input = altTxIns(index)
     for {
-      scriptPubKey <- scriptPubKey(tx, index)
+      scriptPubKey <- scriptPubKey(tx.txIn(index), tx.testnet)
     } yield {
-      val txIns =
-        altTxIns.updated(index, input.copy(scriptSig = scriptPubKey))
-      val tx1 = tx.copy(txIn = txIns)
-      val result = Transaction.serialize(tx1) ++ writeUInt32(hashType)
-      val hash = hash256(result)
-      (tx1, hash)
-
+      val modTxIns = for ((tIn, i) <- tx.txIn.zipWithIndex)
+        yield
+          tIn.copy(
+            scriptSig = if (index == i) scriptPubKey else ByteVector.empty
+          )
+      val modTx = tx.copy(txIn = modTxIns)
+      HashHelper.hash256(modTx.serialize ++ hashType)
     }
   }
 
@@ -204,12 +205,12 @@ class BlockchainService @Inject()(cache: AsyncCacheApi, client: WSClient)(
     // fixme: combined = tx_in.script_sig + script_pubkey
     //        # evaluate the combined script
     //        return combined.evaluate(z)
-    sigHash(transaction, index, ht)
-      .map(result => point.verify(result._2, signature))
+    sigHash(transaction, index, mapHashType(ht))
+      .map(result => point.verify(result, signature))
 
   }
 
-  def verify(tx: Transaction): Future[Future[Boolean]] = {
+  def verify(tx: Transaction): Future[Boolean] = {
 
     fee(tx) map { fee =>
       if (fee < 0) FastFuture.successful(false)
@@ -219,9 +220,11 @@ class BlockchainService @Inject()(cache: AsyncCacheApi, client: WSClient)(
       } yield {
         val foundUnverified: Option[Boolean] =
           isVerifiedList.find(isVerified => !isVerified)
-        if (foundUnverified.isDefined) false else true
+        foundUnverified.isEmpty
       }
 
+    } flatMap { result =>
+      result
     }
 
   }
@@ -233,40 +236,40 @@ class BlockchainService @Inject()(cache: AsyncCacheApi, client: WSClient)(
     * @param hashType
     * @return
     */
-  def signInput(tx: Transaction,
-                index: Int,
-                privateKey: PrivateKey,
-                hashType: Int): Future[Future[Transaction]] = {
-
-    sigHash(tx, index, hashType).map(
-      result => {
-        val z = result._2
-        val tx1 = result._1
-        val signature = privateKey.sign(z)
-        val der = signature.der
-        val sig = ByteVector(der :+ hashType.toByte)
-        val publicKey = privateKey.publicKey.sec(compressed = true)
-        val scriptSig: Seq[ScriptElt] = OP_PUSHDATA(sig) :: OP_PUSHDATA(
-          publicKey
-        ) :: Nil
-        val ss = Script.serialize(scriptSig)
-        val tx2 = tx1.copy(
-          txIn = tx.txIn
-            .updated(index, tx.txIn(index).copy(scriptSig = ss))
-        )
-        for {
-
-          isVerified <- verifyInput(tx2, index)
-        } yield {
-
-          println(s"is verified = $isVerified")
-          // require(isVerified)
-          tx2
-        }
-
-      }
-    )
-  }
+//  def signInput(tx: Transaction,
+//                index: Int,
+//                privateKey: PrivateKey,
+//                hashType: Int): Future[Transaction] = {
+//
+//    sigHash(tx, index, hashType)
+//      .map(result => {
+//        val z = result._2
+//        val tx1 = result._1
+//        val signature = privateKey.sign(z)
+//        val der = signature.der
+//        val sig = ByteVector(der :+ hashType.toByte)
+//        val publicKey = privateKey.publicKey.sec(compressed = true)
+//        val scriptSig: Seq[ScriptElt] = OP_PUSHDATA(sig) :: OP_PUSHDATA(
+//          publicKey
+//        ) :: Nil
+//        val ss = Script.serialize(scriptSig)
+//        val tx2 = tx1.copy(
+//          txIn = tx.txIn
+//            .updated(index, tx.txIn(index).copy(scriptSig = ss))
+//        )
+//        for {
+//
+//          isVerified <- verifyInput(tx2, index)
+//        } yield {
+//
+//          println(s"is verified = $isVerified")
+//          // require(isVerified)
+//          tx2
+//        }
+//
+//      })
+//      .flatMap(result => result)
+//  }
 
   def coinbaseHeight(tx: Transaction): Unit = {
 

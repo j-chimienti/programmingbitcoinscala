@@ -39,14 +39,14 @@ case class TxIn(prevTx: ByteVector32,
   require(prevIdx >= -1)
 
   override def serializer: BtcSerializer[TxIn] = TxIn
-  lazy val prevTxId: ByteVector = prevTx.reverse
+  def prevTxId: ByteVector = prevTx.reverse
 
   override def toString: String = s"TxIn(${prevTxId.toHex}, $prevIdx)"
 
-  def derSignature(idx: Int = 0) =
+  def derSignature(idx: Int = 0): ByteVector =
     Script(scriptSig).signature(idx).dropRight(1)
 
-  def hashType(idx: Int = 0) =
+  def hashType(idx: Int = 0): Byte =
     Script(scriptSig).signature(idx).last
 
   /**
@@ -54,7 +54,7 @@ case class TxIn(prevTx: ByteVector32,
     * @param idx
     * @return SEC format public if the scriptSig has one
     */
-  def secPubKey(idx: Int = 0) = {
+  def secPubKey(idx: Int = 0): ByteVector = {
 
     val script = Script(scriptSig)
     Script.secPubkey(script, idx)
@@ -62,6 +62,8 @@ case class TxIn(prevTx: ByteVector32,
 
   def redeemScript =
     Script(scriptSig).redeemScript
+
+  def serialize: ByteVector = TxIn.serialize(this)
 
 }
 
